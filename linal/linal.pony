@@ -29,6 +29,4 @@ Example:
    * try to use compile time expressions once adopted by pony
        fun inv(q: Q4) : Q4 => #( div(conj(q), dot(q,q)) )
    * consider writing longhand
-
-@author macdougall.doug@gmail.com
 """
