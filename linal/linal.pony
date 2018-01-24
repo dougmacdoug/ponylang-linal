@@ -1,11 +1,10 @@
-# Linear Algebra library for Pony Language
+"""
+# Linear Algebra Pony Package
 
-### pre-alpha software (0.1.0 version coming soonerish)
-
-### Tuple-based Linear Algebra for typical 2D, 3D operations  
-  * operate on the stack
-  * 100% immutable
-  * float32 internals (F32)
+Tuple-based Linear Algebra for typical 2d, 3d operations  
+  - operate on the stack
+  - 100% immutable
+  - float32 internals (F32)
 
 
 Each TYPE consists of a type alias and a primitive behaving similar to a "class"
@@ -15,15 +14,11 @@ Each TYPE consists of a type alias and a primitive behaving similar to a "class"
  - rather than modify state, result is returned as immutable stack tuple
 
 Example:
-
-```
   let a = (F32(1),F32(1)) // simple tuple compatible with V2
   let b : V2 = (3,3) // declared type alias forces 3's to F32
   let c = V2fun(3,3) // apply sugar => V2
   let d = V2fun.add(a, b) // a + b
   let f = V2fun.mul(V2fun.unit(d), 5) // scale to 5 units
-```
-
 
 @TODO:
 *** UNIT TESTS! [more and fix logging, standardize] ***
@@ -35,5 +30,5 @@ Example:
        fun inv(q: Q4) : Q4 => #( div(conj(q), dot(q,q)) )
    * consider writing longhand
 
-@TODO:
-*** more inline docstrings, build/host docs
+@author macdougall.doug@gmail.com
+"""
