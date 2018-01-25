@@ -22,6 +22,11 @@ class Quaternion
     | let q : Quaternion box => q.as_tuple()
     end
 
+  fun x() : F32 => _x
+  fun y() : F32 => _y
+  fun z() : F32 => _z
+  fun w() : F32 => _w
+
 primitive Q4fun
   fun apply(x': F32, y': F32, z': F32, w': F32) : Q4 => (x',y',z',w')
   fun zero() : Q4 => (0,0,0,0)

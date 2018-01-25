@@ -100,18 +100,22 @@ linear functions and helpers for linal types
       """floating point equality with epsilon"""      
       (a - b).abs() < eps
     fun lerp(a: F32, b: F32, t: F32) : F32 =>
-      """floating point lerp expects 0<=t<=1"""
-      (a*(1-t)) + (b*t)
+      """floating point lerp t% (0-1) from a to b"""
+      let t' = clamp01(t)
+      (a*(1-t')) + (b*t')
     fun unlerp(a: F32, b: F32, t: F32) : F32 =>
-      """floating point unlerp expects 0<=t<=1"""
-      (t-a)/(b-a)
+      """floating point unlerp t% (0-1) from b to a"""
+      let t' = clamp01(t)
+      (t'-a)/(b-a)
     fun smooth_step(a: F32, b: F32, t: F32) : F32 =>
-      """floating point smooth step expects 0<=t<=1"""
-       let x = (t - a)/(b - a)
-       x*x*(3.0 - (2.0*x))
+      """floating point smooth step t% (0-1) from a to b"""
+      let t' = clamp01(t)
+      let x = (t' - a)/(b - a)
+      x*x*(3.0 - (2.0*x))
     fun smoother_step(a: F32, b: F32, t: F32) : F32 =>
-      """floating point smoother step expects 0<=t<=1"""
-      let x = (t - a)/(b - a)
+      """floating point smoother step t% (0-1) from a to b"""
+      let t' = clamp01(t)
+      let x = (t' - a)/(b - a)
       x*x*x*((x*((6.0*x) - 15.0)) + 10.0)
 
     fun clamp01(t: F32) : F32 =>
@@ -120,9 +124,9 @@ linear functions and helpers for linal types
 
     fun clamp(t: F32, min': F32, max': F32) : F32 => 
       """clamps t to min<=t<=max"""
-      if t < min' then min'
-      elseif t > max' then max'
-      else t end
+      if \unlikely\ t < min' then min'
+      elseif \unlikely\ t > max' then max'
+      else \likely\ t end
 
     fun deg_to_rad() : F32 => 0.0174532924
     fun rad_to_deg() : F32 => 57.29578

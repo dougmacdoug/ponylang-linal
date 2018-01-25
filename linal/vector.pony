@@ -1,48 +1,67 @@
 type V2 is (F32, F32)
-""" tuple based Vector2 alias"""
+""" tuple based Vector 2 alias - see VectorFun for functions"""
 type V3 is (F32, F32, F32)
-""" tuple based Vector3 alias"""
+""" tuple based Vector 3 alias - see VectorFun for functions"""
 type V4 is (F32, F32, F32, F32)
-""" tuple based Vector4 alias"""
+""" tuple based Vector 4 alias - see VectorFun for functions"""
 type FixVector  is (V2 | V3 | V4)
-""" tuple based Vector alias"""
+""" tuple based Vector alias - see VectorFun for functions"""
 // @TODO: consider removing.. not particularly useful
 type OptVector is (FixVector | None)
 """ tuple based Vector or None alias"""
 
 // @Hack VectorX is Vector[VX] but compiler requires both in the alias
 type AnyVector2 is (Vector2 | Vector[V2] | V2) 
-"""instance | tuple vector 2 alias"""
+"""instance | tuple vector 2 alias - see Vector and VectorFun"""
 type AnyVector3 is (Vector3 | Vector[V3] | V3)
-"""instance | tuple vector 3 alias"""
+"""instance | tuple vector 3 alias - see Vector and VectorFun"""
 type AnyVector4 is (Vector4 | Vector[V4] | V4)
-"""instance | tuple vector 4 alias"""
+"""instance | tuple vector 4 alias - see Vector and VectorFun"""
 
 // cannot use tuple as constraint
 // trait primarily used for code validation
 trait VectorFun[V /*: Vector */]
 """Trait defining tuple based vector functions"""
   fun zero() : V
+    """all zeroes vector"""
   fun id() : V
+    """all ones vector"""
   fun add(a: V, b: V) : V
+    """add a and b"""
   fun sub(a: V, b: V) : V
+    """subtract b from a"""
   fun neg(v: V) : V
+    """negate vector"""
   fun mul(v: V, s: F32) : V
+    """scalar multiply (scale) vector"""
   fun div(v: V, s: F32)  : V
+    """scalar divide (1/scale) vector"""
   fun dot(a: V, b: V) : F32
+    """dot product of a and b"""    
   fun len2(v: V) : F32
+    """length of vector squared"""
   fun len(v: V) : F32
+    """length of vector"""
   fun dist2(a : V, b : V) : F32
+    """distance between a and b squared"""
   fun dist(a : V, b : V) : F32
+    """distance between a and b"""
   fun unit(v : V) : V
+    """normalized unit vector"""
   fun eq(a: V, b: V, eps: F32) : Bool
+    """test equality between a and b  +/-(~epsilon)"""
   fun lerp(a: V, b: V, t: F32) : V
+    """lerp t% (0-1) from a to b"""
 
   fun v2(v: V) : V2
+    """return a vector 2 from v"""
   fun v3(v: V) : V3
+    """return a vector 3 from v - fill with zeroes if necessary"""
   fun v4(v: V) : V4
+    """return a vector 4 from v - fill with zeroes if necessary"""
 
 primitive V2fun is VectorFun[V2 val]
+  """tuple based Vector 2 functions - see VectorFun for details"""
   fun apply(x' : F32, y': F32) : V2 => (x',y')
   fun zero() : V2 => (0,0)
   fun id() : V2 => (1,1)
@@ -69,6 +88,7 @@ primitive V2fun is VectorFun[V2 val]
     (Linear.lerp(a._1, b._1, t), Linear.lerp(a._2, b._2, t))
 
 primitive V3fun is VectorFun[V3 val]
+  """tuple based Vector 3 functions - see VectorFun for details"""
   fun apply(x' : F32, y': F32, z': F32) : V3 => (x',y',z')
   fun zero() : V3 => (0,0,0)
   fun id() : V3 => (1,1,1)
@@ -94,6 +114,7 @@ primitive V3fun is VectorFun[V3 val]
     (Linear.lerp(a._1, b._1, t), Linear.lerp(a._2, b._2, t), Linear.lerp(a._3, b._3, t))
 
 primitive V4fun is VectorFun[V4 val]
+  """tuple based Vector 4 functions - see VectorFun for details"""
   fun apply(x' : F32, y': F32, z': F32, w': F32) : V4 => (x',y',z',w')
   fun zero() : V4 => (0,0,0,0)
   fun id() : V4 => (1,1,1,1)
@@ -121,68 +142,96 @@ primitive V4fun is VectorFun[V4 val]
     (Linear.lerp(a._1, b._1, t), Linear.lerp(a._2, b._2, t),
      Linear.lerp(a._3, b._3, t), Linear.lerp(a._4, b._4, t))
 
-
-
-
-// @Hack tuples dont work for subtypes so using Any instead of FixVector
 trait Vector[V : Any #read] is (Stringable & Equatable[Vector[V val]])
 """
-@author macdougall.doug@gmail.com
+trait for class wrappers for tuple types
 
-Class Wrapper for Tuple-based Linear Algebra for typical 2d, 3d operations
-  - mainly used for sugar
-  - minimize GC'd classes by returning Tuple-based objects for all operations
-  - update() allows reuse of instance
+ * mainly used for sugar
+ * minimize GC'd classes by returning Tuple-based objects for all operations
+ * update() allows reuse of instance
 
-@TODO
-  - math ops on different sizes grow vectors..
-    ...  might be better to disallow this
+** Note: V is actually one of the tuple types from FixVector 
+ but pony doesn't support tuples as subtypes so we use
+ Any here **
 
-Example:
-  let a : V2 = (3,3) // Tuple-based Vector2
-  let b = Vector2((1,3))
-  let d = V2fun.add(a, b) // a + b
-  let f = V2fun.mul(V2fun.unit(d), 5) // scale to 5 units
 
-@Note: initially designed classes to be assignable from any vector but
-this could lead to errors which are meant to be found by strongly typed 
-languages. if you need to resize and copy a vector use a new constructor
-on the appropriate vector
+### Example:
 
-  let p2 = Vector2((5,3))    // construct from tuple
-  let p2' = Vector2(p2)      // construct from instance
-  let p3 = Vector3((5,3,1))  // construct from tuple
-  let p3' = Vector3(p2.v3()) // upsize (z=0)
-  let p2x = Vector2(p3.v2()) // downsize (z chomped)
+```
+  let p2 = Vector2((5, 3))     // construct from tuple
+  let p2' = Vector2(p2)        // construct from instance
+  let p3 = Vector3((5, 3, 1))  // construct from tuple
+  let p3' = Vector3(p2.v3())   // upsize (z=0)
+  let p2x = Vector2(p3.v2())   // downsize (z chomped)
+
+// for sugar, left must be instance but right can tuple or instance
+  var pt = Vector2((1, 1))
+  let tuple_v2 : V2 = pt + pt // return type is tuple
+  pt() = pt + ((2, 3))        // update() accepts tuples     
+  let pt' : V2 = (1, 2)   
+  pt() = pt - pt'             
+```
 
 """
   fun v2() : V2
+    """return V2 tuple"""
   fun v3() : V3
+    """return V3 tuple - fill with zeroes if necessary"""
   fun v4() : V4
+    """return V4 tuple - fill with zeroes if necessary"""
   fun x()  : F32 ?
+    """return x coord"""
   fun y() : F32 ?
+    """return y coord"""
   fun z() : F32 ?
+    """return z coord if available"""
   fun w() : F32 ?
+    """return w coord if available"""
 
   fun vecfun() : VectorFun[V val] val
+    """handle to the appropriate Primitive VectorFun for this vector"""
+
   fun as_tuple() : V
+    """return this vector as a tuple"""
   fun as_array() : Array[F32] val
+    """return this vector as an Array"""
+
   fun add(that: (Vector[V] box | V)) : V => 
+    """add this vector with another instance|tuple => tuple"""
     let mine : V = as_tuple()
     match that
     | let v: Vector[V] box => vecfun().add(mine, v.as_tuple())
     | let v: V =>      vecfun().add(mine, v)
     end
+
   fun sub(that: (Vector[V] box | V)) : V => 
+    """subtract another instance|tuple from this vector => tuple"""
     let mine : V = as_tuple()
     match that
     | let v: Vector[V] box => vecfun().sub(mine, v.as_tuple())
     | let v: V =>      vecfun().sub(mine, v)
     end
 
-  fun ref update(value: (Vector[V] | V))
+  fun mul(scale': F32) : V => 
+    """subtract another instance|tuple from this vector => tuple"""
+    let mine : V = as_tuple()
+    vecfun().mul(mine, scale')
 
-  fun eq(that: (box->Vector[V]|V)) : Bool  => 
+  fun div(scale': F32) : V => 
+    """scalar div (1/scale) this vector => tuple"""
+    let mine : V = as_tuple()
+    vecfun().div(mine, scale')
+
+  fun neg() : V => 
+    """negate this vector => tuple"""
+    let mine : V = as_tuple()
+    vecfun().neg(mine)
+
+  fun ref update(value: (Vector[V] | V))
+    """set this vector value to instance|tuple"""
+
+  fun eq(that: (Vector[V] box|V)) : Bool  => 
+    """test equality with this vector and another instance|tuple"""
     let mine : V = as_tuple()
     match that
     | let v : Vector[V] box  => vecfun().eq(mine, v.as_tuple(), F32.epsilon())
@@ -190,10 +239,11 @@ on the appropriate vector
       vecfun().eq(mine, v, F32.epsilon())
     end
 
-  fun ne(that: (box->Vector[V]|V)) : Bool => not eq(that)
+  fun ne(that: (Vector[V] box|V)) : Bool => not eq(that)
 
 class Vector2 is Vector[V2]
-  var _x : F32
+  """class wrapper for V2 - see Vector for details"""
+  var _x : F32 
   var _y : F32
 
   new create(v' : AnyVector2) => 
@@ -224,6 +274,7 @@ class Vector2 is Vector[V2]
 
 
 class Vector3 is Vector[V3]
+  """class wrapper for V3 - see Vector for details"""
   var _x : F32
   var _y : F32
   var _z : F32
@@ -256,6 +307,7 @@ class Vector3 is Vector[V3]
   fun box string() : String iso^ => Linear.to_string(as_tuple())
 
 class Vector4 is Vector[V4]
+  """class wrapper for V4 - see Vector for details"""
   var _x : F32
   var _y : F32
   var _z : F32
