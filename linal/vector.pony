@@ -11,16 +11,17 @@ type OptVector is (FixVector | None)
 """ tuple based Vector or None alias"""
 
 // @Hack VectorX is Vector[VX] but compiler requires both in the alias
-type AnyVector2 is (Vector2 | Vector[V2] | V2) 
+type AnyVector2 is (Vector2 | Vector[V2, V2fun] | V2) 
 """instance | tuple vector 2 alias - see Vector and VectorFun"""
-type AnyVector3 is (Vector3 | Vector[V3] | V3)
+type AnyVector3 is (Vector3 | Vector[V3, V3fun] | V3)
 """instance | tuple vector 3 alias - see Vector and VectorFun"""
-type AnyVector4 is (Vector4 | Vector[V4] | V4)
+type AnyVector4 is (Vector4 | Vector[V4, V4fun] | V4)
 """instance | tuple vector 4 alias - see Vector and VectorFun"""
 
 // cannot use tuple as constraint
 // trait primarily used for code validation
 trait VectorFun[V /*: Vector */]
+  new val create() 
 """Trait defining tuple based vector functions"""
   fun zero() : V
     """all zeroes vector"""
@@ -142,7 +143,7 @@ primitive V4fun is VectorFun[V4 val]
     (Linear.lerp(a._1, b._1, t), Linear.lerp(a._2, b._2, t),
      Linear.lerp(a._3, b._3, t), Linear.lerp(a._4, b._4, t))
 
-trait Vector[V : Any #read] is (Stringable & Equatable[Vector[V val]])
+trait Vector[V : Any #read, Vfun: VectorFun[V] val] is (Stringable & Equatable[Vector[V, Vfun]])
 """
 trait for class wrappers for tuple types
 
@@ -190,109 +191,109 @@ trait for class wrappers for tuple types
   fun w() : F32 ?
     """return w coord if available"""
 
-  fun _vecfun() : VectorFun[V val] val
-    """handle to the appropriate Primitive VectorFun for this vector"""
+  // fun Vfun : VectorFun[V val] val =>  Vfun
+  //   """handle to the appropriate Primitive VectorFun for this vector"""
 
   fun as_tuple() : V
     """return this vector as a tuple"""
   fun as_array() : Array[F32] val
     """return this vector as an Array"""
 
-  fun add(that: (Vector[V] box | V)) : V => 
+  fun add(that: (Vector[V, Vfun] box | V)) : V => 
     """add this vector with another instance|tuple => tuple"""
     let mine : V = as_tuple()
     let that' : V = _tuplize(that)
-    _vecfun().add(mine, that')
+    Vfun.add(mine, that')
 
-  fun sub(that: (Vector[V] box | V)) : V => 
+  fun sub(that: (Vector[V, Vfun] box | V)) : V => 
     """subtract another instance|tuple from this vector => tuple"""
     let mine : V = as_tuple()
     let that' : V = _tuplize(that)
-    _vecfun().sub(mine, that')
+    Vfun.sub(mine, that')
 
   fun mul(scale': F32) : V => 
     """subtract another instance|tuple from this vector => tuple"""
     let mine : V = as_tuple()
-    _vecfun().mul(mine, scale')
+    Vfun.mul(mine, scale')
 
   fun div(scale': F32) : V => 
     """scalar div (1/scale) this vector => tuple"""
     let mine : V = as_tuple()
-    _vecfun().div(mine, scale')
+    Vfun.div(mine, scale')
 
   fun neg() : V => 
     """negate this vector => tuple"""
     let mine : V = as_tuple()
-    _vecfun().neg(mine)
+    Vfun.neg(mine)
 
-  fun dot(that: (Vector[V] box | V)) : F32 => 
+  fun dot(that: (Vector[V, Vfun] box | V)) : F32 => 
     """dot product of this and that"""    
     let mine  : V = as_tuple()
     let that' : V = _tuplize(that)
-    _vecfun().dot(mine, that')
+    Vfun.dot(mine, that')
 
   fun len2() : F32 =>
     """length of vector squared"""
     let mine  : V = as_tuple()
-    _vecfun().len2(mine)
+    Vfun.len2(mine)
 
   fun len() : F32 =>
     """length of vector"""
     let mine  : V = as_tuple()
-    _vecfun().len(mine)
+    Vfun.len(mine)
 
-  fun dist2(that: (Vector[V] box | V)) : F32 =>
+  fun dist2(that: (Vector[V, Vfun] box | V)) : F32 =>
     """distance between this and that squared"""
     let mine  : V = as_tuple()
     let that' : V = _tuplize(that)
-    _vecfun().dist2(mine, that')
+    Vfun.dist2(mine, that')
 
-  fun dist(that: (Vector[V] box | V)) : F32 =>
+  fun dist(that: (Vector[V, Vfun] box | V)) : F32 =>
     """distance between this and that"""
     let mine  : V = as_tuple()
     let that' : V = _tuplize(that)
-    _vecfun().dist(mine, that')
+    Vfun.dist(mine, that')
 
   fun unit() : V =>
     """normalized unit vector"""
     let mine  : V = as_tuple()
-    _vecfun().unit(mine)
+    Vfun.unit(mine)
 
-  fun lerp(that: (Vector[V] box | V), t: F32) : V =>
+  fun lerp(that: (Vector[V, Vfun] box | V), t: F32) : V =>
     """lerp t% (0-1) from this to that"""
     let mine  : V = as_tuple()
     let that' : V = _tuplize(that)
-    _vecfun().lerp(mine, that', t)
+    Vfun.lerp(mine, that', t)
 
-  fun ref update(value: (box->Vector[V]| V)) =>
+  fun ref update(value: (box->Vector[V, Vfun]| V)) =>
     """set this vector value to instance|tuple"""
 
-  fun eq(that: (Vector[V] box|V)) : Bool  => 
+  fun eq(that: (Vector[V, Vfun] box|V)) : Bool  => 
     """test equality with this vector and another instance|tuple"""
     let mine : V = as_tuple()
     match that
-    | let v : Vector[V] box  => _vecfun().eq(mine, v.as_tuple(), F32.epsilon())
+    | let v : Vector[V, Vfun] box  => Vfun.eq(mine, v.as_tuple(), F32.epsilon())
     | let v : V =>
-      _vecfun().eq(mine, v, F32.epsilon())
+      Vfun.eq(mine, v, F32.epsilon())
     end
 
-  fun ne(that: (Vector[V] box|V)) : Bool => not eq(that)
+  fun ne(that: (Vector[V, Vfun] box|V)) : Bool => not eq(that)
 
-  fun _tuplize(that: (Vector[V] box | V)) : V =>
+  fun _tuplize(that: (Vector[V, Vfun] box | V)) : V =>
     match that
     | let v: V => v
-    | let v: Vector[V] box => v.as_tuple()
+    | let v: Vector[V, Vfun] box => v.as_tuple()
     end
 
 
-class Vector2 is Vector[V2]
+class Vector2 is Vector[V2, V2fun]
   """class wrapper for V2 - see Vector for details"""
   var _x : F32 
   var _y : F32
 
   new create(v' : box->AnyVector2) => 
     (_x, _y) = match v'
-    | let v : Vector[V2] box => v.as_tuple()
+    | let v : Vector[V2, V2fun] box => v.as_tuple()
     | let v : V2 => (v._1, v._2)
     end
 
@@ -303,7 +304,6 @@ class Vector2 is Vector[V2]
   fun z() : F32 ? => error
   fun w() : F32 ? => error
   fun as_array() : Array[F32] val => [_x; _y]
-  fun _vecfun() : VectorFun[V2 val] val => V2fun
   fun as_tuple() : V2 => (_x, _y)
 
   fun v2() : V2 => (_x, _y)
@@ -312,14 +312,14 @@ class Vector2 is Vector[V2]
 
   fun ref update(value: box->AnyVector2)  => 
     (_x, _y) = match value
-    | let v : Vector[V2] box => v.as_tuple()
+    | let v : Vector[V2, V2fun] box => v.as_tuple()
     | let v : V2 => v
     end
 
   fun box string() : String iso^ => Linear.to_string(as_tuple())
 
 
-class Vector3 is Vector[V3]
+class Vector3 is Vector[V3, V3fun]
   """class wrapper for V3 - see Vector for details"""
   var _x : F32
   var _y : F32
@@ -327,7 +327,7 @@ class Vector3 is Vector[V3]
 
   new create(v' : box->AnyVector3) => 
     (_x, _y, _z) = match v'
-    | let v : Vector[V3] box => v.as_tuple()
+    | let v : Vector[V3, V3fun] box => v.as_tuple()
     | let v : V3 => v
     end
   new zero() => (_x, _y, _z) = (0,0,0)
@@ -339,7 +339,6 @@ class Vector3 is Vector[V3]
   fun w() : F32 ? => error
   fun as_array() : Array[F32] val => [_x; _y; _z]
 
-  fun _vecfun() : VectorFun[V3 val] val => V3fun
   fun as_tuple() : V3 => (_x, _y, _z)
 
   fun v2() : V2 => (_x, _y)
@@ -348,13 +347,13 @@ class Vector3 is Vector[V3]
 
   fun ref update(value: box->AnyVector3)  => 
     (_x, _y, _z) = match value
-    | let v : Vector[V3] box => v.as_tuple()
+    | let v : Vector[V3, V3fun] box => v.as_tuple()
     | let v : V3 => v
     end
 
   fun box string() : String iso^ => Linear.to_string(as_tuple())
 
-class Vector4 is Vector[V4]
+class Vector4 is Vector[V4, V4fun]
   """class wrapper for V4 - see Vector for details"""
   var _x : F32
   var _y : F32
@@ -363,7 +362,7 @@ class Vector4 is Vector[V4]
 
   new create(v' : box->AnyVector4) => 
     (_x, _y, _z, _w) = match v'
-    | let v : Vector[V4] box => v.as_tuple()
+    | let v : Vector[V4, V4fun] box => v.as_tuple()
     | let v : V4 => v
     end
   new zero() => (_x, _y, _z, _w) = (0,0,0,0)
@@ -375,7 +374,7 @@ class Vector4 is Vector[V4]
   fun w() : F32 => _w
   fun as_array() : Array[F32] val => [_x; _y; _z; _w]
 
-  fun _vecfun() : VectorFun[V4 val] val => V4fun
+  // fun Vfun : VectorFun[V4 val] val => V4fun
   fun as_tuple() : V4 => (_x, _y, _z, _w)
 
   fun v2() : V2 => (_x, _y)
@@ -384,7 +383,7 @@ class Vector4 is Vector[V4]
 
   fun ref update(value: box->AnyVector4)  => 
     (_x, _y, _z, _w) = match value
-    | let v : Vector[V4] box => v.as_tuple()
+    | let v : Vector[V4, V4fun] box => v.as_tuple()
     | let v : V4 => v
     end
 

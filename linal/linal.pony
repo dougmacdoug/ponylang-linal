@@ -1,8 +1,6 @@
 """
 # Linear Algebra library for Pony Language
 
-### pre-alpha software (0.1.0 version coming soonerish)
-
 ### Tuple-based Linear Algebra for typical 2D, 3D operations  
   * operate on the stack
   * 100% immutable
@@ -23,14 +21,4 @@
   let d = V2fun.add(a, b) // a + b
   let f = V2fun.mul(V2fun.unit(d), 5) // scale to 5 units
 ```
-
-@TODO:
-*** UNIT TESTS! [more and fix logging, standardize] ***
-   * add fast sqrt for unit vector
-   * slerp nlerp
-   * M4
-   * faster Q4
-   * try to use compile time expressions once adopted by pony
-       fun inv(q: Q4) : Q4 => #( div(conj(q), dot(q,q)) )
-   * consider writing longhand
 """
