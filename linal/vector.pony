@@ -10,7 +10,7 @@ type FixVector  is (V2 | V3 | V4)
 type OptVector is (FixVector | None)
 """ tuple based Vector or None alias"""
 
-// @Hack VectorX is Vector[VX] but compiler requires both in the alias
+// @Hack VectorX is Vector[VX, VXfun] but compiler requires both in the alias
 type AnyVector2 is (Vector2 | Vector[V2, V2fun] | V2) 
 """instance | tuple vector 2 alias - see Vector and VectorFun"""
 type AnyVector3 is (Vector3 | Vector[V3, V3fun] | V3)
@@ -18,11 +18,10 @@ type AnyVector3 is (Vector3 | Vector[V3, V3fun] | V3)
 type AnyVector4 is (Vector4 | Vector[V4, V4fun] | V4)
 """instance | tuple vector 4 alias - see Vector and VectorFun"""
 
-// cannot use tuple as constraint
-// trait primarily used for code validation
 trait VectorFun[V /*: Vector */]
-  new val create() 
 """Trait defining tuple based vector functions"""
+  new val create() 
+  """expects primitive implimentation with val constructor"""    
   fun zero() : V
     """all zeroes vector"""
   fun id() : V
@@ -191,9 +190,6 @@ trait for class wrappers for tuple types
   fun w() : F32 ?
     """return w coord if available"""
 
-  // fun Vfun : VectorFun[V val] val =>  Vfun
-  //   """handle to the appropriate Primitive VectorFun for this vector"""
-
   fun as_tuple() : V
     """return this vector as a tuple"""
   fun as_array() : Array[F32] val
@@ -338,7 +334,6 @@ class Vector3 is Vector[V3, V3fun]
   fun z() : F32 => _z
   fun w() : F32 ? => error
   fun as_array() : Array[F32] val => [_x; _y; _z]
-
   fun as_tuple() : V3 => (_x, _y, _z)
 
   fun v2() : V2 => (_x, _y)
@@ -373,8 +368,6 @@ class Vector4 is Vector[V4, V4fun]
   fun z() : F32 => _z
   fun w() : F32 => _w
   fun as_array() : Array[F32] val => [_x; _y; _z; _w]
-
-  // fun Vfun : VectorFun[V4 val] val => V4fun
   fun as_tuple() : V4 => (_x, _y, _z, _w)
 
   fun v2() : V2 => (_x, _y)
