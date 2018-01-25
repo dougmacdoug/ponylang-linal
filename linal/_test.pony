@@ -19,6 +19,15 @@ class iso _TestVector is UnitTest
       let d = v2.dist(pt_a,pt_b)
       h.assert_true(Linear.eq(2.828, d, 0.001))
 
+      let zero = Vector2.zero()
+      let one = Vector2.id()
+      let zero' = zero.lerp(one, 0)
+      h.assert_true(zero == zero')
+      let one' = zero.lerp(one, 1)
+      h.assert_true(one == one')
+      let half = zero.lerp(one, 0.5)
+      h.assert_true(v2.eq(half, (0.5, 0.5)))
+
 class iso _TestQuaternion is UnitTest
     fun name():String => "linal/Q4"
 

@@ -14,8 +14,6 @@ class Quaternion
 
   fun as_tuple() : Q4 => (_x, _y, _z, _w)
 
-  fun qfun() : Q4fun => Q4fun
-
   fun ref update(value : (Q4 | Quaternion box)) =>
     (_x, _y, _z, _w) = match value
     | let q : Q4 => q
@@ -145,5 +143,5 @@ primitive Q4fun
       (((2*test)/unit').asin(), (((2*q._2) * q._4) - ((2*q._1)*q._3)).atan2(
         ((sqx - sqy) - sqz) + sqw), (((2*q._1)*q._4)-((2*q._2)*q._3)).atan2(((-sqx + sqy) - sqz) + sqw)) 
     end
-    V3fun.mul(v, 57.29578)
+    V3fun.mul(v, Linear.rad_to_deg())
 

@@ -26,14 +26,14 @@ Example:
 
 
 @TODO:
-*** UNIT TESTS! [more and fix logging, standardize] ***
-   * add fast sqrt for unit vector
-   * slerp nlerp
-   * M4
-   * faster Q4
-   * try to use compile time expressions once adopted by pony
-       fun inv(q: Q4) : Q4 => #( div(conj(q), dot(q,q)) )
-   * consider writing longhand
+  * M4 - finish
+  * Matrix wrapper
+  * docstrings: Q4, R4, M2-4
+  * UNIT TESTS! [more and fix logging, standardize] 
+  * add fast sqrt for unit vector
+  * slerp nlerp
+  * faster Q4
+  * try to use compile time expressions once adopted by pony
+     fun inv(q: Q4) : Q4 => #( div(conj(q), dot(q,q)) )
+  * consider writing longhand (dist2 = distance_squared)
 
-@TODO:
-*** more inline docstrings, build/host docs
