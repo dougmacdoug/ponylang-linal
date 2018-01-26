@@ -356,6 +356,10 @@ class Vector3 is Vector[V3, V3fun]
   fun v3(): V3 => (_x, _y, _z)
   fun v4(): V4 => (_x, _y, _z, 0)
 
+  fun cross(that: box->AnyVector3): V3 =>
+    "cross product of this and that"    
+    V3fun.cross((_x, _y, _z), _tuplize(that))
+
   fun ref update(value: box->AnyVector3)  => 
     (_x, _y, _z) =
     match value
