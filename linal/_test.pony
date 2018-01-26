@@ -5,28 +5,117 @@ actor Main is TestList
   new make() => None
 
   fun tag tests(test: PonyTest) =>
-    test(_TestVector)
+    test(_TestVectorFun)
     test(_TestQuaternion)
+    test(_TestVectorFunCross)
 
+primitive VectorTester
 
-class iso _TestVector is UnitTest
-    fun name():String => "linal/Vector"
+  fun testVectorFun[V: Any val](v: VectorFun[V val] val, h: TestHelper) =>
+    let zero  = v.zero()
+    let one   = v.id()
+    let one'  = v.add(zero, one)
+    let zero' = v.sub(one, one')
+    let two   = v.add(one, one')
+    let two'  = v.mul(one, 2)
+
+    let mul1  = v.div(one, 1)
+    let div1  = v.div(two, 2)
+    let unit1 = v.unit(one)
+    let unit2 = v.unit(two)
+
+    let dist1 = v.dist(one, zero)
+    let dist2 = v.dist(one, two)
+
+    let dist1' = v.dist2(one, zero)
+    let dist2' = v.dist2(one, two)
+
+    let lerp0 = v.lerp(zero, one, 0)
+    let lerp1 = v.lerp(zero, one, 1)
+    let lerp1' = v.lerp(zero, two, 0.5)
+
+    let half =  v.lerp(zero, one, 0.5)
+    let half' = v.mul(one, 0.5)
+    
+    h.log("0==0 " + _s[V](zero) + " == " + _s[V](zero'))
+    h.assert_true(v.eq(zero, zero', F32.epsilon()))
+
+    h.log("1==1 " + _s[V](one) + " == " + _s[V](one'))
+    h.assert_true(v.eq(one, one', F32.epsilon()))
+
+    h.log("2==2 " + _s[V](two) + " == " + _s[V](two'))
+    h.assert_true(v.eq(two, two', F32.epsilon()))
+
+    h.log("mul1 " + _s[V](one) + " == " + _s[V](mul1))
+    h.assert_true(v.eq(one, mul1, F32.epsilon()))
+
+    h.log("div1 " + _s[V](one) + " == " + _s[V](div1))
+    h.assert_true(v.eq(one, div1, F32.epsilon()))
+
+    h.log("unit " + _s[V](unit1) + " == " + _s[V](unit2))
+    h.assert_true(v.eq(unit1, unit2, F32.epsilon()))
+
+    h.log("dist " + dist1.string() + " == " + dist2.string())
+    h.assert_true(Linear.eq(dist1, dist2))
+
+    h.log("dist2 " + dist1'.string() + " == " + dist2'.string())
+    h.assert_true(Linear.eq(dist1', dist2'))
+
+    h.log("lerp0 " + _s[V](zero) + " == " + _s[V](lerp0))
+    h.assert_true(v.eq(zero, lerp0, F32.epsilon()))
+
+    h.log("lerp1 " + _s[V](one) + " == " + _s[V](lerp1))
+    h.assert_true(v.eq(one, lerp1, F32.epsilon()))
+
+    h.log("lerp1' " + _s[V](one) + " == " + _s[V](lerp1'))
+    h.assert_true(v.eq(one, lerp1', F32.epsilon()))
+
+    h.log("lerp0.5==0.5 " + _s[V](half) + " == " + _s[V](half'))
+    h.assert_true(v.eq(half, half', F32.epsilon()))
+
+    fun testScaleAndCross[V: Any val](v: VectorFun[V val] val, h: TestHelper) =>
+      let one   = v.id()
+
+    fun _s[V](a: V val) : String => 
+      match a
+      | let s: FixVector => Linear.to_string(s)
+      else "n/a"
+      end
+
+class iso _TestVectorFun is UnitTest
+    fun name():String => "VectorFun/Basic"
 
     fun apply(h: TestHelper) =>
-      let v2 = V2fun // gives us nice shorthand to Vector2 Functions
-      let pt_a = (F32(1),F32(1))
-      let pt_b : V2 = (3,3)
-      let d = v2.dist(pt_a,pt_b)
-      h.assert_true(Linear.eq(2.828, d, 0.001))
+      VectorTester.testVectorFun[V2](V2fun, h)
+      VectorTester.testVectorFun[V3](V3fun, h)
+      VectorTester.testVectorFun[V4](V4fun, h)
 
-      let zero = Vector2.zero()
-      let one = Vector2.id()
-      let zero' = zero.lerp(one, 0)
-      h.assert_true(zero == zero')
-      let one' = zero.lerp(one, 1)
-      h.assert_true(one == one')
-      let half = zero.lerp(one, 0.5)
-      h.assert_true(v2.eq(half, (0.5, 0.5)))
+class iso _TestVectorFunCross is UnitTest
+    fun name():String => "VectorFun/Cross"
+
+    fun apply(h: TestHelper) =>
+      let a = V2fun(1,3)
+      let b = V2fun(2,4)
+
+      let axb = V2fun.cross(a, b)
+      let bxa = V2fun.cross(b, a)
+      h.assert_eq[F32](axb, -2)
+      h.assert_eq[F32](bxa, 2)
+
+      let f = V3fun(1, 3, 5)
+      let g = V3fun(2, 4, 6)
+
+      let fxg = V3fun.cross(f, g)
+      let gxf = V3fun.cross(g, f)
+      
+      let fxg' = V3fun(-2, 4, -2)
+      let gxf' = V3fun(2, -4, 2)
+
+      h.log("fxg " + Linear.to_string(fxg) + " == " +  Linear.to_string(fxg'))
+      h.assert_true(V3fun.eq(fxg, fxg', F32.epsilon()))
+
+      h.log("gxf " + Linear.to_string(gxf) + " == " +  Linear.to_string(gxf'))
+      h.assert_true(V3fun.eq(gxf, gxf', F32.epsilon()))
 
 class iso _TestQuaternion is UnitTest
     fun name():String => "linal/Q4"

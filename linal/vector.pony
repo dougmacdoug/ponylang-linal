@@ -77,7 +77,11 @@ primitive V2fun is VectorFun[V2 val]
   fun dist2(a: V2, b: V2): F32  => len2(sub(a, b))
   fun dist(a: V2, b: V2): F32  => len(sub(a, b))
   fun unit(v: V2): V2 => div(v, len(v))
-  fun cross(a: V2, b: V2): F32 => (a._1*b._2) - (b._1*a._2)
+  
+  fun cross(a: V2, b: V2): F32 =>
+    """cross product"""
+    (a._1*b._2) - (b._1*a._2)
+
   fun eq(a: V2, b: V2, eps: F32 = F32.epsilon()): Bool =>
     Linear.eq(a._1, b._1, eps)  and Linear.eq(a._2, b._2, eps)
   fun v2(v: V2): V2 => v
@@ -105,6 +109,7 @@ primitive V3fun is VectorFun[V3 val]
   fun unit(v: V3): V3 => div(v, len(v))
 
   fun cross(a: V3, b: V3): V3 =>
+    """cross product"""
     ((a._2*b._3) - (a._3*b._2),
      (a._3*b._1) - (a._1*b._3),
      (a._1*b._2) - (a._2*b._1))
