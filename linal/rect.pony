@@ -58,9 +58,26 @@ primitive R4fun
     (lhs._1._1 == rhs._1._1) and (lhs._1._2 == rhs._1._2) and
      (lhs._2 == rhs._2) and (lhs._3 == rhs._3)
 
+  fun to_string(r: R4) : String iso^ =>
+    """string format a vector"""
+    recover
+      var s = String(170)
+      s.append("(x: ")
+      s.append(r._1._1.string())
+      s.append(", y: ")
+      s.append(r._1._2.string())
+      s.append(", w: ")
+      s.append(r._2.string())
+      s.append(", h: ")
+      s.append(r._3.string())
+      s.push(')')
+      s.>recalc()
+      s
+    end
+
 type AnyRect is (Rect | R4)
 
-class Rect is Equatable[Rect]
+class Rect is (Stringable & Equatable[Rect])
   var _x: F32
   var _y: F32
   var _w: F32
@@ -93,7 +110,6 @@ class Rect is Equatable[Rect]
   fun ref center_on(pt: V2) =>
     update(R4fun.center_on(r4(), pt))
 
-
   fun min(): V2 => R4fun.min(r4())
   fun max(): V2 => R4fun.max(r4())
   fun xMin(): F32 => R4fun.xMin(r4())
@@ -106,7 +122,6 @@ class Rect is Equatable[Rect]
   fun center(): V2 => R4fun.center(r4())
 
   fun contains(pt: V2): Bool => R4fun.contains(r4(), pt)
-
   fun contains(pt: V3): Bool => R4fun.contains(r4(), pt)
 
   fun overlaps(that: box->AnyRect): Bool => 
@@ -135,3 +150,4 @@ class Rect is Equatable[Rect]
 
   fun box ne(that: box->AnyRect): Bool => not eq(that)
 
+  fun string(): String iso^ => R4fun.to_string(r4())
