@@ -169,7 +169,6 @@ trait for class wrappers for tuple types
  but pony doesn't support tuples as subtypes so we use
  Any here **
 
-
 ### Example:
 
 ```
@@ -186,7 +185,6 @@ trait for class wrappers for tuple types
   let pt': V2 = (1, 2)   
   pt() = pt - pt'             
 ```
-
 """
   new zero()
   new id()
@@ -321,6 +319,10 @@ class Vector2 is Vector[V2, V2fun]
   fun v2(): V2 => (_x, _y)
   fun v3(): V3 => (_x, _y, 0)
   fun v4(): V4 => (_x, _y, 0, 0)
+
+  fun cross(that: box->AnyVector2): F32 =>
+    """V2->F32 cross product of this and that"""
+    V2fun.cross((_x, _y), _tuplize(that))
 
   fun ref update(value: box->AnyVector2)  => 
     (_x, _y) = match value

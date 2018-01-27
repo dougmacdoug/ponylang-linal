@@ -73,9 +73,6 @@ primitive VectorTester
     h.log("lerp0.5==0.5 " + _s[V](half) + " == " + _s[V](half'))
     h.assert_true(v.eq(half, half', F32.epsilon()))
 
-    fun testScaleAndCross[V: Any val](v: VectorFun[V val] val, h: TestHelper) =>
-      let one   = v.id()
-
     fun _s[V](a: V val) : String => 
       match a
       | let s: FixVector => Linear.to_string(s)
