@@ -1,11 +1,16 @@
 # Linear Algebra library for Pony Language
 
+This library is intended for use in common 2D and 3D applications
+not as a scientific or math library. Various scientific libraries
+such as [LAPACK], [GSL] or even [NumPy] can be bound with the [Pony C ABI].
+
 ### pre-alpha software (0.1.0 version coming soonerish)
 
 ### Tuple-based Linear Algebra for typical 2D, 3D operations  
   * operate on the stack
   * 100% immutable
   * float32 internals (F32)
+  * 🐎 pure pony
 
 
 Each TYPE consists of a type alias and a primitive behaving similar to a "class"
