@@ -7,15 +7,25 @@ Position is always bottom left or more accurately minX, minY
 """
 
 primitive R4fun
-  fun apply(x': F32, y': F32, w': F32, h': F32): R4 =>((x', y'), w', h')
+"""rectangle operations for R4"""
+  fun apply(x': F32, y': F32, w': F32, h': F32): R4 =>
+    rectify(((x', y'), w', h'))
 
   fun zero(): R4 => ((0, 0), 0, 0)
   fun unit(): R4 => ((0, 0), 1, 1)
-  fun sized(w': F32, h': F32): R4 => ((0, 0), w', h')
-  fun moved(r: R4, pt: V2): R4 => (pt, r._2, r._3)
+  fun sized(w': F32, h': F32): R4 =>
+    """create R4 at zero with size (w', h')"""
+    rectify(((0, 0), w', h'))
+  fun moved(r: R4, pt: V2): R4 =>
+    """create R4 at new location pt"""
+   (pt, r._2, r._3)
 
-  fun min(r: R4): V2 => r._1
-  fun max(r: R4): V2 => (r._1._1 + r._2, r._1._2 + r._3)
+  fun min(r: R4): V2 =>
+    """smallest point in R4 (bottom left corner)"""
+    r._1
+  fun max(r: R4): V2 =>
+    """largest point in R4 (top right corner)"""
+    (r._1._1 + r._2, r._1._2 + r._3)
   fun xMin(r: R4): F32 => r._1._1
   fun yMin(r: R4): F32 => r._1._2
   fun xMax(r: R4): F32 => r._1._1 + r._2
@@ -25,14 +35,14 @@ primitive R4fun
   fun height(r: R4): F32 => r._3
   fun size(r: R4): (F32, F32) => (r._2, r._3)
 
-  fun center(r: R4): V2 => 
+  fun center(r: R4): V2 =>
     ((r._1._1 + r._2) / 2, (r._1._2 + r._3) / 2)
 
-  fun center_on(r: R4, pt: V2): R4 => 
+  fun center_on(r: R4, pt: V2): R4 =>
     ((pt._1 - (r._2 / 2), pt._2 - (r._3 / 2)), r._2, r._3)
 
-  fun from_center(pt: V2, w': F32, h': F32): R4 => 
-    ((pt._1 - (w' / 2), pt._2 - (h' / 2)), w', h')
+  fun from_center(pt: V2, w': F32, h': F32): R4 =>
+    rectify(((pt._1 - (w' / 2), pt._2 - (h' / 2)), w', h'))
 
   fun contains(r: R4, pt: V2): Bool =>
     (r._1._1 <= pt._1) and ((r._1._1 + r._2) >= pt._1) and
@@ -59,7 +69,7 @@ primitive R4fun
      (lhs._2 == rhs._2) and (lhs._3 == rhs._3)
 
   fun to_string(r: R4) : String iso^ =>
-    """string format a vector"""
+    """string format a rectangle"""
     recover
       var s = String(170)
       s.append("(x: ")
@@ -75,6 +85,21 @@ primitive R4fun
       s
     end
 
+  fun rectify(r: R4): R4 =>
+    ((var x', var y'), var w', var h') = r
+    if w' < 0 then
+      w' = -w'
+      x' = x' - w'
+    end
+    if h' < 0 then
+      h' = -h'
+      y' = y' - h'
+    end
+    ((x', y'), w', h')
+
+  fun is_rectified(r: R4): Bool =>
+    if (r._2 < 0) or (r._3 < 0) then false else true end
+
 type AnyRect is (Rect | R4)
 
 class Rect is (Stringable & Equatable[Rect])
@@ -84,27 +109,40 @@ class Rect is (Stringable & Equatable[Rect])
   var _h: F32
 
   new create(x': F32, y': F32, w': F32, h': F32) =>
-    (_x, _y, _w, _h) = (x', y', w', h')
+    ((_x, _y), _w, _h) = R4fun(x', y', w', h')
 
-  fun ref update(r: (Rect box | R4)) => 
+  fun ref update(r: (Rect box | R4)) =>
     ((_x, _y), _w, _h) =
     match r
+    | let r' : R4 => R4fun.rectify(r')
     | let r' : Rect box => r'.r4()
-    | let r' : R4 => r'
     end
-
-  fun r4(): R4 => ((_x, _y), _w, _h)
 
   new zero() =>(_x, _y, _w, _h) = (0, 0, 0, 0)
   new unit() =>(_x, _y, _w, _h) = (0, 0, 1, 1)
 
-  new sized(w': F32, h': F32) => (_x, _y, _w, _h) = (0, 0, w', h')
+  new sized(w': F32, h': F32) =>
+    (_x, _y, _w, _h) = (0, 0, w', h')
 
-  new from_center(pt: V2, w': F32, h': F32) => 
+  new from_center(pt: V2, w': F32, h': F32) =>
     ((_x, _y), _w, _h) = R4fun.from_center(pt, w', h')
 
+  fun r4(): R4 => ((_x, _y), _w, _h)
+
    // @todo: check out .> operator.. return this
-  fun ref move(pt: V2) => (_x, _y) = pt
+  fun ref move_to(pt: V2) => (_x, _y) = pt
+
+  fun ref move_by(x': F32 = 0, y': F32 = 0) =>
+    (_x, _y) = (_x + x', _y + y')
+
+  fun ref resize(w': F32 = 0, h': F32 = 0) =>
+    (_w, _h) = (w', h')
+
+  fun ref resize_centered(w': F32 = 0, h': F32 = 0) =>
+    (_w, _h) = (w', h')
+
+  // fun ref grow(x': F32 = 0, y': F32 = 0) =>
+  //   (_w, _h) = (_w + w', _h + h')
 
    // @todo: check out .> operator.. return this
   fun ref center_on(pt: V2) =>
@@ -124,7 +162,7 @@ class Rect is (Stringable & Equatable[Rect])
   fun contains(pt: V2): Bool => R4fun.contains(r4(), pt)
   fun contains(pt: V3): Bool => R4fun.contains(r4(), pt)
 
-  fun overlaps(that: box->AnyRect): Bool => 
+  fun overlaps(that: box->AnyRect): Bool =>
     let mine = r4()
     let that' =
     match that
@@ -139,7 +177,7 @@ class Rect is (Stringable & Equatable[Rect])
   fun point_to_normalized(pt: V2): V2 =>
     R4fun.point_to_normalized(r4(), pt)
 
-  fun box eq(that: box->AnyRect): Bool => 
+  fun box eq(that: box->AnyRect): Bool =>
     let mine = r4()
     let that' =
     match that
