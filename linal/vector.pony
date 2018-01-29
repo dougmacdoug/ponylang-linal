@@ -11,7 +11,7 @@ type OptVector is (FixVector | None)
 """ tuple based Vector or None alias"""
 
 // @Hack VectorX is Vector[VX, VXfun] but compiler requires both in the alias
-type AnyVector2 is (Vector2 | Vector[V2, V2fun] | V2) 
+type AnyVector2 is (Vector2 | Vector[V2, V2fun] | V2)
 """instance|tuple vector 2 alias - see Vector and VectorFun"""
 type AnyVector3 is (Vector3 | Vector[V3, V3fun] | V3)
 """instance|tuple vector 3 alias - see Vector and VectorFun"""
@@ -20,12 +20,14 @@ type AnyVector4 is (Vector4 | Vector[V4, V4fun] | V4)
 
 trait VectorFun[V /*: Vector */]
 """Trait defining tuple based vector functions"""
-  new val create() 
-  """expects primitive implimentation with val constructor"""    
+  new val create()
+  """expects primitive implimentation with val constructor"""
   fun zero(): V
     """all zeroes vector"""
   fun id(): V
     """all ones vector"""
+  fun from_array(a: box->Array[F32], offset: USize=0): V ?
+    """create vector from array - fill with zeroes if missing"""
   fun add(a: V, b: V): V
     """add a and b"""
   fun sub(a: V, b: V): V
@@ -37,7 +39,7 @@ trait VectorFun[V /*: Vector */]
   fun div(v: V, s: F32): V
     """scalar divide (1/scale) vector"""
   fun dot(a: V, b: V): F32
-    """dot product of a and b"""    
+    """dot product of a and b"""
   fun len2(v: V): F32
     """length of vector squared"""
   fun len(v: V): F32
@@ -65,6 +67,8 @@ primitive V2fun is VectorFun[V2 val]
   fun apply(x': F32, y': F32): V2 => (x', y')
   fun zero(): V2 => (0, 0)
   fun id(): V2 => (1, 1)
+  fun from_array(a: Array[F32] box, offset: USize=0): V2 ? =>
+    (a(0 + offset)?, a(1 + offset)?)
   fun add(a: V2, b: V2): V2 => (a._1 + b._1, a._2 + b._2)
   fun sub(a: V2, b: V2): V2 => (a._1 - b._1, a._2 - b._2)
   fun neg(v: V2): V2 => (-v._1 , -v._2)
@@ -77,7 +81,7 @@ primitive V2fun is VectorFun[V2 val]
   fun dist2(a: V2, b: V2): F32  => len2(sub(a, b))
   fun dist(a: V2, b: V2): F32  => len(sub(a, b))
   fun unit(v: V2): V2 => div(v, len(v))
-  
+
   fun cross(a: V2, b: V2): F32 =>
     """cross product"""
     (a._1*b._2) - (b._1*a._2)
@@ -88,7 +92,7 @@ primitive V2fun is VectorFun[V2 val]
   fun v3(v: V2): V3 => (v._1, v._2, 0)
   fun v4(v: V2): V4 => (v._1, v._2, 0, 0)
 
-  fun lerp(a: V2, b: V2, t: F32): V2 => 
+  fun lerp(a: V2, b: V2, t: F32): V2 =>
     (Linear.lerp(a._1, b._1, t), Linear.lerp(a._2, b._2, t))
 
 primitive V3fun is VectorFun[V3 val]
@@ -96,6 +100,8 @@ primitive V3fun is VectorFun[V3 val]
   fun apply(x': F32, y': F32, z': F32): V3 => (x', y', z')
   fun zero(): V3 => (0, 0, 0)
   fun id(): V3 => (1, 1, 1)
+  fun from_array(a: Array[F32] box, offset: USize=0): V3 ? =>
+    (a(0 + offset)?, a(1 + offset)?, a(2 + offset)?)
   fun add(a: V3, b: V3): V3 => (a._1 + b._1, a._2 + b._2, a._3 + b._3)
   fun sub(a: V3, b: V3): V3 => (a._1 - b._1, a._2 - b._2, a._3 - b._3)
   fun neg(v: V3): V3 => (-v._1 , -v._2, -v._3)
@@ -122,7 +128,7 @@ primitive V3fun is VectorFun[V3 val]
   fun v2(v: V3): V2 => (v._1, v._2)
   fun v3(v: V3): V3 => v
   fun v4(v: V3): V4 => (v._1, v._2, v._3, 0)
-  fun lerp(a: V3, b: V3, t: F32): V3 => 
+  fun lerp(a: V3, b: V3, t: F32): V3 =>
     (Linear.lerp(a._1, b._1, t),
      Linear.lerp(a._2, b._2, t),
      Linear.lerp(a._3, b._3, t))
@@ -132,6 +138,8 @@ primitive V4fun is VectorFun[V4 val]
   fun apply(x': F32, y': F32, z': F32, w': F32): V4 => (x', y', z', w')
   fun zero(): V4 => (0, 0, 0, 0)
   fun id(): V4 => (1, 1, 1, 1)
+  fun from_array(a: Array[F32] box, offset: USize=0): V4 ? =>
+    (a(0 + offset)?, a(1 + offset)?, a(2 + offset)?, a(3 + offset)?)
   fun add(a: V4, b: V4): V4 =>
     (a._1 + b._1, a._2 + b._2, a._3 + b._3, a._4 + b._4)
   fun sub(a: V4, b: V4): V4 =>
@@ -152,7 +160,7 @@ primitive V4fun is VectorFun[V4 val]
    fun v2(v: V4): V2 => (v._1, v._2)
    fun v3(v: V4): V3 => (v._1, v._2, v._3)
    fun v4(v: V4): V4 => v
-   fun lerp(a: V4, b: V4, t: F32): V4 => 
+   fun lerp(a: V4, b: V4, t: F32): V4 =>
     (Linear.lerp(a._1, b._1, t), Linear.lerp(a._2, b._2, t),
      Linear.lerp(a._3, b._3, t), Linear.lerp(a._4, b._4, t))
 
@@ -165,7 +173,7 @@ trait for class wrappers for tuple types
  * minimize GC'd classes by returning Tuple-based objects for all operations
  * update() allows reuse of instance
 
-** Note: V is actually one of the tuple types from FixVector 
+** Note: V is actually one of the tuple types from FixVector
  but pony doesn't support tuples as subtypes so we use
  Any here **
 
@@ -181,9 +189,9 @@ trait for class wrappers for tuple types
 // for sugar, left must be instance but right can be tuple or instance
   var pt = Vector2((1, 1))
   let tuple_v2: V2 = pt + pt // return type is tuple
-  pt() = pt + ((2, 3))        // update() accepts tuples     
-  let pt': V2 = (1, 2)   
-  pt() = pt - pt'             
+  pt() = pt + ((2, 3))        // update() accepts tuples
+  let pt': V2 = (1, 2)
+  pt() = pt - pt'
 ```
 """
   new zero()
@@ -208,35 +216,35 @@ trait for class wrappers for tuple types
   fun as_array(): Array[F32] val
     """return this vector as an Array"""
 
-  fun add(that: (Vector[V, Vfun] box | V)): V => 
+  fun add(that: (Vector[V, Vfun] box | V)): V =>
     """add this vector with another instance|tuple => tuple"""
     let mine: V = as_tuple()
     let that': V = _tuplize(that)
     Vfun.add(mine, that')
 
-  fun sub(that: (Vector[V, Vfun] box | V)): V => 
+  fun sub(that: (Vector[V, Vfun] box | V)): V =>
     """subtract another instance|tuple from this vector => tuple"""
     let mine: V = as_tuple()
     let that': V = _tuplize(that)
     Vfun.sub(mine, that')
 
-  fun mul(scale': F32): V => 
+  fun mul(scale': F32): V =>
     """subtract another instance|tuple from this vector => tuple"""
     let mine: V = as_tuple()
     Vfun.mul(mine, scale')
 
-  fun div(scale': F32): V => 
+  fun div(scale': F32): V =>
     """scalar div (1/scale) this vector => tuple"""
     let mine: V = as_tuple()
     Vfun.div(mine, scale')
 
-  fun neg(): V => 
+  fun neg(): V =>
     """negate this vector => tuple"""
     let mine: V = as_tuple()
     Vfun.neg(mine)
 
-  fun dot(that: (Vector[V, Vfun] box | V)): F32 => 
-    """dot product of this and that"""    
+  fun dot(that: (Vector[V, Vfun] box | V)): F32 =>
+    """dot product of this and that"""
     let mine : V = as_tuple()
     let that': V = _tuplize(that)
     Vfun.dot(mine, that')
@@ -277,7 +285,7 @@ trait for class wrappers for tuple types
   fun ref update(value: (box->Vector[V, Vfun] | V)) =>
     """set this vector value to instance|tuple"""
 
-  fun eq(that: (Vector[V, Vfun] box | V)): Bool  => 
+  fun eq(that: (Vector[V, Vfun] box | V)): Bool  =>
     """test equality with this vector and another instance|tuple"""
     let mine: V = as_tuple()
     match that
@@ -297,10 +305,10 @@ trait for class wrappers for tuple types
 
 class Vector2 is Vector[V2, V2fun]
   """class wrapper for V2 - see Vector for details"""
-  var _x: F32 
+  var _x: F32
   var _y: F32
 
-  new create(v': box->AnyVector2) => 
+  new create(v': box->AnyVector2) =>
     (_x, _y) = match v'
     | let v: Vector[V2, V2fun] box => v.as_tuple()
     | let v: V2 => (v._1, v._2)
@@ -308,7 +316,6 @@ class Vector2 is Vector[V2, V2fun]
 
   new zero() => (_x, _y) = (0, 0)
   new id() => (_x, _y) = (1, 1)
-
   fun x(): F32 => _x
   fun y(): F32 => _y
   fun z(): F32 ? => error
@@ -324,7 +331,7 @@ class Vector2 is Vector[V2, V2fun]
     """V2->F32 cross product of this and that"""
     V2fun.cross((_x, _y), _tuplize(that))
 
-  fun ref update(value: box->AnyVector2)  => 
+  fun ref update(value: box->AnyVector2)  =>
     (_x, _y) = match value
     | let v: Vector[V2, V2fun] box => v.as_tuple()
     | let v: V2 => v
@@ -339,14 +346,13 @@ class Vector3 is Vector[V3, V3fun]
   var _y: F32
   var _z: F32
 
-  new create(v': box->AnyVector3) => 
+  new create(v': box->AnyVector3) =>
     (_x, _y, _z) = match v'
     | let v: Vector[V3, V3fun] box => v.as_tuple()
     | let v: V3 => v
     end
   new zero() => (_x, _y, _z) = (0, 0, 0)
   new id() => (_x, _y, _z) = (1, 1, 1)
-
   fun x(): F32 => _x
   fun y(): F32 => _y
   fun z(): F32 => _z
@@ -362,7 +368,7 @@ class Vector3 is Vector[V3, V3fun]
     """cross product of this and that"""
     V3fun.cross((_x, _y, _z), _tuplize(that))
 
-  fun ref update(value: box->AnyVector3)  => 
+  fun ref update(value: box->AnyVector3)  =>
     (_x, _y, _z) =
     match value
     | let v: Vector[V3, V3fun] box => v.as_tuple()
@@ -378,7 +384,7 @@ class Vector4 is Vector[V4, V4fun]
   var _z: F32
   var _w: F32
 
-  new create(v': box->AnyVector4) => 
+  new create(v': box->AnyVector4) =>
     (_x, _y, _z, _w) =
     match v'
     | let v: Vector[V4, V4fun] box => v.as_tuple()
@@ -386,7 +392,6 @@ class Vector4 is Vector[V4, V4fun]
     end
   new zero() => (_x, _y, _z, _w) = (0, 0, 0, 0)
   new id() => (_x, _y, _z, _w) = (1, 1, 1, 1)
-
   fun x(): F32 => _x
   fun y(): F32 => _y
   fun z(): F32 => _z
@@ -398,8 +403,8 @@ class Vector4 is Vector[V4, V4fun]
   fun v3(): V3 => (_x, _y, _z)
   fun v4(): V4 => (_x, _y, _z, _w)
 
-  fun ref update(value: box->AnyVector4)  => 
-    (_x, _y, _z, _w) = 
+  fun ref update(value: box->AnyVector4)  =>
+    (_x, _y, _z, _w) =
     match value
     | let v: Vector[V4, V4fun] box => v.as_tuple()
     | let v: V4 => v
