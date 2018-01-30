@@ -8,17 +8,26 @@ Position is always bottom left or more accurately minX, minY
 
 primitive R4fun
 """rectangle operations for R4"""
+/** SIMULATED NEW:  CREATE R4  **/
   fun apply(x': F32, y': F32, w': F32, h': F32): R4 =>
+    """create R4"""
     rectify(((x', y'), w', h'))
 
-  fun zero(): R4 => ((0, 0), 0, 0)
-  fun unit(): R4 => ((0, 0), 1, 1)
+  fun zero(): R4 =>
+    """create zero R4"""
+    ((0, 0), 0, 0)
+    
+  fun unit(): R4 =>
+    """create unit R4"""
+    ((0, 0), 1, 1)
+    
   fun sized(w': F32, h': F32): R4 =>
-    """create R4 at zero with size (w', h')"""
+    """create R4 at zero with size *(w', h')*"""
     rectify(((0, 0), w', h'))
-  fun moved(r: R4, pt: V2): R4 =>
-    """create R4 at new location pt"""
-   (pt, r._2, r._3)
+
+  fun centered(pt: V2, w': F32, h': F32): R4 =>
+    """create R4 centered on point  *pt*  with size *(w', h')*"""
+    rectify(((pt._1 - (w' / 2), pt._2 - (h' / 2)), w', h'))
 
   fun min(r: R4): V2 =>
     """smallest point in R4 (bottom left corner)"""
@@ -36,13 +45,31 @@ primitive R4fun
   fun size(r: R4): (F32, F32) => (r._2, r._3)
 
   fun center(r: R4): V2 =>
+    """get center point of R4"""
     ((r._1._1 + r._2) / 2, (r._1._2 + r._3) / 2)
 
-  fun center_on(r: R4, pt: V2): R4 =>
-    ((pt._1 - (r._2 / 2), pt._2 - (r._3 / 2)), r._2, r._3)
+  fun move(r: R4, pt: V2): R4 =>
+    """move R4 to point"""
+   (pt, r._2, r._3)
 
-  fun from_center(pt: V2, w': F32, h': F32): R4 =>
-    rectify(((pt._1 - (w' / 2), pt._2 - (h' / 2)), w', h'))
+  fun move_centered(r: R4, pt: V2): R4 =>
+    """move R4 to be centered on point"""
+    move(r, (pt._1 - (r._2 / 2), pt._2 - (r._3 / 2)))
+
+  fun resize(r: R4, w': F32, h': F32): R4 =>
+    rectify((r._1, w', h'))
+
+  fun resize_centered(r: R4, w': F32, h': F32): R4 =>
+    let pos_w = w'.abs()
+    let pos_h = h'.abs()
+    let c = V2fun.sub(center(r), (pos_w / 2, pos_h / 2))
+    (c, pos_w, pos_h)
+
+  fun grow(r: R4, dx: F32, dy: F32): R4 =>
+    resize(r, r._2 + dx, r._3 + dy)
+
+  fun grow_centered(r: R4, dx: F32, dy: F32): R4 =>
+    resize_centered(r, r._2 + dx, r._3 + dy)
 
   fun contains(r: R4, pt: V2): Bool =>
     (r._1._1 <= pt._1) and ((r._1._1 + r._2) >= pt._1) and
@@ -108,8 +135,8 @@ class Rect is (Stringable & Equatable[Rect])
   var _w: F32
   var _h: F32
 
-  new create(x': F32, y': F32, w': F32, h': F32) =>
-    ((_x, _y), _w, _h) = R4fun(x', y', w', h')
+  // new create(x': F32, y': F32, w': F32, h': F32) =>
+  //   ((_x, _y), _w, _h) = R4fun(x', y', w', h')
 
   fun ref update(r: (Rect box | R4)) =>
     ((_x, _y), _w, _h) =
@@ -122,10 +149,10 @@ class Rect is (Stringable & Equatable[Rect])
   new unit() =>(_x, _y, _w, _h) = (0, 0, 1, 1)
 
   new sized(w': F32, h': F32) =>
-    (_x, _y, _w, _h) = (0, 0, w', h')
+    ((_x, _y), _w, _h) = R4fun.sized(w', h')
 
-  new from_center(pt: V2, w': F32, h': F32) =>
-    ((_x, _y), _w, _h) = R4fun.from_center(pt, w', h')
+  new centered(pt: V2, w': F32, h': F32) =>
+    ((_x, _y), _w, _h) = R4fun.centered(pt, w', h')
 
   fun r4(): R4 => ((_x, _y), _w, _h)
 
@@ -135,18 +162,24 @@ class Rect is (Stringable & Equatable[Rect])
   fun ref move_by(x': F32 = 0, y': F32 = 0) =>
     (_x, _y) = (_x + x', _y + y')
 
-  fun ref resize(w': F32 = 0, h': F32 = 0) =>
-    (_w, _h) = (w', h')
+  fun ref resize(w': F32, h': F32) =>
+    ((_x, _y), _w, _h) = R4fun(_x, _y, w', h')
 
-  fun ref resize_centered(w': F32 = 0, h': F32 = 0) =>
-    (_w, _h) = (w', h')
+  fun ref resize_centered(w': F32, h': F32) =>
+    ((_x, _y), _w, _h) = R4fun.resize_centered(r4(), w', h')
 
-  // fun ref grow(x': F32 = 0, y': F32 = 0) =>
-  //   (_w, _h) = (_w + w', _h + h')
+  fun ref grow(x': F32 = 0, y': F32 = 0) =>
+    ((_x, _y), _w, _h) = R4fun(_x, _y, _w + x', _h + y')
+
+  fun ref grow_centered(x': F32 = 0, y': F32 = 0) =>
+    ((_x, _y), _w, _h) =
+    R4fun(_x - (x'.abs() / 2),
+          _y - (y'.abs() / 2),
+          _w + x', _h + y')
 
    // @todo: check out .> operator.. return this
-  fun ref center_on(pt: V2) =>
-    update(R4fun.center_on(r4(), pt))
+  fun ref move_centered(pt: V2) =>
+    ((_x, _y), _w, _h) = R4fun.move_centered(r4(), pt)
 
   fun min(): V2 => R4fun.min(r4())
   fun max(): V2 => R4fun.max(r4())
