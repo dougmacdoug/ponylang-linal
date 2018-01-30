@@ -322,7 +322,6 @@ primitive M4fun
     let n = _det1(m)
     _det2(n)
    
-
   fun _det1(m: M4): (V4, V4, V4) =>
     let n1  = (m._1._1 * m._2._2) - (m._1._2 * m._2._1)
     let n2  = (m._1._1 * m._2._3) - (m._1._3 * m._2._1)
@@ -478,9 +477,9 @@ class Matrix4// is (Stringable & Equatable[Matrix4])
 
   fun ref apply(m': box->AnyMatrix4) =>
     ((m11, m12, m13, m14),
-         (m21, m22, m23, m24),
-         (m31, m32, m33, m34),
-         (m41, m42, m43, m44)) = _tuplize(m')
+     (m21, m22, m23, m24),
+     (m31, m32, m33, m34),
+     (m41, m42, m43, m44)) = _tuplize(m')
 
   fun ref update(value: box->AnyMatrix4) => apply(value)
 
