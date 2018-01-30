@@ -27,7 +27,7 @@ trait VectorFun[V /*: Vector */]
   fun id(): V
     """all ones vector"""
   fun from_array(a: box->Array[F32], offset: USize=0): V ?
-    """create vector from array - fill with zeroes if missing"""
+    """create vector from array - error on array fetch fail"""
   fun add(a: V, b: V): V
     """add a and b"""
   fun sub(a: V, b: V): V
