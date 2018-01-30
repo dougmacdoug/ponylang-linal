@@ -85,11 +85,5 @@ class iso _TestVectorFunCross is UnitTest
     let fxg = V3fun.cross(f, g)
     let gxf = V3fun.cross(g, f)
     
-    let fxg' = V3fun(-2, 4, -2)
-    let gxf' = V3fun(2, -4, 2)
-
-    h.log("fxg " + Linear.to_string(fxg) + " == " +  Linear.to_string(fxg'))
-    h.assert_true(V3fun.eq(fxg, fxg', F32.epsilon()))
-
-    h.log("gxf " + Linear.to_string(gxf) + " == " +  Linear.to_string(gxf'))
-    h.assert_true(V3fun.eq(gxf, gxf', F32.epsilon()))
+    h.assert_eq[Vector3](Vector3(fxg), Vector3((-2, 4, -2)))
+    h.assert_eq[Vector3](Vector3(gxf), Vector3((2, -4, 2)))
