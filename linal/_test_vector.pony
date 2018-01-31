@@ -65,7 +65,61 @@ fun _testVectorFun[V: Any val, VF: VectorFun[V val] val](
   h.assert_eq[F32](v.len(one), v.len(v.neg(one)), "length")
   h.assert_eq[F32](dist1, dist2, "distance")
   h.assert_eq[F32](dist1', dist2', "distance squared")
+
+  h.assert_eq[U32](v.size().u32(), v.sum(one).round().u32(), "Sum")
+  var a = zero
+  var out: F32 
+  var i: USize = 0
+
+  a = try v.set(a, i, 1)? else zero end
+  out = try v.get(a, i)? else -1 end
+  h.assert_eq[F32](1, out, "Get/Set: Head")
+
+  i = v.size() - 1
+  a = try v.set(a, i, 1)? else zero end
+  out = try v.get(a, i)? else -1 end
+  h.assert_eq[F32](1, out, "Get/Set: Tail")
+
+
+  a = v.shift_left(one)
+  out = try v.get(a, v.size() - 1)? else -1 end
+  h.assert_eq[F32](0, out, "Shift Left")
+  a = v.roll_right(a)
+  out = try v.get(a, U32(0))? else -1 end
+  h.assert_eq[F32](0, out, "Roll Right")
   
+  a = v.shift_right(one)
+  out = try v.get(a, U32(0))? else -1 end
+  h.assert_eq[F32](0, out, "Shift Right")
+  a = v.roll_left(a)
+  out = try v.get(a, v.size() - 1)? else -1 end
+  h.assert_eq[F32](0, out, "Roll Left")
+
+  var b : V
+  a = one
+  b = one
+  i = v.size()
+  while i > 0 do
+    i = i - 1
+    a = v.shift_left(a)
+    b = v.roll_left(b)
+  end
+
+  test(zero, a)
+  test(one, b)
+
+  a = one
+  b = one
+  i = v.size()
+  while i > 0 do
+    i = i - 1
+    a = v.shift_right(a)
+    b = v.roll_right(b)
+  end
+
+  test(zero, a)
+  test(one, b)
+
 
 class iso _TestVectorFunCross is UnitTest
   fun name():String => "Vector/Cross"
@@ -84,6 +138,6 @@ class iso _TestVectorFunCross is UnitTest
 
     let fxg = V3fun.cross(f, g)
     let gxf = V3fun.cross(g, f)
-    
+
     h.assert_eq[Vector3](Vector3(fxg), Vector3((-2, 4, -2)))
     h.assert_eq[Vector3](Vector3(gxf), Vector3((2, -4, 2)))

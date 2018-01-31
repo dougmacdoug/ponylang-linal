@@ -18,7 +18,7 @@ type AnyVector3 is (Vector3 | Vector[V3, V3fun] | V3)
 type AnyVector4 is (Vector4 | Vector[V4, V4fun] | V4)
 """instance|tuple vector 4 alias - see Vector and VectorFun"""
 
-trait VectorFun[V /*: Vector */]
+trait VectorFun[V/*: Vector */]
 """Trait defining tuple based vector functions"""
   new val create()
   """expects primitive implimentation with val constructor"""
@@ -50,6 +50,9 @@ trait VectorFun[V /*: Vector */]
     """distance between a and b"""
   fun unit(v: V): V
     """normalized unit vector"""
+  fun sum(v: V): F32
+    """sum of all elements in the vector"""
+
   fun eq(a: V, b: V, eps: F32): Bool
     """test equality between a and b  +/-(~epsilon)"""
   fun lerp(a: V, b: V, t: F32): V
@@ -61,6 +64,36 @@ trait VectorFun[V /*: Vector */]
     """return a vector 3 from v - fill with zeroes if necessary"""
   fun v4(v: V): V4
     """return a vector 4 from v - fill with zeroes if necessary"""
+
+  fun shift_right(v: V): V
+  fun shift_left(v: V): V
+  fun roll_right(v: V): V
+  fun roll_left(v: V): V
+  fun size(): USize
+  fun get(v: val->V, i: Int): F32 ?
+  fun set(v: val->V, i: Int, value: F32): V ?
+
+  fun box to_string(v: val->V): String iso^ =>
+    """string format a vector"""
+    recover
+      let zero': String = "0"
+      let n = size()
+      var s = String(160)
+      s.push('(')
+      s.append((try get(v, U32(0))?.string() else zero' end))
+      s.push(',')
+      s.append((try get(v, U32(1))?.string() else zero' end))
+      if n > 2 then
+        s.push(',')
+        s.append((try get(v, U32(2))?.string() else zero' end))
+        if n > 3 then
+          s.push(',')
+          s.append((try get(v, U32(3))?.string() else zero' end))
+        end
+      end
+      s.push(')')
+      s.>recalc()
+    end
 
 primitive V2fun is VectorFun[V2 val]
   """tuple based Vector 2 functions - see VectorFun for details"""
@@ -81,10 +114,11 @@ primitive V2fun is VectorFun[V2 val]
   fun dist2(a: V2, b: V2): F32  => len2(sub(a, b))
   fun dist(a: V2, b: V2): F32  => len(sub(a, b))
   fun unit(v: V2): V2 => div(v, len(v))
+  fun sum(v: V2): F32 => v._1 + v._2
 
   fun cross(a: V2, b: V2): F32 =>
     """cross product"""
-    (a._1*b._2) - (b._1*a._2)
+    (a._1 * b._2) - (b._1 * a._2)
 
   fun eq(a: V2, b: V2, eps: F32 = F32.epsilon()): Bool =>
     Linear.eq(a._1, b._1, eps)  and Linear.eq(a._2, b._2, eps)
@@ -94,6 +128,27 @@ primitive V2fun is VectorFun[V2 val]
 
   fun lerp(a: V2, b: V2, t: F32): V2 =>
     (Linear.lerp(a._1, b._1, t), Linear.lerp(a._2, b._2, t))
+
+  fun shift_right(v: V2): V2 => (0, v._1)
+  fun shift_left(v: V2): V2 => (v._2, 0)
+  fun roll_right(v: V2): V2 => (v._2, v._1)
+  fun roll_left(v: V2): V2 => (v._2, v._1)
+  fun size(): USize => 2
+  fun get(v: V2, i: Int): F32 ? =>
+    match i.u32()
+    | 0 => v._1
+    | 1 => v._2
+    else
+      error
+    end
+
+  fun set(v: V2, i: Int, value: F32): V2 ? =>
+    match i.u32()
+    | 0 => (value, v._2)
+    | 1 => (v._1, value)
+    else
+      error
+    end
 
 primitive V3fun is VectorFun[V3 val]
   """tuple based Vector 3 functions - see VectorFun for details"""
@@ -113,12 +168,13 @@ primitive V3fun is VectorFun[V3 val]
   fun dist2(a: V3, b: V3): F32  => len2(sub(a, b))
   fun dist(a: V3, b: V3): F32  => len(sub(a, b))
   fun unit(v: V3): V3 => div(v, len(v))
+  fun sum(v: V3): F32 => v._1 + v._2 + v._3
 
   fun cross(a: V3, b: V3): V3 =>
     """cross product"""
-    ((a._2*b._3) - (a._3*b._2),
-     (a._3*b._1) - (a._1*b._3),
-     (a._1*b._2) - (a._2*b._1))
+    ((a._2 * b._3) - (a._3 * b._2),
+     (a._3 * b._1) - (a._1 * b._3),
+     (a._1 * b._2) - (a._2 * b._1))
 
   fun eq(a: V3, b: V3, eps: F32 = F32.epsilon()): Bool =>
     Linear.eq(a._1, b._1, eps) and
@@ -132,6 +188,28 @@ primitive V3fun is VectorFun[V3 val]
     (Linear.lerp(a._1, b._1, t),
      Linear.lerp(a._2, b._2, t),
      Linear.lerp(a._3, b._3, t))
+  fun shift_right(v: V3): V3 => (0, v._1, v._2)
+  fun shift_left(v: V3): V3 => (v._2, v._3, 0)
+  fun roll_right(v: V3): V3 => (v._3, v._1, v._2)
+  fun roll_left(v: V3): V3 => (v._2, v._3, v._1)
+  fun size(): USize => 3
+  fun get(v: V3, i: Int): F32 ? =>
+    match i.u32()
+    | 0 => v._1
+    | 1 => v._2
+    | 2 => v._3
+    else
+      error
+    end
+
+  fun set(v: V3, i: Int, value: F32): V3 ? =>
+    match i.u32()
+    | 0 => (value, v._2, v._3)
+    | 1 => (v._1, value, v._3)
+    | 2 => (v._1, v._2, value)
+    else
+      error
+    end
 
 primitive V4fun is VectorFun[V4 val]
   """tuple based Vector 4 functions - see VectorFun for details"""
@@ -148,12 +226,14 @@ primitive V4fun is VectorFun[V4 val]
   fun mul(v: V4, s: F32): V4  => (v._1 * s, v._2 * s, v._3 * s, v._4 * s)
   fun div(v: V4, s: F32): V4  => (v._1 / s, v._2 / s, v._3 / s, v._4 / s)
   fun dot(a: V4, b: V4): F32 =>
-    (a._1 * b._1) + (a._2 * b._2) + (a._3 * b._3)+ (a._4 * b._4)
+    (a._1 * b._1) + (a._2 * b._2) + (a._3 * b._3) + (a._4 * b._4)
   fun len2(v: V4): F32 => dot(v, v)
   fun len(v: V4): F32 => dot(v, v).sqrt()
   fun dist2(a: V4, b: V4): F32  => len2(sub(a, b))
   fun dist(a: V4, b: V4): F32  => len(sub(a, b))
   fun unit(v: V4): V4 => div(v, len(v))
+  fun sum(v: V4): F32 => v._1 + v._2 + v._3 + v._4
+
   fun eq(a: V4, b: V4, eps: F32 = F32.epsilon()): Bool =>
    Linear.eq(a._1, b._1, eps)  and Linear.eq(a._2, b._2, eps)
    and Linear.eq(a._3, b._3, eps) and Linear.eq(a._4, b._4, eps)
@@ -163,6 +243,30 @@ primitive V4fun is VectorFun[V4 val]
    fun lerp(a: V4, b: V4, t: F32): V4 =>
     (Linear.lerp(a._1, b._1, t), Linear.lerp(a._2, b._2, t),
      Linear.lerp(a._3, b._3, t), Linear.lerp(a._4, b._4, t))
+  fun shift_right(v: V4): V4 => (0, v._1, v._2, v._3)
+  fun shift_left(v: V4): V4 => (v._2, v._3, v._4, 0)
+  fun roll_right(v: V4): V4 => (v._4, v._1, v._2, v._3)
+  fun roll_left(v: V4): V4 => (v._2, v._3, v._4, v._1)
+  fun size(): USize => 4
+  fun get(v: V4, i: Int): F32 ? =>
+    match i.u32()
+    | 0 => v._1
+    | 1 => v._2
+    | 2 => v._3
+    | 3 => v._4
+    else
+      error
+    end
+
+  fun set(v: V4, i: Int, value: F32): V4 ? =>
+    match i.u32()
+    | 0 => (value, v._2, v._3, v._4)
+    | 1 => (v._1, value, v._3, v._4)
+    | 2 => (v._1, v._2, value, v._4)
+    | 3 => (v._1, v._2, v._3, value)
+    else
+      error
+    end
 
 trait Vector[V: Any #read, Vfun: VectorFun[V] val] is
  (Stringable & Equatable[Vector[V, Vfun]])

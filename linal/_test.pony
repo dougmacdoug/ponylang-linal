@@ -126,28 +126,29 @@ class iso _TestLinearVec is UnitTest
   fun name():String => "Linear/Vec"
 
   fun apply(h: TestHelper) =>
-    h.assert_eq[Vector2](Vector2((1, 2)),
-                         Linear.vector2((1, 2)))
-    h.assert_eq[Vector3](Vector3((1, 2,3)),
-                         Linear.vector3((1, 2, 3)))
-    h.assert_eq[Vector4](Vector4((1, 2, 3, 4)),
-                         Linear.vector4((1, 2, 3, 4)))
+    """"""
+    // h.assert_eq[Vector2](Vector2((1, 2)),
+    //                      Linear.vector2((1, 2)))
+    // h.assert_eq[Vector3](Vector3((1, 2,3)),
+    //                      Linear.vector3((1, 2, 3)))
+    // h.assert_eq[Vector4](Vector4((1, 2, 3, 4)),
+    //                      Linear.vector4((1, 2, 3, 4)))
  
-    h.assert_eq[Vector2](Vector2.zero(), Linear.vector2(None))
-    h.assert_eq[Vector3](Vector3.zero(), Linear.vector3(None))
-    h.assert_eq[Vector4](Vector4.zero(), Linear.vector4(None))
+    // h.assert_eq[Vector2](Vector2.zero(), Linear.vector2(None))
+    // h.assert_eq[Vector3](Vector3.zero(), Linear.vector3(None))
+    // h.assert_eq[Vector4](Vector4.zero(), Linear.vector4(None))
 
-    h.assert_eq[Vector2](Vector2.id(), Linear.vector2(V2fun.id()))
-    h.assert_eq[Vector2](Vector2.id(), Linear.vector2(V3fun.id()))
-    h.assert_eq[Vector2](Vector2.id(), Linear.vector2(V4fun.id()))
+    // h.assert_eq[Vector2](Vector2.id(), Linear.vector2(V2fun.id()))
+    // h.assert_eq[Vector2](Vector2.id(), Linear.vector2(V3fun.id()))
+    // h.assert_eq[Vector2](Vector2.id(), Linear.vector2(V4fun.id()))
  
-    h.assert_eq[Vector3](Vector3((1, 1, 0)), Linear.vector3(V2fun.id()))
-    h.assert_eq[Vector3](Vector3.id(), Linear.vector3(V3fun.id()))
-    h.assert_eq[Vector3](Vector3.id(), Linear.vector3(V4fun.id()))
+    // h.assert_eq[Vector3](Vector3((1, 1, 0)), Linear.vector3(V2fun.id()))
+    // h.assert_eq[Vector3](Vector3.id(), Linear.vector3(V3fun.id()))
+    // h.assert_eq[Vector3](Vector3.id(), Linear.vector3(V4fun.id()))
  
-    h.assert_eq[Vector4](Vector4((1, 1, 0, 0)), Linear.vector4(V2fun.id()))
-    h.assert_eq[Vector4](Vector4((1, 1, 1, 0)), Linear.vector4(V3fun.id()))
-    h.assert_eq[Vector4](Vector4.id(), Linear.vector4(V4fun.id()))
+    // h.assert_eq[Vector4](Vector4((1, 1, 0, 0)), Linear.vector4(V2fun.id()))
+    // h.assert_eq[Vector4](Vector4((1, 1, 1, 0)), Linear.vector4(V3fun.id()))
+    // h.assert_eq[Vector4](Vector4.id(), Linear.vector4(V4fun.id()))
 
 class iso _TestLinearFun is UnitTest
   fun name():String => "Linear/Fun"
@@ -167,7 +168,6 @@ class iso _TestLinearFun is UnitTest
     h.assert_true(Linear.approx_eq(999999.9, 1000000))
     h.assert_false(Linear.approx_eq(999999,  1000000))
 
-//    ping_pong(t : F32, len : F32) : F32
     h.assert_eq[F32](1, Linear.toggle(1, 3))
     h.assert_eq[F32](2, Linear.toggle(2, 3))
     h.assert_eq[F32](0, Linear.toggle(3, 3))

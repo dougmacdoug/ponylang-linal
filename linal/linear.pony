@@ -3,96 +3,107 @@ primitive Linear
   linear functions and helpers for linal types
   """
 
-  fun vector2(v': OptVector): Vector2 =>
-    """create Vector2 instance from any vector"""
-    Vector2(v2(v'))
-  fun vector3(v': OptVector): Vector3 =>
-    """create Vector3 instance from any vector"""
-    Vector3(v3(v'))
-  fun vector4(v': OptVector): Vector4 =>
-    """create Vector4 instance from any vector"""
-    Vector4(v4(v'))
+  // fun vector2(v': OptVector): Vector2 =>
+  //   """create Vector2 instance from any vector"""
+  //   Vector2(v2(v'))
+  // fun vector3(v': OptVector): Vector3 =>
+  //   """create Vector3 instance from any vector"""
+  //   Vector3(v3(v'))
+  // fun vector4(v': OptVector): Vector4 =>
+  //   """create Vector4 instance from any vector"""
+  //   Vector4(v4(v'))
+  
+  // fun vector[V: Any #read](v': OptVector): (Vector2|Vector3|Vector4) =>
+  //   """create V2 tuple from any vector"""
+  //   match v'
+  //   | let v: V2 => Vector2(v)
+  //   | let v: V3 => Vector3(v)
+  //   | let v: V4 => Vector4(v)
+  //   else Vector2((0, 0))
+  //   end
 
-  fun v2(v': OptVector): V2 =>
-    """create V2 tuple from any vector"""
-    match v'
-    | let v: V2 => v
-    | let v: V3 => (v._1, v._2)
-    | let v: V4 => (v._1, v._2)
-    else (0, 0)
-    end
 
-  fun v3(v': OptVector): V3 =>
-    """create V3 tuple from any vector"""
-    match v'
-    | let v: V2 => (v._1, v._2, 0)
-    | let v: V3 => v
-    | let v: V4 => (v._1, v._2, v._3)
-    else (0, 0, 0)
-    end
+  // fun v2(v': OptVector): V2 =>
+  //   """create V2 tuple from any vector"""
+  //   match v'
+  //   | let v: V2 => v
+  //   | let v: V3 => (v._1, v._2)
+  //   | let v: V4 => (v._1, v._2)
+  //   else (0, 0)
+  //   end
 
-  fun v4(v': OptVector): V4 =>
-    """create V4 tuple from any vector"""
-    match v'
-    | let v: V2 => (v._1, v._2, 0, 0)
-    | let v: V3 => (v._1, v._2, v._3, 0)
-    | let v: V4 => v
-    else (0, 0, 0, 0)
-    end
+  // fun v3(v': OptVector): V3 =>
+  //   """create V3 tuple from any vector"""
+  //   match v'
+  //   | let v: V2 => (v._1, v._2, 0)
+  //   | let v: V3 => v
+  //   | let v: V4 => (v._1, v._2, v._3)
+  //   else (0, 0, 0)
+  //   end
 
-  fun _smat(a: V4, b: V4, c: V4 = V4fun.zero(),
-            d: V4 = V4fun.zero(), n: USize): String iso^  =>
+  // fun v4(v': OptVector): V4 =>
+  //   """create V4 tuple from any vector"""
+  //   match v'
+  //   | let v: V2 => (v._1, v._2, 0, 0)
+  //   | let v: V3 => (v._1, v._2, v._3, 0)
+  //   | let v: V4 => v
+  //   else (0, 0, 0, 0)
+  //   end
+
+  fun _smat(a: String, b: String, c: String = "",
+            d: String = "", n: USize): String iso^  =>
     """string format a matrix"""
     recover
       var s = String(600)
       s.push('(')
-      s.append(_svec(a, n))
+      s.append(a)
       s.push(',')
-      s.append(_svec(b, n))
+      s.append(b)
       if n > 2 then
         s.push(',')
-        s.append(_svec(c, n))
+        s.append(c)
         if n > 3 then
           s.push(',')
-          s.append(_svec(d, n))
+          s.append(d)
         end
       end
       s.push(')')
       s.>recalc()
-      s
     end
 
-  fun _svec(v: V4, n: USize): String iso^ =>
-    """string format a vector"""
-    recover
-      var s = String(160)
-      s.push('(')
-      s.append(v._1.string())
-      s.push(',')
-      s.append(v._2.string())
-      if n > 2 then
-        s.push(',')
-        s.append(v._3.string())
-        if n > 3 then
-          s.push(',')
-          s.append(v._4.string())
-        end
-      end
-      s.push(')')
-      s.>recalc()
-      s
-    end
+  // fun _svec(v: V4, n: USize): String iso^ =>
+  //   """string format a vector"""
+  //   recover
+  //     var s = String(160)
+  //     s.push('(')
+  //     s.append(v._1.string())
+  //     s.push(',')
+  //     s.append(v._2.string())
+  //     if n > 2 then
+  //       s.push(',')
+  //       s.append(v._3.string())
+  //       if n > 3 then
+  //         s.push(',')
+  //         s.append(v._4.string())
+  //       end
+  //     end
+  //     s.push(')')
+  //     s.>recalc()
+  //     s
+  //   end
 
   fun to_string(o: (Q4 | M2 | M3 | M4 | OptVector)): String iso^ =>
     """convert linal tuple based objects to string"""
     match o
-    | let v: V2 => _svec(v4(v), 2)
-    | let v: V3 => _svec(v4(v), 3)
-    | let v: V4 => _svec(v, 4)
-    | let v: Q4 => _svec(v, 4)
-    | let m: M2 => _smat(v4(m._1), v4(m._2) where n=2 )
-    | let m: M3 => _smat(v4(m._1), v4(m._2), v4(m._3) where n=3)
-    | let m: M4 => _smat(m._1, m._2, m._3, m._4, 4)
+    | let v: V2 => V2fun.to_string(v)
+    | let v: V3 => V3fun.to_string(v)
+    | let v: V4 => V4fun.to_string(v)
+    | let v: Q4 => V4fun.to_string(v)
+    | let m: M2 => _smat(to_string(m._1), to_string(m._2) where n=2)
+    | let m: M3 => _smat(to_string(m._1), to_string(m._2),
+                         to_string(m._3) where n=3)
+    | let m: M4 => _smat(to_string(m._1), to_string(m._2),
+                         to_string(m._3), to_string(m._4), 4)
     else "None".string()
     end
 
