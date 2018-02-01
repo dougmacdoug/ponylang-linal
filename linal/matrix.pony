@@ -1,8 +1,9 @@
 type M2 is (V2, V2)
-""" tuple based matrix aliases"""
+""" tuple based matrix alias 2x2"""
 type M3 is (V3, V3, V3)
+""" tuple based matrix alias 3x3"""
 type M4 is (V4, V4, V4, V4)
-""" tuple based quaternion alias"""
+""" tuple based matrix alias 4x4"""
 
 primitive M2fun
   fun apply(r1: V2, r2: V2): M2 => (r1, r2)
@@ -499,64 +500,37 @@ fun solve(m: M4, v: V4): V4 ? =>
 
 type AnyMatrix4 is (Matrix4 | M4)
 
-class Matrix4// is (Stringable & Equatable[Matrix4])
-  var m11 : F32 = 0
-  var m12 : F32 = 0
-  var m13 : F32 = 0
-  var m14 : F32 = 0
-  var m21 : F32 = 0
-  var m22 : F32 = 0
-  var m23 : F32 = 0
-  var m24 : F32 = 0
-  var m31 : F32 = 0
-  var m32 : F32 = 0
-  var m33 : F32 = 0
-  var m34 : F32 = 0
-  var m41 : F32 = 0
-  var m42 : F32 = 0
-  var m43 : F32 = 0
-  var m44 : F32 = 0
+class Matrix4 is (Stringable & Equatable[Matrix4])
+  var _m11 : F32 = 0
+  var _m12 : F32 = 0
+  var _m13 : F32 = 0
+  var _m14 : F32 = 0
+  var _m21 : F32 = 0
+  var _m22 : F32 = 0
+  var _m23 : F32 = 0
+  var _m24 : F32 = 0
+  var _m31 : F32 = 0
+  var _m32 : F32 = 0
+  var _m33 : F32 = 0
+  var _m34 : F32 = 0
+  var _m41 : F32 = 0
+  var _m42 : F32 = 0
+  var _m43 : F32 = 0
+  var _m44 : F32 = 0
 
   fun ref apply(m': box->AnyMatrix4) =>
-    ((m11, m12, m13, m14),
-     (m21, m22, m23, m24),
-     (m31, m32, m33, m34),
-     (m41, m42, m43, m44)) = _tuplize(m')
+    ((_m11, _m12, _m13, _m14),
+     (_m21, _m22, _m23, _m24),
+     (_m31, _m32, _m33, _m34),
+     (_m41, _m42, _m43, _m44)) = _tuplize(m')
 
   fun ref update(value: box->AnyMatrix4) => apply(value)
 
   fun m4(): M4 =>
-    ((m11, m12, m13, m14),
-     (m21, m22, m23, m24),
-     (m31, m32, m33, m34),
-     (m41, m42, m43, m44))
-
-  fun get(index: (Int | (Int, Int))): F32 ? =>
-    (let row: U32, let col: U32) =
-    match index
-    | let i: Int => (i.u32() / 4, i.u32() % 4)
-    | (let r: Int, let c: Int) => (r.u32(), c.u32())
-    end
-    match (row, col)
-    | (0, 0) => m11
-    | (0, 1) => m12
-    | (0, 2) => m13
-    | (0, 3) => m14
-    | (1, 0) => m21
-    | (1, 1) => m22
-    | (1, 2) => m23
-    | (1, 3) => m24
-    | (2, 0) => m31
-    | (2, 1) => m32
-    | (2, 2) => m33
-    | (2, 3) => m34
-    | (3, 0) => m41
-    | (3, 1) => m42
-    | (3, 2) => m43
-    | (3, 3) => m44
-    else
-      error
-    end
+    ((_m11, _m12, _m13, _m14),
+     (_m21, _m22, _m23, _m24),
+     (_m31, _m32, _m33, _m34),
+     (_m41, _m42, _m43, _m44))
 
   fun _tuplize(that: box->AnyMatrix4): M4 =>
     match that
@@ -569,7 +543,36 @@ class Matrix4// is (Stringable & Equatable[Matrix4])
   fun mul(s: F32): M4 => M4fun.mul(m4(), s)
   fun div(s: F32): M4 => M4fun.div(m4(), s)
 
+  fun get(index: (Int | (Int, Int))): F32 ? =>
+    """get cell value. index flat 0-15 or (row, col)"""
+    (let row: U32, let col: U32) =
+    match index
+    | let i: Int => (i.u32() / 4, i.u32() % 4)
+    | (let r: Int, let c: Int) => (r.u32(), c.u32())
+    end
+    match (row, col)
+    | (0, 0) => _m11
+    | (0, 1) => _m12
+    | (0, 2) => _m13
+    | (0, 3) => _m14
+    | (1, 0) => _m21
+    | (1, 1) => _m22
+    | (1, 2) => _m23
+    | (1, 3) => _m24
+    | (2, 0) => _m31
+    | (2, 1) => _m32
+    | (2, 2) => _m33
+    | (2, 3) => _m34
+    | (3, 0) => _m41
+    | (3, 1) => _m42
+    | (3, 2) => _m43
+    | (3, 3) => _m44
+    else
+      error
+    end
+
   fun ref set(index: (Int | (Int, Int)), value: F32): F32 ? =>
+    """set cell value return old value. index flat 0-15 or (row, col)"""
     let old = get(index)?
     (let row: U32, let col: U32) =
     match index
@@ -577,23 +580,28 @@ class Matrix4// is (Stringable & Equatable[Matrix4])
     | (let r: Int, let c: Int) => (r.u32(), c.u32())
     end
     match (row.u32(), col.u32())
-    | (0, 0) => m11 = value
-    | (0, 1) => m12 = value
-    | (0, 2) => m13 = value
-    | (0, 3) => m14 = value
-    | (1, 0) => m21 = value
-    | (1, 1) => m22 = value
-    | (1, 2) => m23 = value
-    | (1, 3) => m24 = value
-    | (2, 0) => m31 = value
-    | (2, 1) => m32 = value
-    | (2, 2) => m33 = value
-    | (2, 3) => m34 = value
-    | (3, 0) => m41 = value
-    | (3, 1) => m42 = value
-    | (3, 2) => m43 = value
-    | (3, 3) => m44 = value
+    | (0, 0) => _m11 = value
+    | (0, 1) => _m12 = value
+    | (0, 2) => _m13 = value
+    | (0, 3) => _m14 = value
+    | (1, 0) => _m21 = value
+    | (1, 1) => _m22 = value
+    | (1, 2) => _m23 = value
+    | (1, 3) => _m24 = value
+    | (2, 0) => _m31 = value
+    | (2, 1) => _m32 = value
+    | (2, 2) => _m33 = value
+    | (2, 3) => _m34 = value
+    | (3, 0) => _m41 = value
+    | (3, 1) => _m42 = value
+    | (3, 2) => _m43 = value
+    | (3, 3) => _m44 = value
     else
       error
     end
     old
+
+  fun string(): String iso^ => M4fun.to_string(m4())
+
+  fun box eq(that: box->AnyMatrix4): Bool => M4fun.eq(m4(), _tuplize(that))
+  fun box ne(that: box->AnyMatrix4): Bool => not(eq(that))
