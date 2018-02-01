@@ -12,7 +12,6 @@ actor Main is TestList
     test(_TestLinearString)
     test(_TestLinearEq)
     test(_TestLinearClamp)
-    test(_TestLinearVec)
     test(_TestLinearFun)
 
 
@@ -83,6 +82,7 @@ class iso _TestLinearString is UnitTest
   fun name():String => "Linear/String"
 
   fun apply(h: TestHelper) =>
+    h.assert_eq[String]("None", Linear.to_string(None))
     h.assert_eq[String]("(1,2)", Linear.to_string(V2fun(1, 2)))
     h.assert_eq[String]("(1,2,3)", Linear.to_string(V3fun(1, 2, 3)))
     h.assert_eq[String]("(1,2,3,4)", Linear.to_string(V4fun(1, 2, 3, 4)))
@@ -121,34 +121,6 @@ class iso _TestLinearEq is UnitTest
     h.assert_false(Linear.eq(1, 1.1, 0.09))
     h.assert_true(Linear.eq(1, 1))
     h.assert_false(Linear.eq(1, 1.1))
-
-class iso _TestLinearVec is UnitTest
-  fun name():String => "Linear/Vec"
-
-  fun apply(h: TestHelper) =>
-    """"""
-    // h.assert_eq[Vector2](Vector2((1, 2)),
-    //                      Linear.vector2((1, 2)))
-    // h.assert_eq[Vector3](Vector3((1, 2,3)),
-    //                      Linear.vector3((1, 2, 3)))
-    // h.assert_eq[Vector4](Vector4((1, 2, 3, 4)),
-    //                      Linear.vector4((1, 2, 3, 4)))
- 
-    // h.assert_eq[Vector2](Vector2.zero(), Linear.vector2(None))
-    // h.assert_eq[Vector3](Vector3.zero(), Linear.vector3(None))
-    // h.assert_eq[Vector4](Vector4.zero(), Linear.vector4(None))
-
-    // h.assert_eq[Vector2](Vector2.id(), Linear.vector2(V2fun.id()))
-    // h.assert_eq[Vector2](Vector2.id(), Linear.vector2(V3fun.id()))
-    // h.assert_eq[Vector2](Vector2.id(), Linear.vector2(V4fun.id()))
- 
-    // h.assert_eq[Vector3](Vector3((1, 1, 0)), Linear.vector3(V2fun.id()))
-    // h.assert_eq[Vector3](Vector3.id(), Linear.vector3(V3fun.id()))
-    // h.assert_eq[Vector3](Vector3.id(), Linear.vector3(V4fun.id()))
- 
-    // h.assert_eq[Vector4](Vector4((1, 1, 0, 0)), Linear.vector4(V2fun.id()))
-    // h.assert_eq[Vector4](Vector4((1, 1, 1, 0)), Linear.vector4(V3fun.id()))
-    // h.assert_eq[Vector4](Vector4.id(), Linear.vector4(V4fun.id()))
 
 class iso _TestLinearFun is UnitTest
   fun name():String => "Linear/Fun"

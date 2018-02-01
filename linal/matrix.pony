@@ -63,6 +63,18 @@ primitive M2fun
     Linear.eq(a._2._1, b._2._1, eps) and
     Linear.eq(a._2._2, b._2._2, eps)
 
+  fun to_string(m: M2): String iso^  =>
+    """string format a matrix"""
+    recover
+      var s = String(600)
+      s.push('(')
+      s.append(V2fun.to_string(m._1))
+      s.push(',')
+      s.append(V2fun.to_string(m._2))
+      s.push(')')
+      s.>recalc()
+    end
+
 primitive M3fun
   fun apply(r1: V3, r2: V3, r3: V3): M3 => (r1, r2, r3)
   fun zero(): M3 => ((0, 0, 0), (0, 0, 0), (0, 0, 0))
@@ -179,6 +191,20 @@ primitive M3fun
     Linear.eq(a._3._1, b._3._1, eps) and
     Linear.eq(a._3._2, b._3._2, eps) and
     Linear.eq(a._3._3, b._3._3, eps)
+
+  fun to_string(m: M3): String iso^  =>
+    """string format a matrix"""
+    recover
+      var s = String(600)
+      s.push('(')
+      s.append(V3fun.to_string(m._1))
+      s.push(',')
+      s.append(V3fun.to_string(m._2))
+      s.push(',')
+      s.append(V3fun.to_string(m._3))
+      s.push(')')
+      s.>recalc()
+    end
 
 primitive M4fun
   fun apply(r1: V4, r2: V4, r3: V4, r4: V4): M4 => (r1, r2, r3, r4)
@@ -454,6 +480,22 @@ fun solve(m: M4, v: V4): V4 ? =>
     Linear.eq(a._4._2, b._4._2, eps) and
     Linear.eq(a._4._3, b._4._3, eps) and
     Linear.eq(a._4._4, b._4._4, eps)
+
+  fun to_string(m: M4): String iso^  =>
+    """string format a matrix"""
+    recover
+      var s = String(600)
+      s.push('(')
+      s.append(V4fun.to_string(m._1))
+      s.push(',')
+      s.append(V4fun.to_string(m._2))
+      s.push(',')
+      s.append(V4fun.to_string(m._3))
+      s.push(',')
+      s.append(V4fun.to_string(m._4))
+      s.push(')')
+      s.>recalc()
+    end
 
 type AnyMatrix4 is (Matrix4 | M4)
 
