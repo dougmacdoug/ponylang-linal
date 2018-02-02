@@ -18,7 +18,7 @@ type AnyVector3 is (Vector3 | Vector[V3, V3fun] | V3)
 type AnyVector4 is (Vector4 | Vector[V4, V4fun] | V4)
 """instance|tuple vector 4 alias - see Vector and VectorFun"""
 
-trait VectorFun[V/*: Vector */]
+trait VectorFun[V]
 """Trait defining tuple based vector functions"""
   new val create()
   """expects primitive implimentation with val constructor"""
@@ -95,7 +95,7 @@ trait VectorFun[V/*: Vector */]
       s.>recalc()
     end
 
-primitive V2fun is VectorFun[V2 val]
+primitive V2fun is VectorFun[V2]
   """tuple based Vector 2 functions - see VectorFun for details"""
   fun apply(x': F32, y': F32): V2 => (x', y')
   fun zero(): V2 => (0, 0)

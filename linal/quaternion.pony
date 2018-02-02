@@ -76,6 +76,7 @@ primitive Q4fun
   fun sub(a: Q4, b: Q4): Q4 => V4fun.sub(a, b)
   fun mul(q: Q4, s: F32): Q4 => V4fun.mul(q, s)
   fun div(q: Q4, s: F32): Q4 => V4fun.div(q, s)
+  fun neg(q: Q4): Q4 => V4fun.neg(q)
   fun eq(a: Q4, b: Q4): Bool => V4fun.eq(a, b)
 
   fun mulq4(a: Q4, b: Q4): Q4 =>

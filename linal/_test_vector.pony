@@ -5,21 +5,16 @@ class iso _TestVectorFun is UnitTest
   fun name():String => "Vector/Basic"
   
   fun apply(h: TestHelper) =>
-    let test2 = {(a: V2, b: V2): Bool => 
-      h.assert_eq[Vector2](Vector2(a), Vector2(b))}
-    let test3 = {(a: V3, b: V3): Bool =>
-     h.assert_eq[Vector3](Vector3(a), Vector3(b))}
-    let test4 = {(a: V4, b: V4): Bool =>
-      h.assert_eq[Vector4](Vector4(a), Vector4(b))}
-// Vector as a type parameter fails due to tuple @Hack workaround
-// so just use lambdas here
-    _testVectorFun[V2, V2fun](test2, h)
-    _testVectorFun[V3, V3fun](test3, h)
-    _testVectorFun[V4, V4fun](test4, h)
+   let test = _TestHelperHelper(h)
+   let vf: VectorFun[V2] val = V2fun
+   h.log("======== V2 ========")
+    _testVectorFun[V2](V2fun, test)
+   h.log("======== V3 ========")
+    _testVectorFun[V3](V3fun, test)
+   h.log("======== V4 ========")
+    _testVectorFun[V4](V4fun, test)
 
-fun _testVectorFun[V: Any val, VF: VectorFun[V val] val](
-    test: {(V, V): Bool}, h: TestHelper) =>
-  let v = VF
+fun _testVectorFun[V: Any val](v: VectorFun[V val] val, test: _TestHelperHelper) =>
   let zero  = v.zero()
   let one   = v.id()
   let one'  = v.add(zero, one)
@@ -44,57 +39,54 @@ fun _testVectorFun[V: Any val, VF: VectorFun[V val] val](
 
   let half =  v.lerp(zero, one, 0.5)
   let half' = v.mul(one, 0.5)
-  test(zero, zero')
-  test(one, one')
-  test(two, two')
-
-  test(one, mul1)
-  test(one, div1)
-  test(unit1, unit2)
-
-  test(zero, lerp0)
-  test(one, lerp1)
-  test(one, lerp1')
-
-  test(half, half')
+  test.assert_eq_t[V](zero, zero', "Zero")
+  test.assert_eq_t[V](one, one', "One")
+  test.assert_eq_t[V](two, two', "Two")
+  test.assert_eq_t[V](one, mul1)
+  test.assert_eq_t[V](one, div1)
+  test.assert_eq_t[V](unit1, unit2)
+  test.assert_eq_t[V](zero, lerp0)
+  test.assert_eq_t[V](one, lerp1)
+  test.assert_eq_t[V](one, lerp1')
+  test.assert_eq_t[V](half, half')
 
 // F32 assert_eq fails here due to sqrt() precision
   let prec = F32(1000000)
   let len1 = (v.len(unit1) * prec).round()
-  h.assert_eq[F32](1, len1/prec, "unit length")
+  test.assert_eq(1, len1/prec, "unit length")
 
-  h.assert_eq[F32](v.len(one), v.len(v.neg(one)), "length")
-  h.assert_eq[F32](dist1, dist2, "distance")
-  h.assert_eq[F32](dist1', dist2', "distance squared")
+  test.assert_eq(v.len(one), v.len(v.neg(one)), "length")
+  test.assert_eq(dist1, dist2, "distance")
+  test.assert_eq(dist1', dist2', "distance squared")
 
-  h.assert_eq[U32](v.size().u32(), v.sum(one).round().u32(), "Sum")
+  test.h.assert_eq[U32](v.size().u32(), v.sum(one).round().u32(), "Sum")
   var a = zero
   var out: F32 
   var i: USize = 0
 
   a = try v.set(a, i, 1)? else zero end
   out = try v.get(a, i)? else -1 end
-  h.assert_eq[F32](1, out, "Get/Set: Head")
+  test.assert_eq(1, out, "Get/Set: Head")
 
   i = v.size() - 1
   a = try v.set(a, i, 1)? else zero end
   out = try v.get(a, i)? else -1 end
-  h.assert_eq[F32](1, out, "Get/Set: Tail")
+  test.assert_eq(1, out, "Get/Set: Tail")
 
 
   a = v.shift_left(one)
   out = try v.get(a, v.size() - 1)? else -1 end
-  h.assert_eq[F32](0, out, "Shift Left")
+  test.assert_eq(0, out, "Shift Left")
   a = v.roll_right(a)
   out = try v.get(a, U32(0))? else -1 end
-  h.assert_eq[F32](0, out, "Roll Right")
+  test.assert_eq(0, out, "Roll Right")
   
   a = v.shift_right(one)
   out = try v.get(a, U32(0))? else -1 end
-  h.assert_eq[F32](0, out, "Shift Right")
+  test.assert_eq(0, out, "Shift Right")
   a = v.roll_left(a)
   out = try v.get(a, v.size() - 1)? else -1 end
-  h.assert_eq[F32](0, out, "Roll Left")
+  test.assert_eq(0, out, "Roll Left")
 
   var b : V
   a = one
@@ -106,8 +98,8 @@ fun _testVectorFun[V: Any val, VF: VectorFun[V val] val](
     b = v.roll_left(b)
   end
 
-  test(zero, a)
-  test(one, b)
+  test.assert_eq_t[V](zero, a)
+  test.assert_eq_t[V](one, b)
 
   a = one
   b = one
@@ -118,8 +110,8 @@ fun _testVectorFun[V: Any val, VF: VectorFun[V val] val](
     b = v.roll_right(b)
   end
 
-  test(zero, a)
-  test(one, b)
+  test.assert_eq_t[V](zero, a)
+  test.assert_eq_t[V](one, b)
 
 
 class iso _TestVectorFunCross is UnitTest

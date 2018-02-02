@@ -497,7 +497,7 @@ fun solve(m: M4, v: V4): V4 ? =>
       s.push(')')
       s.>recalc()
     end
-    
+
 type AnyMatrix2 is (Matrix2 | M2)
 
 class Matrix2 is (Stringable & Equatable[Matrix2])
@@ -534,6 +534,7 @@ class Matrix2 is (Stringable & Equatable[Matrix2])
   fun sub(that: box->AnyMatrix2): M2 => M2fun.sub(m2(), _tuplize(that))
   fun mul(s: F32): M2 => M2fun.mul(m2(), s)
   fun div(s: F32): M2 => M2fun.div(m2(), s)
+  fun neg(): M2 => M2fun.neg(m2())
 
   fun get(index: (Int | (Int, Int))): F32 ? =>
     """get cell value. index flat 0-15 or (row, col)"""
@@ -627,6 +628,7 @@ class Matrix4 is (Stringable & Equatable[Matrix4])
   fun sub(that: box->AnyMatrix4): M4 => M4fun.sub(m4(), _tuplize(that))
   fun mul(s: F32): M4 => M4fun.mul(m4(), s)
   fun div(s: F32): M4 => M4fun.div(m4(), s)
+  fun neg(): M4 => M4fun.neg(m4())
 
   fun get(index: (Int | (Int, Int))): F32 ? =>
     """get cell value. index flat 0-15 or (row, col)"""

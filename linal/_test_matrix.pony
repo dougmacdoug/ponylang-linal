@@ -15,7 +15,7 @@ interface VWrap9[V] is (Stringable & Equatable[VWrap9[box->V]])
 
 //   fun eq(that: VWrap9[V] box): Bool
 //   fun ne(that: VWrap9[V] box): Bool => not eq(that)
-  
+
 class iso _TestMatrixFun is UnitTest
     fun name():String => "MatrixFun/Basic"
 
@@ -28,37 +28,6 @@ class iso _TestMatrixFun is UnitTest
       _testMfun[M3, V3](h, M3fun, V3fun)
       h.log("Start M4Fun")
       _testMfun[M4, V4](h, M4fun, V4fun)
-
-    // fun _testM2(h: TestHelper) =>
-    //   let identity: Matrix2 box = Matrix2.id()
-    //   let zero: Matrix2 box = Matrix2(M2fun.zero())
-    //   let all1: Matrix2 box = Matrix2(M2fun(V2fun.id(), V2fun.id()))
-      
-    //   let x = M2fun.rowx(M2fun.id())
-    //   let y = M2fun.rowy(M2fun.id())
-    //   let v2one = V2fun.add(x, y)
-
-    //   let ma = Matrix2            // zero
-    //   let mb = Matrix2(identity)        // copy constructor
-    //   let mc = Matrix2(ma + mb)   // construct from tuples
-
-    //   h.assert_eq[Matrix2](mb, mc)
-    //   ma() = identity * 2
-    //   mb() = identity + identity
-    //   mc() = ma - mb
-    //   h.assert_eq[Matrix2](ma, mb)
-    //   h.assert_eq[Matrix2 box](zero, mc)
-
-    //   mc() = M2fun(v2one, v2one)
-    //   h.assert_eq[Matrix2 box](all1, mc)
-
-    //   let rx = M2fun.rowx(M2fun.id())
-    //   let cx = M2fun.colx(M2fun.id())
-    //   let ry = M2fun.rowy(M2fun.id())
-    //   let cy = M2fun.coly(M2fun.id())
-    //   h.assert_eq[Vector2](Vector2(rx), Vector2(cx))
-    //   h.assert_eq[Vector2](Vector2(ry), Vector2(cy))
-    //   h.assert_ne[Vector2](Vector2(rx), Vector2(ry))
 
     fun _testMfun[M: Any val, V: Any val](h: TestHelper, mf: Mfun[M, V] val,
      vf: Vxfun[V] val) =>
