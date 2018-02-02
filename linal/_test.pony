@@ -1,16 +1,12 @@
 use "ponytest"
 
-type _Testable is (F32 | Q4 | M2 | M3 | M4 | OptVector)
+type _Testable is (F32 | M2 | M3 | M4 | OptVector)
 
 class _TWrap is (Stringable & Equatable[_TWrap])
   var _o: _Testable = None
 
   fun ref apply(o: _Testable): _TWrap =>
     _o = o
-    this
-
-  fun ref update(value: _Testable): _TWrap =>
-    _o = value
     this
 
   fun eq(that: box->_TWrap): Bool =>
@@ -30,7 +26,6 @@ class _TWrap is (Stringable & Equatable[_TWrap])
       | let that': V4 => V4fun.eq(mine, that')
       else false
       end
-
     | let mine: M2 =>
       match that._o
       | let that': M2 => M2fun.eq(mine, that')
@@ -55,7 +50,6 @@ class _TWrap is (Stringable & Equatable[_TWrap])
     end
 
   fun ne(that: box->_TWrap): Bool => not eq(that)
-
   
   fun string(): String iso^ =>
     match _o 
@@ -63,6 +57,23 @@ class _TWrap is (Stringable & Equatable[_TWrap])
    else 
     Linear.to_string(_o)
     end
+
+class _TestHelperHelper
+  let h: TestHelper
+  let _this: _TWrap = _TWrap
+  let _that: _TWrap = _TWrap
+
+  new create(h': TestHelper)=> h=h'
+
+  fun ref assert_eq(a: _Testable, b: _Testable,
+                    msg: String = "", loc: SourceLoc = __loc)
+  =>
+    h.assert_eq[_TWrap](_this(a), _that(b), msg, loc)
+  
+  fun ref assert_ne(a: _Testable, b: _Testable,
+                    msg: String = "", loc: SourceLoc= __loc)
+  =>
+    h.assert_ne[_TWrap](_this(a), _that(b), msg, loc)
 
 actor Main is TestList
   new create(env: Env) => PonyTest(env, this)
@@ -78,19 +89,6 @@ actor Main is TestList
     test(_TestLinearEq)
     test(_TestLinearClamp)
     test(_TestLinearFun)
-
-class _TestHelperHelper
-  let h: TestHelper
-
-  new create(h': TestHelper)=> h=h'
-
-  fun assert_eq(a: _Testable, b: _Testable, msg: String = "", loc: SourceLoc= __loc)=>
-
-    h.assert_eq[_TWrap](_TWrap(a), _TWrap(b), msg, loc)
-  
-  fun assert_ne(a: _Testable, b: _Testable, msg: String = "", loc: SourceLoc= __loc)=>
-
-    h.assert_ne[_TWrap](_TWrap(a), _TWrap(b), msg, loc)
 
 class iso _TestQuaternion is UnitTest
   fun name(): String => "linal/Q4"
