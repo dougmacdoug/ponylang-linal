@@ -1,5 +1,69 @@
 use "ponytest"
 
+type _Testable is (F32 | Q4 | M2 | M3 | M4 | OptVector)
+
+class _TWrap is (Stringable & Equatable[_TWrap])
+  var _o: _Testable = None
+
+  fun ref apply(o: _Testable): _TWrap =>
+    _o = o
+    this
+
+  fun ref update(value: _Testable): _TWrap =>
+    _o = value
+    this
+
+  fun eq(that: box->_TWrap): Bool =>
+    match _o
+    | let mine: V2 =>
+      match that._o
+      | let that': V2 => V2fun.eq(mine, that')
+      else false
+      end
+    | let mine: V3 =>
+      match that._o
+      | let that': V3 => V3fun.eq(mine, that')
+      else false
+      end
+    | let mine: V4 =>
+      match that._o
+      | let that': V4 => V4fun.eq(mine, that')
+      else false
+      end
+
+    | let mine: M2 =>
+      match that._o
+      | let that': M2 => M2fun.eq(mine, that')
+      else false
+      end
+    | let mine: M3 =>
+      match that._o
+      | let that': M3 => M3fun.eq(mine, that')
+      else false
+      end
+    | let mine: M4 =>
+      match that._o
+      | let that': M4 => M4fun.eq(mine, that')
+      else false
+      end
+    | let mine: F32 =>
+      match that._o
+      | let that': F32 => mine == that'
+      else false
+      end
+    else false
+    end
+
+  fun ne(that: box->_TWrap): Bool => not eq(that)
+
+  
+  fun string(): String iso^ =>
+    match _o 
+    | let n: F32 => n.string()
+   else 
+    Linear.to_string(_o)
+    end
+
 actor Main is TestList
   new create(env: Env) => PonyTest(env, this)
   new make() => None
@@ -10,21 +74,36 @@ actor Main is TestList
     test(_TestVectorFunCross)
     test(_TestMatrixFun)
     test(_TestLinearString)
+    test(_TestStringable)    
     test(_TestLinearEq)
     test(_TestLinearClamp)
     test(_TestLinearFun)
 
+class _TestHelperHelper
+  let h: TestHelper
+
+  new create(h': TestHelper)=> h=h'
+
+  fun assert_eq(a: _Testable, b: _Testable, msg: String = "", loc: SourceLoc= __loc)=>
+
+    h.assert_eq[_TWrap](_TWrap(a), _TWrap(b), msg, loc)
+  
+  fun assert_ne(a: _Testable, b: _Testable, msg: String = "", loc: SourceLoc= __loc)=>
+
+    h.assert_ne[_TWrap](_TWrap(a), _TWrap(b), msg, loc)
 
 class iso _TestQuaternion is UnitTest
   fun name(): String => "linal/Q4"
 
   fun apply(h: TestHelper) =>
+    let test = _TestHelperHelper(h)
     let eps = F32.epsilon()
     let v3 = V3fun // gives us nice shorthand to Vector3 Functions
     let v4 = V4fun // gives us nice shorthand to Vector4 Functions
     let quat = Q4fun // gives us nice shorthand to Q4 Functions
 
-    h.assert_eq[F32](quat.len(quat.unit(quat.zero())), eps)
+    test.assert_eq(1, quat.len(quat.unit(quat.id())), "Unit length")
+    test.assert_eq(1, quat.len(quat.id()), "Identity length")
     var a = quat(0,0,0,2)
     var b : Q4
     var result : Q4
@@ -35,10 +114,12 @@ class iso _TestQuaternion is UnitTest
     let qk = quat(0,0,1,0)
     let q_one = quat.id()
 
-    h.assert_eq[F32](1,  quat.len(qi))
-    h.assert_eq[F32](1,  quat.len(qj))
-    h.assert_eq[F32](1,  quat.len(qk))
+    test.assert_eq(1,  quat.len(qi), "TEST HELPER")
+    test.assert_eq(1,  quat.len(qj), "TEST HELPER")
+    test.assert_eq(1,  quat.len(qk), "TEST HELPER")
     h.assert_eq[F32](1,  quat.len(q_one))
+
+    test.assert_eq(quat.mulq4(qi,qj), qk, "WRAPPPPED")
 
     h.assert_true(v4.eq(quat.mulq4(qi,qj), qk))
     h.assert_true(v4.eq(quat.mulq4(qi,qi), v4.neg(q_one)))
@@ -82,11 +163,16 @@ class iso _TestLinearString is UnitTest
   fun name():String => "Linear/String"
 
   fun apply(h: TestHelper) =>
+    let v2 = V2fun(1, 2)
+    let v3 = V3fun(1, 2, 3)
+    let v4 = V4fun(1, 2, 3, 4)
+    let q4 = Q4fun(1, 2, 3, 4)
+
     h.assert_eq[String]("None", Linear.to_string(None))
-    h.assert_eq[String]("(1,2)", Linear.to_string(V2fun(1, 2)))
-    h.assert_eq[String]("(1,2,3)", Linear.to_string(V3fun(1, 2, 3)))
-    h.assert_eq[String]("(1,2,3,4)", Linear.to_string(V4fun(1, 2, 3, 4)))
-    h.assert_eq[String]("(1,2,3,4)", Linear.to_string(Q4fun(1, 2, 3, 4)))
+    h.assert_eq[String]("(1,2)", Linear.to_string(v2))
+    h.assert_eq[String]("(1,2,3)", Linear.to_string(v3))
+    h.assert_eq[String]("(1,2,3,4)", Linear.to_string(v4))
+    h.assert_eq[String]("(1,2,3,4)", Linear.to_string(q4))
 
     h.assert_eq[String]("((1,2),(3,4))",
      Linear.to_string(M2fun((1, 2),(3,4))))
@@ -95,6 +181,39 @@ class iso _TestLinearString is UnitTest
 
     h.assert_eq[String]("((1,2,3,4),(5,6,7,8),(9,10,11,12),(13,14,15,16))",
      Linear.to_string(M4fun((1,2,3,4),(5,6,7,8),(9,10,11,12),(13,14,15,16))))
+
+class iso _TestStringable is UnitTest
+
+  fun name():String => "Linear/Stringable"
+
+  fun apply(h: TestHelper) =>
+    let v2 = V2fun(1, 2)
+    let v3 = V3fun(1, 2, 3)
+    let v4 = V4fun(1, 2, 3, 4)
+    let q4 = Q4fun(1, 2, 3, 4)
+    let m4 = M4fun((1,2,3,4),(5,6,7,8),(9,10,11,12),(13,14,15,16))
+    _testStringable(h, "(1,2)", Vector2(v2))
+    _testStringable(h, "(1,2,3)", Vector3(v3))
+    _testStringable(h, "(1,2,3,4)", Vector4(v4))
+    _testStringable(h, "(1,2,3,4)", Quaternion(q4))
+    _testStringable(h, "((1,2,3,4),(5,6,7,8),(9,10,11,12),(13,14,15,16))",
+      Matrix4(m4))
+
+
+  fun _testStringable(h: TestHelper, expected: String, s: Stringable) =>
+    h.assert_eq[String](expected, s.string())
+
+    // h.assert_eq[String]("(1,2,3)", Linear.to_string(V3fun(1, 2, 3)))
+    // h.assert_eq[String]("(1,2,3,4)", Linear.to_string(V4fun(1, 2, 3, 4)))
+    // h.assert_eq[String]("(1,2,3,4)", Linear.to_string(Q4fun(1, 2, 3, 4)))
+
+    // h.assert_eq[String]("((1,2),(3,4))",
+    //  Linear.to_string(M2fun((1, 2),(3,4))))
+    // h.assert_eq[String]("((1,2,3),(4,5,6),(7,8,9))",
+    //  Linear.to_string(M3fun((1,2,3),(4,5,6),(7,8,9))))
+
+    // h.assert_eq[String]("((1,2,3,4),(5,6,7,8),(9,10,11,12),(13,14,15,16))",
+    //  Linear.to_string(M4fun((1,2,3,4),(5,6,7,8),(9,10,11,12),(13,14,15,16))))
 
 class iso _TestLinearClamp is UnitTest
   fun name():String => "Linear/Clamp"

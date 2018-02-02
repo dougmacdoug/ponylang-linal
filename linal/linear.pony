@@ -3,7 +3,7 @@ primitive Linear
   linear functions and helpers for linal types
   """
 
-  fun to_string(o: (Q4 | M2 | M3 | M4 | OptVector)): String iso^ =>
+  fun to_string(o: (Q4 | M2 | M3 | M4 | OptVector| F32)): String iso^ =>
     """convert linal tuple based objects to string"""
     match o
     | let v: V2 => V2fun.to_string(v)
@@ -13,6 +13,7 @@ primitive Linear
     | let m: M2 => M2fun.to_string(m)
     | let m: M3 => M3fun.to_string(m)
     | let m: M4 => M4fun.to_string(m)
+    | let f: F32 => f.string()
     else None.string()
     end
 

@@ -1,6 +1,6 @@
 type Q4 is (F32, F32, F32, F32)
 
-class Quaternion
+class Quaternion is (Stringable & Equatable[Quaternion])
   var _x: F32
   var _y: F32
   var _z: F32
@@ -23,6 +23,19 @@ class Quaternion
   fun z(): F32 => _z
   fun w(): F32 => _w
   fun as_tuple(): Q4 => (_x, _y, _z, _w)
+  fun string(): String iso^ => V4fun.to_string(as_tuple())
+  
+  fun eq(that: (Quaternion box | Q4)): Bool  =>
+    """test equality with this Quaternion and another instance|tuple"""
+    let mine = as_tuple()
+    let that' =
+    match that
+    | let v: Quaternion box => v.as_tuple()
+    | let v: Q4 => v
+    end
+    V4fun.eq(mine, that', F32.epsilon())
+
+  fun ne(that: (Quaternion box | Q4)): Bool => not eq(that)
 
 primitive Q4fun
   fun apply(x': F32, y': F32, z': F32, w': F32): Q4 => (x', y', z', w')

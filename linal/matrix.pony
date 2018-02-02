@@ -497,6 +497,82 @@ fun solve(m: M4, v: V4): V4 ? =>
       s.push(')')
       s.>recalc()
     end
+    
+type AnyMatrix2 is (Matrix2 | M2)
+
+class Matrix2 is (Stringable & Equatable[Matrix2])
+  var _m11 : F32 = 0
+  var _m12 : F32 = 0
+  var _m21 : F32 = 0
+  var _m22 : F32 = 0
+  new create() =>
+    """zeroed 2x2 matrix"""
+  
+  new zero() =>
+    """zeroed 2x2 matrix"""
+  new id() => apply(M2fun.id())
+
+
+  fun ref apply(m': box->AnyMatrix2): Matrix2 =>
+    ((_m11, _m12),
+     (_m21, _m22)) = _tuplize(m')
+    this
+
+  fun ref update(value: box->AnyMatrix2) => apply(value)
+
+  fun m2(): M2 =>
+    ((_m11, _m12),
+     (_m21, _m22))
+
+  fun _tuplize(that: box->AnyMatrix2): M2 =>
+    match that
+    | let m: M2 => m
+    | let m: Matrix2 box => m.m2()
+    end
+
+  fun add(that: box->AnyMatrix2): M2 => M2fun.add(m2(), _tuplize(that))
+  fun sub(that: box->AnyMatrix2): M2 => M2fun.sub(m2(), _tuplize(that))
+  fun mul(s: F32): M2 => M2fun.mul(m2(), s)
+  fun div(s: F32): M2 => M2fun.div(m2(), s)
+
+  fun get(index: (Int | (Int, Int))): F32 ? =>
+    """get cell value. index flat 0-15 or (row, col)"""
+    (let row: U32, let col: U32) =
+    match index
+    | let i: Int => (i.u32() / 2, i.u32() % 2)
+    | (let r: Int, let c: Int) => (r.u32(), c.u32())
+    end
+    match (row, col)
+    | (0, 0) => _m11
+    | (0, 1) => _m12
+    | (1, 0) => _m21
+    | (1, 1) => _m22
+    else
+      error
+    end
+
+  fun ref set(index: (Int | (Int, Int)), value: F32): F32 ? =>
+    """set cell value return old value. index flat 0-15 or (row, col)"""
+    let old = get(index)?
+    (let row: U32, let col: U32) =
+    match index
+    | let i: Int => (i.u32() / 2, i.u32() % 2)
+    | (let r: Int, let c: Int) => (r.u32(), c.u32())
+    end
+    match (row.u32(), col.u32())
+    | (0, 0) => _m11 = value
+    | (0, 1) => _m12 = value
+    | (1, 0) => _m21 = value
+    | (1, 1) => _m22 = value
+    else
+      error
+    end
+    old
+
+  fun string(): String iso^ => M2fun.to_string(m2())
+
+  fun box eq(that: box->AnyMatrix2): Bool => M2fun.eq(m2(), _tuplize(that))
+  fun box ne(that: box->AnyMatrix2): Bool => not(eq(that))
 
 type AnyMatrix4 is (Matrix4 | M4)
 
@@ -517,12 +593,21 @@ class Matrix4 is (Stringable & Equatable[Matrix4])
   var _m42 : F32 = 0
   var _m43 : F32 = 0
   var _m44 : F32 = 0
+  
+  new create() =>
+    """zeroed 4x4 matrix"""
+  
+  new zero() =>
+    """zeroed 4x4 matrix"""
+  new id() => apply(M4fun.id())
 
-  fun ref apply(m': box->AnyMatrix4) =>
+
+  fun ref apply(m': box->AnyMatrix4): Matrix4 =>
     ((_m11, _m12, _m13, _m14),
      (_m21, _m22, _m23, _m24),
      (_m31, _m32, _m33, _m34),
      (_m41, _m42, _m43, _m44)) = _tuplize(m')
+    this
 
   fun ref update(value: box->AnyMatrix4) => apply(value)
 
