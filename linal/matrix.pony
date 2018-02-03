@@ -6,59 +6,97 @@ type M4 is (V4, V4, V4, V4)
 """ tuple based matrix alias 4x4"""
 
 primitive M2fun
-  fun apply(r1: V2, r2: V2): M2 => (r1, r2)
-  fun zero(): M2 => ((0, 0), (0, 0))
-  fun id(): M2 => ((1, 0), (0, 1))
-  fun rowx(m: M2): V2 => m._1
-  fun rowy(m: M2): V2 => m._2
-  fun colx(m: M2): V2 => (m._1._1, m._2._1)
-  fun coly(m: M2): V2 => (m._1._2, m._2._2)
+  """functions for a 2x2 matrix"""
+  fun apply(r1: V2, r2: V2): M2 =>
+  """create M2 from 2 Vector V2"""
+    (r1, r2)
+  fun zero(): M2 =>
+  """zeroed M2"""
+    ((0, 0), (0, 0))
+  fun id(): M2 =>
+  """identity matrix 2x2"""
+    ((1, 0), (0, 1))
+  fun rowx(m: M2): V2 =>
+  """x or 1st row"""
+    m._1
+  fun rowy(m: M2): V2 =>
+    """y or 2nd row"""
+    m._2
+  fun colx(m: M2): V2 =>
+    """x or 1st column"""
+    (m._1._1, m._2._1)
+  fun coly(m: M2): V2 =>
+    """y or 2nd column"""
+    (m._1._2, m._2._2)
 
-  fun from_array(a: Array[F32] box): M2 ? =>
-    (V2fun.from_array(a, 0)?, V2fun.from_array(a, 2)?)
+  fun from_array(a: Array[F32] box, offset: USize=0): M2 ? =>
+    """M2 from flat array starting at offset"""
+    (V2fun.from_array(a, 0 + offset)?,
+     V2fun.from_array(a, 2 + offset)?)
 
   fun rot(angle: F32): M2 =>
-      let c : F32 = angle.cos()
-      let s : F32 = angle.sin()
-      ((c, -s), (s, c))
+    """M2 from angle"""
+    let c : F32 = angle.cos()
+    let s : F32 = angle.sin()
+    ((c, -s), (s, c))
+
   fun add(a: M2, b: M2): M2  =>
-     ( (a._1._1 + b._1._1, a._1._2 + b._1._2),
-       (a._2._1 + b._2._1, a._2._2 + b._2._2) )
+    """a + b"""
+    ((a._1._1 + b._1._1, a._1._2 + b._1._2),
+     (a._2._1 + b._2._1, a._2._2 + b._2._2))
 
   fun sub(a: M2, b: M2): M2 =>
-    ( (a._1._1 - b._1._1, a._1._2 - b._1._2),
-      (a._2._1 - b._2._1, a._2._2 - b._2._2) )
+    """a - b"""
+    ((a._1._1 - b._1._1, a._1._2 - b._1._2),
+     (a._2._1 - b._2._1, a._2._2 - b._2._2))
 
-  fun neg(a: M2): M2 =>((-a._1._1, -a._1._2), (-a._2._1, -a._2._2))
+  fun neg(a: M2): M2 =>
+    """-a"""
+    ((-a._1._1, -a._1._2), (-a._2._1, -a._2._2))
 
   fun mul(a: M2, s: F32): M2 =>
-    ((a._1._1*s, a._1._2*s), (a._2._1*s, a._2._2*s))
+    """scale *a* by factor *s*"""
+    ((a._1._1 * s, a._1._2 * s),
+     (a._2._1 * s, a._2._2 * s))
 
-  fun div(a: M2, s: F32): M2 => mul(a, F32(1) / s)
+  fun div(a: M2, s: F32): M2 => 
+    """scale *a* by factor *1/s*"""
+    mul(a, F32(1) / s)
 
-  fun trans(a: M2): M2 => ((a._1._1, a._2._1), (a._1._2, a._2._2))
+  fun trans(a: M2): M2 =>
+    """translate"""
+    ((a._1._1, a._2._1), (a._1._2, a._2._2))
 
-  fun mulv2(a: M2, v: V2): V2 =>
-      ( (a._1._1*v._1) + (a._1._2* v._2), (a._2._1*v._1) + (a._2._2*v._2))
+  fun v2_mul(a: M2, v: V2): V2 =>
+    """matrix * vector multiplication"""
+    ( (a._1._1*v._1) + (a._1._2* v._2), (a._2._1*v._1) + (a._2._2*v._2))
 
-  fun mulm2(a: M2, b: M2): M2 =>
+  fun m2_mul(a: M2, b: M2): M2 =>
+    """matrix * matrix multiplication"""
     (((a._1._1 * b._1._1) + (a._1._2 * b._2._1),
       (a._1._1 * b._1._2) + (a._1._2 * b._2._2)),
      ((a._2._1 * b._1._1) + (a._2._2 * b._2._1),
       (a._2._1 * b._1._2) + (a._2._2 * b._2._2)))
 
-  fun trace(m: M2): F32 => m._1._1 + m._2._2
-  fun det(m: M2): F32 => (m._1._1 * m._2._2) - (m._1._2 * m._2._1)
+  fun trace(m: M2): F32 =>
+    """trace / sum id"""
+    m._1._1 + m._2._2
+  fun det(m: M2): F32 =>
+    """determinant"""
+    (m._1._1 * m._2._2) - (m._1._2 * m._2._1)
   fun inv(m: M2): M2 =>
-     let m2 = ((m._2._2, -m._1._2), (-m._2._1, m._1._1))
-     div(m2, det(m))
+    """inverse"""
+    let m2 = ((m._2._2, -m._1._2), (-m._2._1, m._1._1))
+    div(m2, det(m))
   fun solve(m: M2, v: V2): V2 =>
+    """solve [2x2][2]"""
     ((((m._1._2 * v._2)    - (m._2._2 * v._1)) /
       ((m._1._2 * m._2._1) - (m._1._1 * m._2._2))),
      (((m._2._1 * v._1)    - (m._1._1 * v._2)) /
       ((m._1._2 * m._2._1) - (m._1._1 * m._2._2))))
 
   fun eq(a: M2, b: M2, eps: F32 = F32.epsilon()): Bool =>
+    """a == b"""
     Linear.eq(a._1._1, b._1._1, eps) and
     Linear.eq(a._1._2, b._1._2, eps) and
     Linear.eq(a._2._1, b._2._1, eps) and
@@ -692,3 +730,4 @@ class Matrix4 is (Stringable & Equatable[Matrix4])
 
   fun box eq(that: box->AnyMatrix4): Bool => M4fun.eq(m4(), _tuplize(that))
   fun box ne(that: box->AnyMatrix4): Bool => not(eq(that))
+    

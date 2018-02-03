@@ -70,5 +70,6 @@ primitive Linear
     clamp(t - ((t / len).floor() * len), 0, len)
 
   fun ping_pong(t: F32, len: F32): F32 =>
+    """ping pong t as a modded range from 0 to len back to 0"""
     let t' = toggle(t, len * 2)
     len - (t' - len).abs()
