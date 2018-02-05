@@ -31,10 +31,9 @@ Example:
 
 
 @TODO:
-  * M4 - finish
-  * Matrix wrapper
   * docstrings: Q4, R4, M2-4
-  * UNIT TESTS! [more and fix logging, standardize] 
+  * UNIT TESTS! [more and fix logging, standardize]
+  * release 0.1.0
   * add fast sqrt for unit vector
   * slerp nlerp
   * faster Q4

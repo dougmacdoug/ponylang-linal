@@ -3,7 +3,7 @@ type R4 is (V2, F32, F32)
 """
 R4 (Rectangle) is Position, Width, Height
 
-Position is always bottom left or more accurately minX, minY
+Position is always bottom left, also called origin
 """
 
 primitive R4fun
@@ -55,6 +55,10 @@ primitive R4fun
   fun move_centered(r: R4, pt: V2): R4 =>
     """move R4 to be centered on point"""
     move(r, (pt._1 - (r._2 / 2), pt._2 - (r._3 / 2)))
+
+  fun shift(r: R4, dx: F32=0, dy: F32=0): R4 =>
+    """move R4 by delta x, delta y"""
+   ((r._1._1 + dx, r._1._2 + dy), r._2, r._3)
 
   fun resize(r: R4, w': F32, h': F32): R4 =>
     rectify((r._1, w', h'))
@@ -157,31 +161,29 @@ class Rect is (Stringable & Equatable[Rect])
     ((_x, _y), _w, _h) = R4fun.centered(pt, w', h')
 
   fun r4(): R4 => ((_x, _y), _w, _h)
-
+  fun origin(): V2 => (_x, _y)
    // @todo: check out .> operator.. return this
-  fun ref move_to(pt: V2) => (_x, _y) = pt
+  fun ref move_to(pt: V2) =>
+    apply(R4fun.move_to(r4(), pt))
 
-  fun ref move_by(x': F32 = 0, y': F32 = 0) =>
-    (_x, _y) = (_x + x', _y + y')
+  fun ref shift(dx: F32 = 0, dy: F32 = 0) =>
+    apply(R4fun.shift(r4(), dx, dy))
 
   fun ref resize(w': F32, h': F32) =>
-    ((_x, _y), _w, _h) = R4fun(_x, _y, w', h')
+    apply(R4fun(_x, _y, w', h'))
 
   fun ref resize_centered(w': F32, h': F32) =>
-    ((_x, _y), _w, _h) = R4fun.resize_centered(r4(), w', h')
+    apply(R4fun.resize_centered(r4(), w', h'))
 
   fun ref grow(x': F32 = 0, y': F32 = 0) =>
-    ((_x, _y), _w, _h) = R4fun(_x, _y, _w + x', _h + y')
+    apply(R4fun(_x, _y, _w + x', _h + y'))
 
-  fun ref grow_centered(x': F32 = 0, y': F32 = 0) =>
-    ((_x, _y), _w, _h) =
-    R4fun(_x - (x'.abs() / 2),
-          _y - (y'.abs() / 2),
-          _w + x', _h + y')
+  fun ref grow_centered(dw: F32 = 0, dh: F32 = 0) =>
+    apply(R4fun.grow_centered(r4(), dw, dh))
 
    // @todo: check out .> operator.. return this
   fun ref move_centered(pt: V2) =>
-    ((_x, _y), _w, _h) = R4fun.move_centered(r4(), pt)
+    apply(R4fun.move_centered(r4(), pt))
 
   fun min(): V2 => R4fun.min(r4())
   fun max(): V2 => R4fun.max(r4())
