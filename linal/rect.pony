@@ -130,20 +130,22 @@ primitive R4fun
 type AnyRect is (Rect | R4)
 
 class Rect is (Stringable & Equatable[Rect])
-  var _x: F32
-  var _y: F32
-  var _w: F32
-  var _h: F32
+  var _x: F32 = 0
+  var _y: F32 = 0
+  var _w: F32 = 0
+  var _h: F32 = 0
 
-  // new create(x': F32, y': F32, w': F32, h': F32) =>
-  //   ((_x, _y), _w, _h) = R4fun(x', y', w', h')
 
-  fun ref update(r: (Rect box | R4)) =>
+  fun ref apply(r: (Rect box | R4)): Rect =>
     ((_x, _y), _w, _h) =
     match r
     | let r' : R4 => R4fun.rectify(r')
     | let r' : Rect box => r'.r4()
     end
+    this
+
+  fun ref update(r: (Rect box | R4)) =>
+    apply(r)
 
   new zero() =>(_x, _y, _w, _h) = (0, 0, 0, 0)
   new unit() =>(_x, _y, _w, _h) = (0, 0, 1, 1)

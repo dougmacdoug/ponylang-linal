@@ -84,10 +84,12 @@ primitive M2fun
   fun det(m: M2): F32 =>
     """determinant"""
     (m._1._1 * m._2._2) - (m._1._2 * m._2._1)
-  fun inv(m: M2): M2 =>
+  fun inv(m: M2): M2 ? =>
     """inverse"""
+    let d = det(m)
+    if d == 0 then error end
     let m2 = ((m._2._2, -m._1._2), (-m._2._1, m._1._1))
-    div(m2, det(m))
+    mul(m2, 1/d)
   fun solve(m: M2, v: V2): V2 =>
     """solve [2x2][2]"""
     ((((m._1._2 * v._2)    - (m._2._2 * v._1)) /
