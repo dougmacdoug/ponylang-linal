@@ -1,48 +1,37 @@
 use "ponytest"
-interface Mfun[M, V]
-  fun id(): M
-  fun rowx(m:M): V
-  fun rowy(m:M): V
-  fun colx(m:M): V
-  fun coly(m:M): V
-  fun eq(a: M, b: M, e: F32 = F32.epsilon()): Bool
-
-interface Vxfun[V]
-  fun eq(a: V, b: V, e: F32 = F32.epsilon()): Bool
-
-interface VWrap9[V] is (Stringable & Equatable[VWrap9[box->V]]) 
-
-
-//   fun eq(that: VWrap9[V] box): Bool
-//   fun ne(that: VWrap9[V] box): Bool => not eq(that)
 
 class iso _TestMatrixFun is UnitTest
-    fun name():String => "MatrixFun/Basic"
+  let arr: Array[F32] = 
+    [ 1; 2; 3; 4; 5; 6; 7; 8; 9;10;11;12;13;14;15;16
+     17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32]
+  
+  fun name():String => "MatrixFun/Basic"
 
-    fun apply(h: TestHelper) =>
-      _testM4(h)
-      let v2: Vector2 = Vector2.zero()
-      h.log("Start M2Fun")      
-      _testMfun[M2, V2](h, M2fun, V2fun)
-      h.log("Start M3Fun")
-      _testMfun[M3, V3](h, M3fun, V3fun)
-      h.log("Start M4Fun")
-      _testMfun[M4, V4](h, M4fun, V4fun)
-
-    fun _testMfun[M: Any val, V: Any val](h: TestHelper, mf: Mfun[M, V] val,
-     vf: Vxfun[V] val) =>
-
-        let rx = mf.rowx(mf.id())
-        let cx = mf.colx(mf.id())
-        let ry = mf.rowy(mf.id())
-        let cy = mf.coly(mf.id())
-                
-        h.assert_true(vf.eq(rx, cx), "Row X == Col X")
-        h.assert_true(vf.eq(ry, cy), "Row Y == Col Y")
-        h.assert_false(vf.eq(rx, ry), "Row X =/= Row Y")
+  fun apply(h: TestHelper) =>
+    _testM2(h)
+    _testMatrix(h)
 
 
-    fun _testM4(h: TestHelper) =>
+  fun _testM2(h: TestHelper) =>
+    let test = _TestHelperHelper(h)
+    let m2 = M2fun
+    let v2 = V2fun
+
+    let rx = m2.rowx(m2.id())
+    let cx = m2.colx(m2.id())
+    let ry = m2.rowy(m2.id())
+    let cy = m2.coly(m2.id())
+    test.assert_eq(rx, cx, "Row X == Col X")
+    test.assert_eq(ry, cy, "Row Y == Col Y")
+    test.assert_ne(rx, ry, "Row X =/= Row Y")
+    try 
+      test.assert_eq(((1,2),(3,4)), m2.from_array(arr)?, "Row X == Col X")
+      test.assert_eq(((3,4),(5,6)), m2.from_array(arr, 2)?, "Row X == Col X")
+    else
+      h.fail("array lookup")
+    end
+
+    fun _testMatrix(h: TestHelper) =>
       let identity: Matrix4 box = Matrix4.id()
       let zero: Matrix4 box = Matrix4(M4fun.zero())
       let all1: Matrix4 box = Matrix4(M4fun(V4fun.id(), V4fun.id(),

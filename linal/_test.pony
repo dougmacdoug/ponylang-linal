@@ -47,7 +47,18 @@ class _TestHelperHelper
     else 
       h.log("unknown type")
       h.fail()
-    end      
+    end
+
+  fun ref assert_ne_t[V: Any val](a: V, b: V,
+                    msg: String = "", loc: SourceLoc = __loc) 
+  =>
+    match (a, b)
+    |  (let a': _Testable, let b': _Testable) => 
+      assert_ne(a', b', msg, loc)
+    else 
+      h.log("unknown type")
+      h.fail()
+    end
 
   fun ref assert_eq(a: _Testable, b: _Testable,
                     msg: String = "", loc: SourceLoc = __loc)

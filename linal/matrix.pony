@@ -8,7 +8,7 @@ type M4 is (V4, V4, V4, V4)
 primitive M2fun
   """functions for a 2x2 matrix"""
   fun apply(r1: V2, r2: V2): M2 =>
-  """create M2 from 2 Vector V2"""
+  """create M2 from 2 V2 vectors"""
     (r1, r2)
   fun zero(): M2 =>
   """zeroed M2"""
@@ -115,65 +115,99 @@ primitive M2fun
     end
 
 primitive M3fun
-  fun apply(r1: V3, r2: V3, r3: V3): M3 => (r1, r2, r3)
-  fun zero(): M3 => ((0, 0, 0), (0, 0, 0), (0, 0, 0))
-  fun id(): M3 => ((1, 0, 0), (0, 1, 0), (0, 0, 1))
-  fun rowx(m: M3): V3 => m._1
-  fun rowy(m: M3): V3 => m._2
-  fun rowz(m: M3): V3 => m._3
-  fun colx(m: M3): V3 => (m._1._1, m._2._1, m._3._1)
-  fun coly(m: M3): V3 => (m._1._2, m._2._2, m._3._2)
-  fun colz(m: M3): V3 => (m._1._3, m._2._3, m._3._3)
+  """functions for a 3x3 matrix"""
 
-  fun from_array(a: Array[F32] box): M3 ? =>
-    (V3fun.from_array(a, 0)?, V3fun.from_array(a, 3)?, V3fun.from_array(a, 6)?)
+  fun apply(r1: V3, r2: V3, r3: V3): M3 =>
+    """create M3 from 3 V3 vectors"""
+    (r1, r2, r3)
+  fun zero(): M3 =>
+    """zeroed M3"""
+    ((0, 0, 0), (0, 0, 0), (0, 0, 0))
+  fun id(): M3 =>
+    """identity matrix 3x3"""
+    ((1, 0, 0), (0, 1, 0), (0, 0, 1))
+  fun rowx(m: M3): V3 =>
+    """x or 1st row"""
+    m._1
+  fun rowy(m: M3): V3 =>
+    """y or 2nd row"""
+    m._2
+  fun rowz(m: M3): V3 =>
+    """z or 3rd row"""
+    m._3
+  fun colx(m: M3): V3 =>
+    """x or 1st column"""
+    (m._1._1, m._2._1, m._3._1)
+  fun coly(m: M3): V3 =>
+    """y or 2nd column"""
+    (m._1._2, m._2._2, m._3._2)
+  fun colz(m: M3): V3 =>
+    """z or 3rd column"""
+    (m._1._3, m._2._3, m._3._3)
+
+  fun from_array(a: Array[F32] box, offset: USize=0): M3 ? =>
+    """M3 from flat array starting at offset"""
+    (V3fun.from_array(a, 0 + offset)?,
+     V3fun.from_array(a, 3 + offset)?,
+     V3fun.from_array(a, 6 + offset)?)
 
   fun rotx(angle: F32): M3 =>
+    """rotate x"""
     let c : F32 = angle.cos()
     let s : F32 = angle.sin()
     ((1, 0, 0), (0, c, -s), (0, s, c))
   fun roty(angle: F32): M3 =>
+    """rotate y"""
     let c : F32 = angle.cos()
     let s : F32 = angle.sin()
     ((c, 0, s), (0, 1, 0), (-s, 0, c))
   fun rotz(angle: F32): M3 =>
+    """rotate z"""
     let c : F32 = angle.cos()
     let s : F32 = angle.sin()
     ((c, -s, 0), (s, c, 0), (0, 0, 1))
 
   fun add(a: M3, b: M3): M3 =>
+    """a + b"""
     ((a._1._1 + b._1._1, a._1._2 + b._1._2, a._1._3 + b._1._3),
      (a._2._1 + b._2._1, a._2._2 + b._2._2, a._2._3 + b._2._3),
      (a._3._1 + b._3._1, a._3._2 + b._3._2, a._3._3 + b._3._3))
 
   fun sub(a: M3, b: M3)  : M3 =>
+    """a - b"""
     ((a._1._1 - b._1._1, a._1._2 - b._1._2, a._1._3 - b._1._3),
      (a._2._1 - b._2._1, a._2._2 - b._2._2, a._2._3 - b._2._3),
      (a._3._1 - b._3._1, a._3._2 - b._3._2, a._3._3 - b._3._3))
 
   fun neg(a: M3): M3 =>
+    """-a"""
     ((-a._1._1, -a._1._2, -a._1._3),
      (-a._2._1, -a._2._2, -a._2._3),
      (-a._3._1, -a._3._2, -a._3._3))
 
   fun mul(a: M3, s: F32): M3 =>
+    """scale *a* by factor *s*"""
     ((a._1._1 * s, a._1._2 * s, a._1._3 * s),
      (a._2._1 * s, a._2._2 * s, a._2._3 * s),
      (a._3._1 * s, a._3._2 * s, a._3._3 * s))
 
-  fun div(a: M3, s: F32): M3 => mul(a, F32(1)/s)
+  fun div(a: M3, s: F32): M3 =>
+    """scale *a* by factor *1/s*"""
+    mul(a, F32(1)/s)
 
   fun trans(a: M3): M3 =>
+    """translate"""
     ((a._1._1, a._2._1, a._3._1),
      (a._1._2, a._2._2, a._3._2),
      (a._1._3, a._2._3, a._3._3))
 
-  fun mulv3(a: M3, v: V3): V3 =>
+  fun v3_mul(a: M3, v: V3): V3 =>
+    """matrix * vector multiplication"""
     ((a._1._1 * v._1) + (a._1._2 * v._2) + (a._1._3 * v._3),
      (a._2._1 * v._1) + (a._2._2 * v._2) + (a._2._3 * v._3),
      (a._3._1 * v._1) + (a._3._2 * v._2) + (a._3._3 * v._3))
 
-  fun mulm3(a: M3, b: M3): M3 =>
+  fun m3_mul(a: M3, b: M3): M3 =>
     (((a._1._1 * b._1._1) + (a._1._2 * b._2._1) + (a._1._3 * b._3._1),
       (a._1._1 * b._1._2) + (a._1._2 * b._2._2) + (a._1._3 * b._3._2),
       (a._1._1 * b._1._3) + (a._1._2 * b._2._3) + (a._1._3 * b._3._3)),
@@ -184,9 +218,12 @@ primitive M3fun
       (a._3._1 * b._1._2) + (a._3._2 * b._2._2) + (a._3._3 * b._3._2),
       (a._3._1 * b._1._3) + (a._3._2 * b._2._3) + (a._3._3 * b._3._3)))
 
-  fun trace(m: M3): F32 => m._1._1 + m._2._2 + m._3._3
+  fun trace(m: M3): F32 =>
+    """trace"""
+    m._1._1 + m._2._2 + m._3._3
 
   fun det(m: M3): F32 =>
+    """determinant"""
     (m._1._1 * m._2._2 * m._3._3) +
     (m._1._2 * m._2._3 * m._3._1) +
     ((m._2._1 * m._3._2 * m._1._3) -
@@ -195,6 +232,7 @@ primitive M3fun
      (m._1._2 * m._2._1 * m._3._3))
 
   fun inv(m: M3): M3 ? =>
+    """inverse"""
     let d =  det(m)
     if d == 0 then error end
     ((((m._2._2 * m._3._3) - (m._2._3 * m._3._2)) / d,
@@ -208,6 +246,7 @@ primitive M3fun
       ((m._1._1 * m._2._2) - (m._1._2 * m._2._1)) / d))
 
   fun solve(m: M3, v: V3): V3 =>
+    """solve"""
     let d  = det(m)
     let dx = det(((v._1, m._1._2, m._1._3),
                   (v._2, m._2._2, m._2._3),
@@ -221,6 +260,7 @@ primitive M3fun
     (dx/d, dy/d, dz/d)
 
   fun eq(a: M3, b: M3, eps: F32 = F32.epsilon()): Bool =>
+    """a == b"""
     Linear.eq(a._1._1, b._1._1, eps) and
     Linear.eq(a._1._2, b._1._2, eps) and
     Linear.eq(a._1._3, b._1._3, eps) and
@@ -246,21 +286,47 @@ primitive M3fun
     end
 
 primitive M4fun
-  fun apply(r1: V4, r2: V4, r3: V4, r4: V4): M4 => (r1, r2, r3, r4)
-  fun zero(): M4 => ((0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0))
-  fun id(): M4 => ((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1))
-  fun rowx(m: M4): V4 => m._1
-  fun rowy(m: M4): V4 => m._2
-  fun rowz(m: M4): V4 => m._3
-  fun roww(m: M4): V4 => m._4
-  fun colx(m: M4): V4 => (m._1._1, m._2._1, m._3._1, m._4._1)
-  fun coly(m: M4): V4 => (m._1._2, m._2._2, m._3._2, m._4._2)
-  fun colz(m: M4): V4 => (m._1._3, m._2._3, m._3._3, m._4._3)
-  fun colw(m: M4): V4 => (m._1._4, m._2._4, m._3._4, m._4._4)
-  fun from_array(a: Array[F32] box): M4 ? =>
-    (V4fun.from_array(a, 0)?, V4fun.from_array(a, 4)?,
-      V4fun.from_array(a, 8)?, V4fun.from_array(a, 12)?)
+  """functions for a 4x4 matrix"""
+  fun apply(r1: V4, r2: V4, r3: V4, r4: V4): M4 =>
+    """create M4 from 4 V4 vectors"""
+    (r1, r2, r3, r4)
+  fun zero(): M4 =>
+    """zeroed M4"""
+    ((0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0))
+  fun id(): M4 =>
+    """identity matrix 4x4"""
+    ((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1))
+  fun rowx(m: M4): V4 =>
+    """x or 1st row"""
+    m._1
+  fun rowy(m: M4): V4 =>
+    """y or 2nd row"""
+    m._2
+  fun rowz(m: M4): V4 =>
+    """z or 3rd row"""
+    m._3
+  fun roww(m: M4): V4 =>
+    """w or 4th row"""
+    m._4
+  fun colx(m: M4): V4 =>
+    """x or 1st column"""
+    (m._1._1, m._2._1, m._3._1, m._4._1)
+  fun coly(m: M4): V4 =>
+    """y or 2nd column"""
+    (m._1._2, m._2._2, m._3._2, m._4._2)
+  fun colz(m: M4): V4 =>
+    """z or 3rd column"""
+    (m._1._3, m._2._3, m._3._3, m._4._3)
+  fun colw(m: M4): V4 =>
+    """w or 3rd column"""
+    (m._1._4, m._2._4, m._3._4, m._4._4)
+  fun from_array(a: Array[F32] box, offset: USize=0): M4 ? =>
+    """M4 from flat array starting at offset"""
+    (V4fun.from_array(a, 0 + offset)?, V4fun.from_array(a,  4 + offset)?,
+     V4fun.from_array(a, 8 + offset)?, V4fun.from_array(a, 12 + offset)?)
+
   fun add(a: M4, b: M4): M4 =>
+    """a + b"""
     ((a._1._1 + b._1._1,  a._1._2 + b._1._2,
       a._1._3 + b._1._3,  a._1._4 + b._1._4),
      (a._2._1 + b._2._1,  a._2._2 + b._2._2,
@@ -271,6 +337,7 @@ primitive M4fun
       a._4._3 + b._4._3,  a._4._4 + b._4._4))
 
   fun sub(a: M4, b: M4): M4 =>
+    """a - b"""
     ((a._1._1 - b._1._1,  a._1._2 - b._1._2,
       a._1._3 - b._1._3,  a._1._4 - b._1._4),
      (a._2._1 - b._2._1,  a._2._2 - b._2._2,
@@ -281,57 +348,67 @@ primitive M4fun
       a._4._3 - b._4._3,  a._4._4 - b._4._4))
 
   fun neg(a: M4): M4 =>
+    """-a"""
     ((-a._1._1, -a._1._2, -a._1._3, -a._1._4),
      (-a._2._1, -a._2._2, -a._2._3, -a._2._4),
      (-a._3._1, -a._3._2, -a._3._3, -a._3._4),
      (-a._4._1, -a._4._2, -a._4._3, -a._4._4))
 
   fun mul(a: M4, s: F32): M4 =>
+    """scale *a* by factor *s*"""
     ((a._1._1 * s, a._1._2 * s, a._1._3 * s, a._1._4 * s),
      (a._2._1 * s, a._2._2 * s, a._2._3 * s, a._2._4 * s),
      (a._3._1 * s, a._3._2 * s, a._3._3 * s, a._3._4 * s),
      (a._4._1 * s, a._4._2 * s, a._4._3 * s, a._4._4 * s))
 
   fun div(a: M4, s: F32): M4 =>
+    """scale *a* by factor *1/s*"""
     ((a._1._1 / s, a._1._2 / s, a._1._3 / s, a._1._4 / s),
      (a._2._1 / s, a._2._2 / s, a._2._3 / s, a._2._4 / s),
      (a._3._1 / s, a._3._2 / s, a._3._3 / s, a._3._4 / s),
      (a._4._1 / s, a._4._2 / s, a._4._3 / s, a._4._4 / s))
 
   fun trans(a: M4): M4 =>
+    """translate"""
     ((a._1._1, a._2._1, a._3._1, a._4._1),
      (a._1._2, a._2._2, a._3._2, a._4._2),
      (a._1._3, a._2._3, a._3._3, a._4._3),
      (a._1._4, a._2._4, a._3._4, a._4._4))
 
-  fun v3trans(v : V3): M4 =>
+  fun v3_trans(v : V3): M4 =>
+    """translate vector 3"""
     ((1, 0, 0, v._1),
     (0, 1, 0, v._2),
     (0, 0, 1, v._3),
     (0, 0, 0, 1))
 
-  fun v3scale(v: V3): M4 =>
+  fun v3_scale(v: V3): M4 =>
+    """scale v3"""
     ((v._1,     0,   0, 0),
      (   0,  v._2,   0, 0),
      (   0,     0, v._3, 0),
      (   0,     0,   0, 1))
 
-  fun v3mul(a: M4, v: V3): V3 =>
+  fun v3_mul(a: M4, v: V3): V3 =>
+    """multiply matrix * vector"""
     ((a._1._1 * v._1) + (a._1._2 * v._2) + (a._1._3 * v._3),
      (a._2._1 * v._1) + (a._2._2 * v._2) + (a._2._3 * v._3),
      (a._3._1 * v._1) + (a._3._2 * v._2) + (a._3._3 * v._3))
 
-  fun v3mul_point_3x4(a: M4, v: V3): V3 =>
+  fun v3_mul_point_3x4(a: M4, v: V3): V3 =>
+    """multiply point matrix * vector"""
     ((a._1._1 * v._1) + (a._1._2 * v._2) + (a._1._3 * v._3) + a._1._4,
      (a._2._1 * v._1) + (a._2._2 * v._2) + (a._2._3 * v._3) + a._2._4,
      (a._3._1 * v._1) + (a._3._2 * v._2) + (a._3._3 * v._3) + a._3._4)
 
-  fun v3mul_point(a: M4, v: V3): V3 =>
-    let v3 = v3mul_point_3x4(a, v)
+  fun v3_mul_point(a: M4, v: V3): V3 =>
+    """multiply point matrix * vector"""
+    let v3 = v3_mul_point_3x4(a, v)
     let n  = (a._4._1 * v._1) + (a._4._2 * v._2) + (a._4._3 * v._3) + a._4._4
     V3fun.div(v3, n)
 
-  fun v4mul(a: M4, v: V4): V4 =>
+  fun v4_mul(a: M4, v: V4): V4 =>
+    """multiply matrix * vector"""
     ((a._1._1 * v._1) + (a._1._2 * v._2) +
      (a._1._3 * v._3) + (a._1._4 * v._4),
 
@@ -344,7 +421,8 @@ primitive M4fun
      (a._4._1 * v._1) + (a._4._2 * v._2) +
      (a._4._3 * v._3) + (a._4._4 * v._4))
 
-  fun mulm4(a: M4, b: M4): M4 =>
+  fun m4_mul(a: M4, b: M4): M4 =>
+    """multiply matrix * matrix"""
     (((a._1._1 * b._1._1) + (a._1._2 * b._2._1) +
       (a._1._3 * b._3._1) + (a._1._4 * b._4._1),
       (a._1._1 * b._1._2) + (a._1._2 * b._2._2) +
@@ -381,9 +459,12 @@ primitive M4fun
       (a._4._1 * b._1._4) + (a._4._2 * b._2._4) +
       (a._4._3 * b._3._4) + (a._4._4 * b._4._4)))
 
-  fun trace(m: M4): F32 => m._1._1 + m._2._2 + m._3._3 + m._4._4
+  fun trace(m: M4): F32 =>
+    """trace"""
+    m._1._1 + m._2._2 + m._3._3 + m._4._4
 
   fun det(m: M4): F32 =>
+    """determinant"""
     let n = _det1(m)
     _det2(n)
    
@@ -410,6 +491,7 @@ primitive M4fun
     (n4 * n9)  + (-n5 * n8)  + (n6 * n7)
 
   fun inv(m: M4): M4 ? =>
+    """inverse"""
     // inline det reduces operations
     let n = _det1(m)
     let d = _det2(n)
@@ -440,7 +522,8 @@ primitive M4fun
     ((b11, b12, b13, b14), (b21, b22, b23, b24),
      (b31, b32, b33, b34), (b41, b42, b43, b44))
 
-fun solve(m: M4, v: V4): V4 ? =>
+  fun solve(m: M4, v: V4): V4 ? =>
+    """solve"""
     // inline det reduces operations
     let n = _det1(m)
     let d = _det2(n)
@@ -478,6 +561,7 @@ fun solve(m: M4, v: V4): V4 ? =>
     (x', y', z', w')
 
   fun rot(m: M4, q: Q4): M4 =>
+    """rotate"""
     let n1  : F32  = q._1 * 2
     let n2  : F32  = q._2 * 2
     let n3  : F32  = q._3 * 2
@@ -497,12 +581,14 @@ fun solve(m: M4, v: V4): V4 ? =>
      (0, 0, 0, 1))
 
   fun from_q4(q: Q4): M4 =>
+    """matrix from quaternion"""
     ((q._1, -q._2, -q._3, -q._4),
      (q._2,  q._1, -q._4,  q._3),
      (q._3,  q._4,  q._1, -q._2),
      (q._4, -q._3,  q._2,  q._1))
 
   fun eq(a: M4, b: M4, eps: F32 = F32.epsilon()): Bool =>
+    """a == b"""
     Linear.eq(a._1._1, b._1._1, eps) and
     Linear.eq(a._1._2, b._1._2, eps) and
     Linear.eq(a._1._3, b._1._3, eps) and
