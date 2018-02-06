@@ -1,36 +1,34 @@
 type Q4 is (F32, F32, F32, F32)
 
 class Quaternion is (Stringable & Equatable[Quaternion])
-  var _x: F32
-  var _y: F32
-  var _z: F32
-  var _w: F32
+  var _x: F32 = 0
+  var _y: F32 = 0
+  var _z: F32 = 0
+  var _w: F32 = 0
 
-  new create(q4: (Q4 | Quaternion box) = Q4fun.zero()) =>
-    (_x, _y, _z, _w) = match q4
-    | let q: Q4 => q
-    | let q: Quaternion box => q.as_tuple()
+  fun ref apply(q: (Q4 | Quaternion box) = Q4fun.zero()): Quaternion =>
+    (_x, _y, _z, _w) = match q
+    | let q': Q4 => q'
+    | let q': Quaternion box => q'.q4()
     end
+    this
 
   fun ref update(value: (Q4 | Quaternion box)) =>
-    (_x, _y, _z, _w) = match value
-    | let q: Q4 => q
-    | let q: Quaternion box => q.as_tuple()
-    end
+    apply(value)
 
   fun x(): F32 => _x
   fun y(): F32 => _y
   fun z(): F32 => _z
   fun w(): F32 => _w
-  fun as_tuple(): Q4 => (_x, _y, _z, _w)
-  fun string(): String iso^ => V4fun.to_string(as_tuple())
+  fun q4(): Q4 => (_x, _y, _z, _w)
+  fun string(): String iso^ => V4fun.to_string(q4())
   
   fun eq(that: (Quaternion box | Q4)): Bool  =>
     """test equality with this Quaternion and another instance|tuple"""
-    let mine = as_tuple()
+    let mine = q4()
     let that' =
     match that
-    | let v: Quaternion box => v.as_tuple()
+    | let v: Quaternion box => v.q4()
     | let v: Q4 => v
     end
     V4fun.eq(mine, that', F32.epsilon())

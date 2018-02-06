@@ -1,291 +1,5 @@
-type M2 is (V2, V2)
-""" tuple based matrix alias 2x2"""
-type M3 is (V3, V3, V3)
-""" tuple based matrix alias 3x3"""
 type M4 is (V4, V4, V4, V4)
 """ tuple based matrix alias 4x4"""
-
-primitive M2fun
-  """functions for a 2x2 matrix"""
-  fun apply(r1: V2, r2: V2): M2 =>
-  """create M2 from 2 V2 vectors"""
-    (r1, r2)
-  fun zero(): M2 =>
-  """zeroed M2"""
-    ((0, 0), (0, 0))
-  fun id(): M2 =>
-  """identity matrix 2x2"""
-    ((1, 0), (0, 1))
-  fun rowx(m: M2): V2 =>
-  """x or 1st row"""
-    m._1
-  fun rowy(m: M2): V2 =>
-    """y or 2nd row"""
-    m._2
-  fun colx(m: M2): V2 =>
-    """x or 1st column"""
-    (m._1._1, m._2._1)
-  fun coly(m: M2): V2 =>
-    """y or 2nd column"""
-    (m._1._2, m._2._2)
-
-  fun from_array(a: Array[F32] box, offset: USize=0): M2 ? =>
-    """M2 from flat array starting at offset"""
-    (V2fun.from_array(a, 0 + offset)?,
-     V2fun.from_array(a, 2 + offset)?)
-
-  fun rot(angle: F32): M2 =>
-    """M2 from angle"""
-    let c : F32 = angle.cos()
-    let s : F32 = angle.sin()
-    ((c, -s), (s, c))
-
-  fun add(a: M2, b: M2): M2  =>
-    """a + b"""
-    ((a._1._1 + b._1._1, a._1._2 + b._1._2),
-     (a._2._1 + b._2._1, a._2._2 + b._2._2))
-
-  fun sub(a: M2, b: M2): M2 =>
-    """a - b"""
-    ((a._1._1 - b._1._1, a._1._2 - b._1._2),
-     (a._2._1 - b._2._1, a._2._2 - b._2._2))
-
-  fun neg(a: M2): M2 =>
-    """-a"""
-    ((-a._1._1, -a._1._2), (-a._2._1, -a._2._2))
-
-  fun mul(a: M2, s: F32): M2 =>
-    """scale *a* by factor *s*"""
-    ((a._1._1 * s, a._1._2 * s),
-     (a._2._1 * s, a._2._2 * s))
-
-  fun div(a: M2, s: F32): M2 => 
-    """scale *a* by factor *1/s*"""
-    mul(a, F32(1) / s)
-
-  fun trans(a: M2): M2 =>
-    """translate"""
-    ((a._1._1, a._2._1), (a._1._2, a._2._2))
-
-  fun v2_mul(a: M2, v: V2): V2 =>
-    """matrix * vector multiplication"""
-    ( (a._1._1*v._1) + (a._1._2* v._2), (a._2._1*v._1) + (a._2._2*v._2))
-
-  fun m2_mul(a: M2, b: M2): M2 =>
-    """matrix * matrix multiplication"""
-    (((a._1._1 * b._1._1) + (a._1._2 * b._2._1),
-      (a._1._1 * b._1._2) + (a._1._2 * b._2._2)),
-     ((a._2._1 * b._1._1) + (a._2._2 * b._2._1),
-      (a._2._1 * b._1._2) + (a._2._2 * b._2._2)))
-
-  fun trace(m: M2): F32 =>
-    """trace / sum id"""
-    m._1._1 + m._2._2
-  fun det(m: M2): F32 =>
-    """determinant"""
-    (m._1._1 * m._2._2) - (m._1._2 * m._2._1)
-  fun inv(m: M2): M2 ? =>
-    """inverse"""
-    let d = det(m)
-    if d == 0 then error end
-    let m2 = ((m._2._2, -m._1._2), (-m._2._1, m._1._1))
-    mul(m2, 1/d)
-  fun solve(m: M2, v: V2): V2 =>
-    """solve [2x2][2]"""
-    ((((m._1._2 * v._2)    - (m._2._2 * v._1)) /
-      ((m._1._2 * m._2._1) - (m._1._1 * m._2._2))),
-     (((m._2._1 * v._1)    - (m._1._1 * v._2)) /
-      ((m._1._2 * m._2._1) - (m._1._1 * m._2._2))))
-
-  fun eq(a: M2, b: M2, eps: F32 = F32.epsilon()): Bool =>
-    """a == b"""
-    Linear.eq(a._1._1, b._1._1, eps) and
-    Linear.eq(a._1._2, b._1._2, eps) and
-    Linear.eq(a._2._1, b._2._1, eps) and
-    Linear.eq(a._2._2, b._2._2, eps)
-
-  fun to_string(m: M2): String iso^  =>
-    """string format a matrix"""
-    recover
-      var s = String(600)
-      s.push('(')
-      s.append(V2fun.to_string(m._1))
-      s.push(',')
-      s.append(V2fun.to_string(m._2))
-      s.push(')')
-      s.>recalc()
-    end
-
-primitive M3fun
-  """functions for a 3x3 matrix"""
-
-  fun apply(r1: V3, r2: V3, r3: V3): M3 =>
-    """create M3 from 3 V3 vectors"""
-    (r1, r2, r3)
-  fun zero(): M3 =>
-    """zeroed M3"""
-    ((0, 0, 0), (0, 0, 0), (0, 0, 0))
-  fun id(): M3 =>
-    """identity matrix 3x3"""
-    ((1, 0, 0), (0, 1, 0), (0, 0, 1))
-  fun rowx(m: M3): V3 =>
-    """x or 1st row"""
-    m._1
-  fun rowy(m: M3): V3 =>
-    """y or 2nd row"""
-    m._2
-  fun rowz(m: M3): V3 =>
-    """z or 3rd row"""
-    m._3
-  fun colx(m: M3): V3 =>
-    """x or 1st column"""
-    (m._1._1, m._2._1, m._3._1)
-  fun coly(m: M3): V3 =>
-    """y or 2nd column"""
-    (m._1._2, m._2._2, m._3._2)
-  fun colz(m: M3): V3 =>
-    """z or 3rd column"""
-    (m._1._3, m._2._3, m._3._3)
-
-  fun from_array(a: Array[F32] box, offset: USize=0): M3 ? =>
-    """M3 from flat array starting at offset"""
-    (V3fun.from_array(a, 0 + offset)?,
-     V3fun.from_array(a, 3 + offset)?,
-     V3fun.from_array(a, 6 + offset)?)
-
-  fun rotx(angle: F32): M3 =>
-    """rotate x"""
-    let c : F32 = angle.cos()
-    let s : F32 = angle.sin()
-    ((1, 0, 0), (0, c, -s), (0, s, c))
-  fun roty(angle: F32): M3 =>
-    """rotate y"""
-    let c : F32 = angle.cos()
-    let s : F32 = angle.sin()
-    ((c, 0, s), (0, 1, 0), (-s, 0, c))
-  fun rotz(angle: F32): M3 =>
-    """rotate z"""
-    let c : F32 = angle.cos()
-    let s : F32 = angle.sin()
-    ((c, -s, 0), (s, c, 0), (0, 0, 1))
-
-  fun add(a: M3, b: M3): M3 =>
-    """a + b"""
-    ((a._1._1 + b._1._1, a._1._2 + b._1._2, a._1._3 + b._1._3),
-     (a._2._1 + b._2._1, a._2._2 + b._2._2, a._2._3 + b._2._3),
-     (a._3._1 + b._3._1, a._3._2 + b._3._2, a._3._3 + b._3._3))
-
-  fun sub(a: M3, b: M3)  : M3 =>
-    """a - b"""
-    ((a._1._1 - b._1._1, a._1._2 - b._1._2, a._1._3 - b._1._3),
-     (a._2._1 - b._2._1, a._2._2 - b._2._2, a._2._3 - b._2._3),
-     (a._3._1 - b._3._1, a._3._2 - b._3._2, a._3._3 - b._3._3))
-
-  fun neg(a: M3): M3 =>
-    """-a"""
-    ((-a._1._1, -a._1._2, -a._1._3),
-     (-a._2._1, -a._2._2, -a._2._3),
-     (-a._3._1, -a._3._2, -a._3._3))
-
-  fun mul(a: M3, s: F32): M3 =>
-    """scale *a* by factor *s*"""
-    ((a._1._1 * s, a._1._2 * s, a._1._3 * s),
-     (a._2._1 * s, a._2._2 * s, a._2._3 * s),
-     (a._3._1 * s, a._3._2 * s, a._3._3 * s))
-
-  fun div(a: M3, s: F32): M3 =>
-    """scale *a* by factor *1/s*"""
-    mul(a, F32(1)/s)
-
-  fun trans(a: M3): M3 =>
-    """translate"""
-    ((a._1._1, a._2._1, a._3._1),
-     (a._1._2, a._2._2, a._3._2),
-     (a._1._3, a._2._3, a._3._3))
-
-  fun v3_mul(a: M3, v: V3): V3 =>
-    """matrix * vector multiplication"""
-    ((a._1._1 * v._1) + (a._1._2 * v._2) + (a._1._3 * v._3),
-     (a._2._1 * v._1) + (a._2._2 * v._2) + (a._2._3 * v._3),
-     (a._3._1 * v._1) + (a._3._2 * v._2) + (a._3._3 * v._3))
-
-  fun m3_mul(a: M3, b: M3): M3 =>
-    (((a._1._1 * b._1._1) + (a._1._2 * b._2._1) + (a._1._3 * b._3._1),
-      (a._1._1 * b._1._2) + (a._1._2 * b._2._2) + (a._1._3 * b._3._2),
-      (a._1._1 * b._1._3) + (a._1._2 * b._2._3) + (a._1._3 * b._3._3)),
-     ((a._2._1 * b._1._1) + (a._2._2 * b._2._1) + (a._2._3 * b._3._1),
-      (a._2._1 * b._1._2) + (a._2._2 * b._2._2) + (a._2._3 * b._3._2),
-      (a._2._1 * b._1._3) + (a._2._2 * b._2._3) + (a._2._3 * b._3._3)),
-     ((a._3._1 * b._1._1) + (a._3._2 * b._2._1) + (a._3._3 * b._3._1),
-      (a._3._1 * b._1._2) + (a._3._2 * b._2._2) + (a._3._3 * b._3._2),
-      (a._3._1 * b._1._3) + (a._3._2 * b._2._3) + (a._3._3 * b._3._3)))
-
-  fun trace(m: M3): F32 =>
-    """trace"""
-    m._1._1 + m._2._2 + m._3._3
-
-  fun det(m: M3): F32 =>
-    """determinant"""
-    (m._1._1 * m._2._2 * m._3._3) +
-    (m._1._2 * m._2._3 * m._3._1) +
-    ((m._2._1 * m._3._2 * m._1._3) -
-     (m._1._3 * m._2._2 * m._3._1) -
-     (m._1._1 * m._2._3 * m._3._2) -
-     (m._1._2 * m._2._1 * m._3._3))
-
-  fun inv(m: M3): M3 ? =>
-    """inverse"""
-    let d =  det(m)
-    if d == 0 then error end
-    ((((m._2._2 * m._3._3) - (m._2._3 * m._3._2)) / d,
-      ((m._3._2 * m._1._3) - (m._3._3 * m._1._2)) / d,
-      ((m._1._2 * m._2._3) - (m._1._3 * m._2._2)) / d),
-     (((m._2._3 * m._3._1) - (m._2._1 * m._3._3)) / d,
-      ((m._3._3 * m._1._1) - (m._3._1 * m._1._3)) / d,
-      ((m._1._3 * m._2._1) - (m._1._1 * m._2._3)) / d),
-     (((m._2._1 * m._3._2) - (m._2._2 * m._3._1)) / d,
-      ((m._3._1 * m._1._2) - (m._3._2 * m._1._1)) / d,
-      ((m._1._1 * m._2._2) - (m._1._2 * m._2._1)) / d))
-
-  fun solve(m: M3, v: V3): V3 =>
-    """solve"""
-    let d  = det(m)
-    let dx = det(((v._1, m._1._2, m._1._3),
-                  (v._2, m._2._2, m._2._3),
-                  (v._3, m._3._2, m._3._3)))
-    let dy = det(((m._1._1, v._1, m._1._3),
-                  (m._2._1, v._2, m._2._3),
-                  (m._3._1, v._3, m._3._3)))
-    let dz = det(((m._1._1, m._1._2, v._1),
-                  (m._2._1, m._2._2, v._2),
-                  (m._3._1, m._3._2, v._3)))
-    (dx/d, dy/d, dz/d)
-
-  fun eq(a: M3, b: M3, eps: F32 = F32.epsilon()): Bool =>
-    """a == b"""
-    Linear.eq(a._1._1, b._1._1, eps) and
-    Linear.eq(a._1._2, b._1._2, eps) and
-    Linear.eq(a._1._3, b._1._3, eps) and
-    Linear.eq(a._2._1, b._2._1, eps) and
-    Linear.eq(a._2._2, b._2._2, eps) and
-    Linear.eq(a._2._3, b._2._3, eps) and
-    Linear.eq(a._3._1, b._3._1, eps) and
-    Linear.eq(a._3._2, b._3._2, eps) and
-    Linear.eq(a._3._3, b._3._3, eps)
-
-  fun to_string(m: M3): String iso^  =>
-    """string format a matrix"""
-    recover
-      var s = String(600)
-      s.push('(')
-      s.append(V3fun.to_string(m._1))
-      s.push(',')
-      s.append(V3fun.to_string(m._2))
-      s.push(',')
-      s.append(V3fun.to_string(m._3))
-      s.push(')')
-      s.>recalc()
-    end
 
 primitive M4fun
   """functions for a 4x4 matrix"""
@@ -562,8 +276,8 @@ primitive M4fun
 
     (x', y', z', w')
 
-  fun rot(m: M4, q: Q4): M4 =>
-    """rotate"""
+  fun rot(q: Q4): M4 =>
+    """rotation M4 from Q4"""
     let n1  : F32  = q._1 * 2
     let n2  : F32  = q._2 * 2
     let n3  : F32  = q._3 * 2
@@ -624,83 +338,6 @@ primitive M4fun
       s.>recalc()
     end
 
-type AnyMatrix2 is (Matrix2 | M2)
-
-class Matrix2 is (Stringable & Equatable[Matrix2])
-  var _m11 : F32 = 0
-  var _m12 : F32 = 0
-  var _m21 : F32 = 0
-  var _m22 : F32 = 0
-  new create() =>
-    """zeroed 2x2 matrix"""
-  
-  new zero() =>
-    """zeroed 2x2 matrix"""
-  new id() => apply(M2fun.id())
-
-
-  fun ref apply(m': box->AnyMatrix2): Matrix2 =>
-    ((_m11, _m12),
-     (_m21, _m22)) = _tuplize(m')
-    this
-
-  fun ref update(value: box->AnyMatrix2) => apply(value)
-
-  fun m2(): M2 =>
-    ((_m11, _m12),
-     (_m21, _m22))
-
-  fun _tuplize(that: box->AnyMatrix2): M2 =>
-    match that
-    | let m: M2 => m
-    | let m: Matrix2 box => m.m2()
-    end
-
-  fun add(that: box->AnyMatrix2): M2 => M2fun.add(m2(), _tuplize(that))
-  fun sub(that: box->AnyMatrix2): M2 => M2fun.sub(m2(), _tuplize(that))
-  fun mul(s: F32): M2 => M2fun.mul(m2(), s)
-  fun div(s: F32): M2 => M2fun.div(m2(), s)
-  fun neg(): M2 => M2fun.neg(m2())
-
-  fun get(index: (Int | (Int, Int))): F32 ? =>
-    """get cell value. index flat 0-15 or (row, col)"""
-    (let row: U32, let col: U32) =
-    match index
-    | let i: Int => (i.u32() / 2, i.u32() % 2)
-    | (let r: Int, let c: Int) => (r.u32(), c.u32())
-    end
-    match (row, col)
-    | (0, 0) => _m11
-    | (0, 1) => _m12
-    | (1, 0) => _m21
-    | (1, 1) => _m22
-    else
-      error
-    end
-
-  fun ref set(index: (Int | (Int, Int)), value: F32): F32 ? =>
-    """set cell value return old value. index flat 0-15 or (row, col)"""
-    let old = get(index)?
-    (let row: U32, let col: U32) =
-    match index
-    | let i: Int => (i.u32() / 2, i.u32() % 2)
-    | (let r: Int, let c: Int) => (r.u32(), c.u32())
-    end
-    match (row.u32(), col.u32())
-    | (0, 0) => _m11 = value
-    | (0, 1) => _m12 = value
-    | (1, 0) => _m21 = value
-    | (1, 1) => _m22 = value
-    else
-      error
-    end
-    old
-
-  fun string(): String iso^ => M2fun.to_string(m2())
-
-  fun box eq(that: box->AnyMatrix2): Bool => M2fun.eq(m2(), _tuplize(that))
-  fun box ne(that: box->AnyMatrix2): Bool => not(eq(that))
-
 type AnyMatrix4 is (Matrix4 | M4)
 
 class Matrix4 is (Stringable & Equatable[Matrix4])
@@ -724,10 +361,9 @@ class Matrix4 is (Stringable & Equatable[Matrix4])
   new create() =>
     """zeroed 4x4 matrix"""
   
-  new zero() =>
-    """zeroed 4x4 matrix"""
   new id() => apply(M4fun.id())
 
+  new rot(q: Q4)=>apply(M4fun.rot(q))
 
   fun ref apply(m': box->AnyMatrix4): Matrix4 =>
     ((_m11, _m12, _m13, _m14),
@@ -755,60 +391,66 @@ class Matrix4 is (Stringable & Equatable[Matrix4])
   fun mul(s: F32): M4 => M4fun.mul(m4(), s)
   fun div(s: F32): M4 => M4fun.div(m4(), s)
   fun neg(): M4 => M4fun.neg(m4())
+  fun rowx(): V4 => M4fun.rowx(m4())
+  fun rowy(): V4 => M4fun.rowy(m4())
+  fun rowz(): V4 => M4fun.rowz(m4())
+  fun roww(): V4 => M4fun.roww(m4())
+  fun colx(): V4 => M4fun.colx(m4())
+  fun coly(): V4 => M4fun.coly(m4())
+  fun colz(): V4 => M4fun.colz(m4())
+  fun colw(): V4 => M4fun.colw(m4())
 
-  fun get(index: (Int | (Int, Int))): F32 ? =>
-    """get cell value. index flat 0-15 or (row, col)"""
-    (let row: U32, let col: U32) =
-    match index
-    | let i: Int => (i.u32() / 4, i.u32() % 4)
-    | (let r: Int, let c: Int) => (r.u32(), c.u32())
-    end
-    match (row, col)
-    | (0, 0) => _m11
-    | (0, 1) => _m12
-    | (0, 2) => _m13
-    | (0, 3) => _m14
-    | (1, 0) => _m21
-    | (1, 1) => _m22
-    | (1, 2) => _m23
-    | (1, 3) => _m24
-    | (2, 0) => _m31
-    | (2, 1) => _m32
-    | (2, 2) => _m33
-    | (2, 3) => _m34
-    | (3, 0) => _m41
-    | (3, 1) => _m42
-    | (3, 2) => _m43
-    | (3, 3) => _m44
+  fun trans(): M4 => M4fun.trans(m4())
+  fun v4_mul(v: V4): V4 => M4fun.v4_mul(m4(), v)
+  fun m4_mul(that: M4): M4 => M4fun.m4_mul(m4(), that)
+  fun trace(): F32 => M4fun.trace(m4())
+  fun det(): F32 => M4fun.det(m4())
+  fun inv(): M4 ? => M4fun.inv(m4())?
+  fun solve(v: V4): V4 ? => M4fun.solve(m4(), v)?
+
+  fun get(index: (USize | (USize, USize))): F32 ? =>
+    """get cell value. flat array index or (row, col)"""
+    match _Mindex(index, 4)
+    | (1, 1) => _m11
+    | (1, 2) => _m12
+    | (1, 3) => _m13
+    | (1, 4) => _m14
+    | (2, 1) => _m21
+    | (2, 2) => _m22
+    | (2, 3) => _m23
+    | (2, 4) => _m24
+    | (3, 1) => _m31
+    | (3, 2) => _m32
+    | (3, 3) => _m33
+    | (3, 4) => _m34
+    | (4, 1) => _m41
+    | (4, 2) => _m42
+    | (4, 3) => _m43
+    | (4, 4) => _m44
     else
       error
     end
 
-  fun ref set(index: (Int | (Int, Int)), value: F32): F32 ? =>
+  fun ref set(index: (USize | (USize, USize)), value: F32): F32 ? =>
     """set cell value return old value. index flat 0-15 or (row, col)"""
     let old = get(index)?
-    (let row: U32, let col: U32) =
-    match index
-    | let i: Int => (i.u32() / 4, i.u32() % 4)
-    | (let r: Int, let c: Int) => (r.u32(), c.u32())
-    end
-    match (row.u32(), col.u32())
-    | (0, 0) => _m11 = value
-    | (0, 1) => _m12 = value
-    | (0, 2) => _m13 = value
-    | (0, 3) => _m14 = value
-    | (1, 0) => _m21 = value
-    | (1, 1) => _m22 = value
-    | (1, 2) => _m23 = value
-    | (1, 3) => _m24 = value
-    | (2, 0) => _m31 = value
-    | (2, 1) => _m32 = value
-    | (2, 2) => _m33 = value
-    | (2, 3) => _m34 = value
-    | (3, 0) => _m41 = value
-    | (3, 1) => _m42 = value
-    | (3, 2) => _m43 = value
-    | (3, 3) => _m44 = value
+    match _Mindex(index, 4)
+    | (1, 1) => _m11 = value
+    | (1, 2) => _m12 = value
+    | (1, 3) => _m13 = value
+    | (1, 4) => _m14 = value
+    | (2, 1) => _m21 = value
+    | (2, 2) => _m22 = value
+    | (2, 3) => _m23 = value
+    | (2, 4) => _m24 = value
+    | (3, 1) => _m31 = value
+    | (3, 2) => _m32 = value
+    | (3, 3) => _m33 = value
+    | (3, 4) => _m34 = value
+    | (4, 1) => _m41 = value
+    | (4, 2) => _m42 = value
+    | (4, 3) => _m43 = value
+    | (4, 4) => _m44 = value
     else
       error
     end
@@ -818,4 +460,11 @@ class Matrix4 is (Stringable & Equatable[Matrix4])
 
   fun box eq(that: box->AnyMatrix4): Bool => M4fun.eq(m4(), _tuplize(that))
   fun box ne(that: box->AnyMatrix4): Bool => not(eq(that))
-    
+
+primitive _Mindex
+  """simplify getting a matrix index from row, col or flat array style"""
+  fun apply(index: (USize | (USize, USize)), n: USize): (USize, USize) =>
+    match index
+    | let i: USize => ((i / n)  + 1, (i % n) + 1)
+    | (let r: USize, let c: USize) => (r + 1, c  + 1)
+    end

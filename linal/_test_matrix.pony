@@ -40,9 +40,10 @@ class iso _TestM2fun is UnitTest
     test.assert_eq((8,18), m2.v2_mul(a1, (2,3)), "m2 * v2")
     test.assert_eq(((13,16),(29,36)), m2.m2_mul(a1, a2), "m2 * m2")
     test.assert_eq(5, m2.trace(a1), "trace")
-    test.assert_eq((5, -3), m2.solve(((2,3), (10,16)), (1,2)), "Ax=b")
-
-    test.assert_eq(-2, m2.det(a1), "determinant")
+    let solve_answer = try m2.solve(((2,3), (10,16)), (1,2))? else zero end
+    test.assert_eq((5, -3), solve_answer, "Ax=b")
+    test.assert_eq(-13, m2.det(((5, -1),(2, -3))), "determinant")
+    test.assert_eq(-2, m2.det(a1), "determinant a1")
 
 class iso _TestM3fun is UnitTest
   fun name():String => "MatrixFun/M3"
@@ -66,15 +67,6 @@ class iso _TestM3fun is UnitTest
     test.assert_ne(rx, ry, "Row X =/= Row Y")
     test.assert_eq(((1,2,3),(4,5,6),(7,8,9)), a1, "A1")
     test.assert_eq(((3,4,5),(6,7,8),(9,10,11)), a2, "A2")
-/*
-    test.assert_eq(((1,0),(0,1)), m3.rot(0), "Rotate 0")
-    test.assert_eq(((0,-1),(1,0)), m3.rot(F32.pi()/2), "Rotate 90")
-    test.assert_eq(((-1,0),(0,-1)), m3.rot(F32.pi()), "Rotate 180")
-    test.assert_eq(((0,1),(-1,0)), m3.rot(3*(F32.pi()/2)), "Rotate 270")
-
-    let hyp = F32(2).sqrt() / 2
-    test.assert_eq(((hyp,-hyp),(hyp,hyp)), m3.rot(F32.pi()/4), "Rotate 45")
-*/
 
     test.assert_eq(
       ((2, 0, 0), (0, 2, 0), (0, 0, 2)),
@@ -126,8 +118,8 @@ class iso _TestM3fun is UnitTest
 
     let solve_m3 = m3((1, 2, 2), (3, -2, 1), (2, 1, -1))
     let solve_v3 = v3(5, -6, -1)
-    test.assert_eq(v3(-1, 2, 1),
-      m3.solve(solve_m3, solve_v3), "solve [m3][v3] equation")
+    let solve_answer = try m3.solve(solve_m3, solve_v3)? else zero end
+    test.assert_eq(v3(-1, 2, 1), solve_answer, "solve [m3][v3] equation")
 
     fun _testMatrix(h: TestHelper) =>
       let identity: Matrix4 box = Matrix4.id()

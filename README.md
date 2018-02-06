@@ -4,7 +4,7 @@ This library is intended for use in common 2D and 3D applications
 not as a scientific or math library. Various scientific libraries
 such as [LAPACK], [GSL] or even [NumPy] can be bound with the [Pony C ABI].
 
-### pre-alpha software (0.1.0 version coming soonerish)
+### pre-alpha software (0.1.0 version coming mid Feb'18)
 
 ### Tuple-based Linear Algebra for typical 2D, 3D operations  
   * operate on the stack
@@ -31,13 +31,18 @@ Example:
 
 
 @TODO:
-  * docstrings: Q4, R4, M2-4
-  * UNIT TESTS! [more and fix logging, standardize]
+  * another sweep of m4, q4, r4
+  * unit tests q4, r4, and wrapper classes
+  * Rect does not follow wrapper pattern.. (align or write doc)
+  * follow lib pattern for pony, add to pony stable
   * release 0.1.0
+@FUTURE
+  * create good example folder
+  * plan for more classes like Plane /or/ move Rect to new lib
+  * consider writing longhand (dist2 = distance_squared)
   * add fast sqrt for unit vector
   * slerp nlerp
   * faster Q4
   * try to use compile time expressions once adopted by pony
      fun inv(q: Q4) : Q4 => #( div(conj(q), dot(q,q)) )
-  * consider writing longhand (dist2 = distance_squared)
 

@@ -1,16 +1,25 @@
-// Rectangle is Pivot (Bottom Left) and Size
 type R4 is (V2, F32, F32)
 """
 R4 (Rectangle) is Position, Width, Height
 
 Position is always bottom left, also called origin
+
+Height and Width are kept positive. When actions such
+as create or resize cause a negative width or height,
+the rectangle is "rectified" having its point of origin
+shifted down and left to accomadate the size
+
+```
+((0, 0), -2, -3) -> ((-2, -3), 2, 3) [rectified] 
+((-1, 2), 3, -1) -> ((-1, 1), 3, 1) [rectified] 
+```
 """
+type AnyRect is (Rect | R4)
 
 primitive R4fun
 """rectangle operations for R4"""
-/** SIMULATED NEW:  CREATE R4  **/
   fun apply(x': F32, y': F32, w': F32, h': F32): R4 =>
-    """create R4"""
+    """create rectified R4"""
     rectify(((x', y'), w', h'))
 
   fun zero(): R4 =>
@@ -22,7 +31,7 @@ primitive R4fun
     ((0, 0), 1, 1)
     
   fun sized(w': F32, h': F32): R4 =>
-    """create R4 at zero with size *(w', h')*"""
+    """create R4 starting at zero with rectified size *(w', h')*"""
     rectify(((0, 0), w', h'))
 
   fun centered(pt: V2, w': F32, h': F32): R4 =>
@@ -35,10 +44,11 @@ primitive R4fun
   fun max(r: R4): V2 =>
     """largest point in R4 (top right corner)"""
     (r._1._1 + r._2, r._1._2 + r._3)
-  fun xMin(r: R4): F32 => r._1._1
-  fun yMin(r: R4): F32 => r._1._2
-  fun xMax(r: R4): F32 => r._1._1 + r._2
-  fun yMax(r: R4): F32 => r._1._2 + r._3
+  fun x_min(r: R4): F32 => r._1._1
+  fun y_min(r: R4): F32 => r._1._2
+  fun x_max(r: R4): F32 => r._1._1 + r._2
+  fun y_max(r: R4): F32 => r._1._2 + r._3
+  fun origin(r: R4): V2 => r._1
 
   fun width(r: R4): F32 => r._2
   fun height(r: R4): F32 => r._3
@@ -82,18 +92,18 @@ primitive R4fun
   fun contains(r: R4, pt: V3): Bool => contains(r, V3fun.v2(pt))
 
   fun overlaps(r: R4, other: R4): Bool =>
-    (xMax(other) > xMin(r)) and
-    (xMin(other) < xMax(r)) and
-    (yMax(other) > yMin(r)) and
-    (yMin(other) < yMax(r))
+    (x_max(other) > x_min(r)) and
+    (x_min(other) < x_max(r)) and
+    (y_max(other) > y_min(r)) and
+    (y_min(other) < y_max(r))
 
   fun normalized_to_point(r: R4, norm: V2): V2 =>
-    (Linear.lerp(r._1._1, xMax(r), norm._1),
-     Linear.lerp(r._1._2, yMax(r), norm._2))
+    (Linear.lerp(r._1._1, x_max(r), norm._1),
+     Linear.lerp(r._1._2, y_max(r), norm._2))
 
   fun point_to_normalized(r: R4, pt: V2): V2 =>
-      (Linear.unlerp(r._1._1, xMax(r), pt._1),
-       Linear.unlerp(r._1._2, yMax(r), pt._2))
+      (Linear.unlerp(r._1._1, x_max(r), pt._1),
+       Linear.unlerp(r._1._2, y_max(r), pt._2))
 
   fun eq(lhs: R4, rhs: R4): Bool =>
     (lhs._1._1 == rhs._1._1) and (lhs._1._2 == rhs._1._2) and
@@ -128,10 +138,6 @@ primitive R4fun
     end
     ((x', y'), w', h')
 
-  fun is_rectified(r: R4): Bool =>
-    if (r._2 < 0) or (r._3 < 0) then false else true end
-
-type AnyRect is (Rect | R4)
 
 class Rect is (Stringable & Equatable[Rect])
   var _x: F32 = 0
@@ -151,31 +157,39 @@ class Rect is (Stringable & Equatable[Rect])
   fun ref update(r: (Rect box | R4)) =>
     apply(r)
 
+  new at(x': F32 = 0, y': F32 = 0, w': F32 = 0, h': F32 = 0) =>
+    apply(R4fun(x', y', h', w'))
+
   new zero() =>(_x, _y, _w, _h) = (0, 0, 0, 0)
   new unit() =>(_x, _y, _w, _h) = (0, 0, 1, 1)
 
   new sized(w': F32, h': F32) =>
-    ((_x, _y), _w, _h) = R4fun.sized(w', h')
+    apply(R4fun.sized(w', h'))
 
   new centered(pt: V2, w': F32, h': F32) =>
-    ((_x, _y), _w, _h) = R4fun.centered(pt, w', h')
+    apply(R4fun.centered(pt, w', h'))
 
   fun r4(): R4 => ((_x, _y), _w, _h)
   fun origin(): V2 => (_x, _y)
    // @todo: check out .> operator.. return this
   fun ref move(pt: V2) =>
+    """move to point"""
     apply(R4fun.move(r4(), pt))
 
   fun ref shift(dx: F32 = 0, dy: F32 = 0) =>
+    """move by delta X, delta Y"""
     apply(R4fun.shift(r4(), dx, dy))
 
   fun ref resize(w': F32, h': F32) =>
+    """resize (negative values rectified)"""
     apply(R4fun(_x, _y, w', h'))
 
   fun ref resize_centered(w': F32, h': F32) =>
+    """resize and keep centered"""
     apply(R4fun.resize_centered(r4(), w', h'))
 
   fun ref grow(x': F32 = 0, y': F32 = 0) =>
+    """grow or shrink rectangle (rectified)"""
     apply(R4fun(_x, _y, _w + x', _h + y'))
 
   fun ref grow_centered(dw: F32 = 0, dh: F32 = 0) =>
@@ -187,10 +201,10 @@ class Rect is (Stringable & Equatable[Rect])
 
   fun min(): V2 => R4fun.min(r4())
   fun max(): V2 => R4fun.max(r4())
-  fun xMin(): F32 => R4fun.xMin(r4())
-  fun yMin(): F32 => R4fun.yMin(r4())
-  fun xMax(): F32 => R4fun.xMax(r4())
-  fun yMax(): F32 => R4fun.yMax(r4())
+  fun x_min(): F32 => R4fun.x_min(r4())
+  fun y_min(): F32 => R4fun.y_min(r4())
+  fun x_max(): F32 => R4fun.x_max(r4())
+  fun y_max(): F32 => R4fun.y_max(r4())
   fun width(): F32 => R4fun.width(r4())
   fun height(): F32 => R4fun.height(r4())
   fun size(): (F32, F32) => R4fun.size(r4())
