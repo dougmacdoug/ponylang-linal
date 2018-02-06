@@ -70,6 +70,11 @@ class _TestHelperHelper
   =>
     h.assert_ne[_TWrap](_this(a), _that(b), msg, loc)
 
+primitive _TestData
+  fun arr(): Array[F32] val =>
+    [1; 2; 3; 4; 5; 6; 7; 8; 9;10;11;12;13;14;15;16
+     17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32]
+
 actor Main is TestList
   new create(env: Env) => PonyTest(env, this)
   new make() => None
@@ -78,7 +83,8 @@ actor Main is TestList
     test(_TestVectorFun)
     test(_TestQuaternion)
     test(_TestVectorFunCross)
-    test(_TestMatrixFun)
+    test(_TestM2fun)
+    test(_TestM3fun)
     test(_TestLinearString)
     test(_TestStringable)    
     test(_TestLinearEq)

@@ -163,8 +163,8 @@ class Rect is (Stringable & Equatable[Rect])
   fun r4(): R4 => ((_x, _y), _w, _h)
   fun origin(): V2 => (_x, _y)
    // @todo: check out .> operator.. return this
-  fun ref move_to(pt: V2) =>
-    apply(R4fun.move_to(r4(), pt))
+  fun ref move(pt: V2) =>
+    apply(R4fun.move(r4(), pt))
 
   fun ref shift(dx: F32 = 0, dy: F32 = 0) =>
     apply(R4fun.shift(r4(), dx, dy))

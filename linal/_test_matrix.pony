@@ -1,20 +1,9 @@
 use "ponytest"
 
-class iso _TestMatrixFun is UnitTest
-  let arr: Array[F32] =
-    [ 1; 2; 3; 4; 5; 6; 7; 8; 9;10;11;12;13;14;15;16
-     17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32]
-
-  fun name():String => "MatrixFun/Basic"
-
+class iso _TestM2fun is UnitTest
+  fun name():String => "MatrixFun/M2"
   fun apply(h: TestHelper) =>
-    h.log("=============== M2 ===============")
-    _testM2(h)
-    h.log("=============== M3 ===============")
-    _testM3(h)
-    _testMatrix(h)
-
-  fun _testM2(h: TestHelper) =>
+    let arr = _TestData.arr()
     let test = _TestHelperHelper(h)
     let m2 = M2fun
     let v2 = V2fun
@@ -55,7 +44,10 @@ class iso _TestMatrixFun is UnitTest
 
     test.assert_eq(-2, m2.det(a1), "determinant")
 
-  fun _testM3(h: TestHelper) =>
+class iso _TestM3fun is UnitTest
+  fun name():String => "MatrixFun/M3"
+  fun apply(h: TestHelper) =>
+    let arr = _TestData.arr()
     let test = _TestHelperHelper(h)
     let m3 = M3fun
     let v3 = V3fun
