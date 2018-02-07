@@ -1,11 +1,18 @@
 type Q4 is (F32, F32, F32, F32)
+type AnyQuaternion is (Quaternion | Q4)
 
 class Quaternion is (Stringable & Equatable[Quaternion])
   var _x: F32 = 0
   var _y: F32 = 0
   var _z: F32 = 0
-  var _w: F32 = 0
+  var _w: F32 = 1
 
+  new create() =>
+    """create Quaternion"""
+  new zero() =>
+    """create zero Quaternion"""
+    apply((0, 0, 0, 0))
+ 
   fun ref apply(q: (Q4 | Quaternion box) = Q4fun.zero()): Quaternion =>
     (_x, _y, _z, _w) = match q
     | let q': Q4 => q'
@@ -20,7 +27,55 @@ class Quaternion is (Stringable & Equatable[Quaternion])
   fun y(): F32 => _y
   fun z(): F32 => _z
   fun w(): F32 => _w
+  fun ref set_x(x': F32): F32 =>
+    let old = _x
+    _x = x'
+    old
+  fun ref set_y(y': F32): F32 =>
+    let old = _y
+    _y = y'
+    old
+  fun ref set_z(z': F32): F32 =>
+    let old = _z
+    _z = z'
+    old
+  fun ref set_w(w': F32): F32 =>
+    let old = _w
+    _w = w'
+    old
+
   fun q4(): Q4 => (_x, _y, _z, _w)
+
+  fun _tuplize(that: box->AnyQuaternion): Q4 =>
+    match that
+    | let q: Q4 => q
+    | let q: Quaternion box => q.q4()
+    end
+
+  fun add(that: box->AnyQuaternion): Q4 => V4fun.add(q4(), _tuplize(that))
+  fun sub(that: box->AnyQuaternion): Q4 => V4fun.sub(q4(), _tuplize(that))
+  fun mul(s: F32): Q4 => V4fun.mul(q4(), s)
+  fun div(s: F32): Q4 => V4fun.div(q4(), s)
+  fun neg(): Q4 => V4fun.neg(q4())
+  
+  fun q4_mul(that: box->AnyQuaternion): Q4 =>
+    Q4fun.q4_mul(q4(), _tuplize(that))
+  fun q4_div(that: box->AnyQuaternion): Q4 =>
+    Q4fun.q4_mul(q4(), _tuplize(that))
+  fun dot(that: box->AnyQuaternion): F32 =>
+    Q4fun.dot(q4(), _tuplize(that))
+  fun len2(): F32 => Q4fun.len2(q4())
+  fun len(): F32 => Q4fun.len(q4())
+  fun unit(): Q4 => Q4fun.unit(q4())
+  fun conj(): Q4 => Q4fun.conj(q4())
+  fun inv(): Q4 => Q4fun.inv(q4())
+  fun angle(): F32 => Q4fun.angle(q4())
+  fun axis(): V3 => Q4fun.axis(q4())
+  fun axis_x(): F32 => Q4fun.axis_x(q4())
+  fun axis_y(): F32 => Q4fun.axis_y(q4())
+  fun axis_z(): F32 => Q4fun.axis_z(q4())
+  fun to_euler(): V3 => Q4fun.to_euler(q4())
+
   fun string(): String iso^ => V4fun.to_string(q4())
   
   fun eq(that: (Quaternion box | Q4)): Bool  =>
@@ -77,13 +132,13 @@ primitive Q4fun
   fun neg(q: Q4): Q4 => V4fun.neg(q)
   fun eq(a: Q4, b: Q4): Bool => V4fun.eq(a, b)
 
-  fun mulq4(a: Q4, b: Q4): Q4 =>
+  fun q4_mul(a: Q4, b: Q4): Q4 =>
     	(((a._4 * b._1) + (a._1 * b._4)  + (a._2 * b._3)) - (a._3 * b._2),
     	 ((a._4 * b._2) - (a._1 * b._3)) + (a._2 * b._4)  + (a._3 * b._1),
     	(((a._4 * b._3) + (a._1 * b._2)) - (a._2 * b._1)) + (a._3 * b._4),
     	  (a._4 * b._4) - (a._1 * b._1)  - (a._2 * b._2)  - (a._3 * b._3))
 
-  fun divq4(a: Q4, b: Q4): Q4 => mulq4(a, inv(b))
+  fun q4_div(a: Q4, b: Q4): Q4 => q4_mul(a, inv(b))
 
   fun dot(a: Q4, b: Q4): F32 =>
     V3fun.dot((a._1, a._2, a._3), (b._1, b._2, b._3)) + (a._4 * b._4)
@@ -113,12 +168,30 @@ primitive Q4fun
     let ii = ((q._1 * q._3) - (q._4 * q._2)) * -2
     ii.asin()
 
-  fun rotv3(q: Q4, v: V3): V3 =>
+  fun v3_rot(q: Q4, v: V3): V3 =>
     let t = V3fun.mul(V3fun.cross((q._1, q._2, q._3), v), 2)
     let p = V3fun.cross((q._1, q._2, q._3), t)
     V3fun.add(V3fun.add(V3fun.mul(t, q._4), v), p)
 
   fun _force_pos_euler(v: V3): V3 => 
+    (var x, var y, var z) = v
+      let rad360 = F32.pi() * 2
+      let n = F32(-0.005729578)
+      let n2 = rad360 + n
+      x = if (x < n) then x + rad360
+      elseif (x > n2) then x - rad360
+      else x end
+
+      y = if (y < n) then y + rad360
+      elseif (y > n2) then y - rad360
+      else y end
+
+      z = if (z < n) then z + rad360
+      elseif (z > n2) then z - rad360
+      else z end
+      (x, y, z)
+
+  fun _force_pos_euler_deg(v: V3): V3 => 
     (var x, var y, var z) = v
       let n = F32(-0.005729578)
       let n2 = 360 + n
@@ -156,5 +229,6 @@ primitive Q4fun
         (((2 * q._1) * q._4) -((2 * q._2) * q._3))
         .atan2(((-sqx + sqy) - sqz) + sqw))
     end
-    V3fun.mul(v, Linear.rad_to_deg())
+    _force_pos_euler(v)
+//    V3fun.mul(v, Linear.rad_to_deg())
 
