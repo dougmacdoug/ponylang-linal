@@ -102,27 +102,34 @@ primitive Q4fun
     (x, y, z, w)
 
   fun from_euler_v3(v: V3): Q4 =>
-    from_euler(v._1, v._2, v._3)
+    from_euler_ypr(v._2, v._1, v._3)
 
-  fun from_euler(x: F32, y: F32, z: F32): Q4 =>
-    // @TODO: maybe drop this down to f32
-    let x': F64 = x.f64() * 0.5
-    let sr: F64 = x'.sin()
-    let cr: F64 = x'.cos()
-  	let y' = y.f64() * 0.5
-    let sp: F64 = y'.sin()
-    let cp: F64 = y'.cos()
-  	let z' = z.f64() * 0.5
-    let sy: F64 = z'.sin()
-    let cy: F64 = z'.cos()
+  fun from_euler_ypr(yaw: F32, pitch: F32, roll: F32): Q4 =>
+
+    let half_roll: F64 = roll.f64() * 0.5
+    let sr: F64 = half_roll.sin()
+    let cr: F64 = half_roll.cos()
+  	let half_pitch = pitch.f64() * 0.5
+    let sp: F64 = half_pitch.sin()
+    let cp: F64 = half_pitch.cos()
+  	let half_yaw = yaw.f64() * 0.5
+    let sy: F64 = half_yaw.sin()
+    let cy: F64 = half_yaw.cos()
     let cpcy: F64 = cp * cy
     let spcy: F64 = sp * cy
     let cpsy: F64 = cp * sy
     let spsy: F64 = sp * sy
-    V4fun.unit((((sr * cpcy) - (cr * spsy)).f32(),
-                ((cr * spcy) + (sr * cpsy)).f32(),
-          	    ((cr * cpsy) - (sr * spcy)).f32(),
-          	    ((cr * cpcy) + (sr * spsy)).f32()))
+
+    unit((((spcy * cr) + (cpsy * sr)).f32(),
+     ((cpsy * cr) - (spcy * sr)).f32(),
+     ((cpcy * sr) - (spsy * cr)).f32(),
+     ((cpcy * cr) + (spsy * sr)).f32()))
+
+
+    // Q4fun.unit((((sr * cpcy) - (cr * spsy)).f32(),
+    //             ((cr * spcy) + (sr * cpsy)).f32(),
+    //       	    ((cr * cpsy) - (sr * spcy)).f32(),
+    //       	    ((cr * cpcy) + (sr * spsy)).f32()))
 
 // convenience aliases
   fun add(a: Q4, b: Q4): Q4 => V4fun.add(a, b)
@@ -140,9 +147,7 @@ primitive Q4fun
 
   fun q4_div(a: Q4, b: Q4): Q4 => q4_mul(a, inv(b))
 
-  fun dot(a: Q4, b: Q4): F32 =>
-    V3fun.dot((a._1, a._2, a._3), (b._1, b._2, b._3)) + (a._4 * b._4)
-
+  fun dot(a: Q4, b: Q4): F32 => V4fun.dot(a, b)
   fun len2(q: Q4): F32 => dot(q, q)
   fun len(q: Q4): F32 => dot(q, q).sqrt()
   fun unit(q: Q4): Q4 => div(q, len(q))
@@ -209,10 +214,10 @@ primitive Q4fun
       (x, y, z)
 
   fun to_euler(q: Q4): V3 =>
-    let sqw = q._4 * q._4
     let sqx = q._1 * q._1
     let sqy = q._2 * q._2
     let sqz = q._3 * q._3
+    let sqw = q._4 * q._4
     let unit' = sqx + sqy + sqz + sqw
     // if normalised is one, otherwise is correction factor
     var test = (q._1 * q._2) + (q._3 * q._4)
@@ -222,13 +227,52 @@ primitive Q4fun
      elseif (test < (-0.4909 * unit')) then // singularity at south pole
       (-F32.pi() / 2, -2 * q._1.atan2(q._4), 0) 
     else
-      // @TODO ; lets make this readable
-      (((2 * test) / unit').asin(),
-       (((2 * q._2) * q._4) - ((2 * q._1) * q._3))
-       .atan2(((sqx - sqy) - sqz) + sqw),
-        (((2 * q._1) * q._4) -((2 * q._2) * q._3))
-        .atan2(((-sqx + sqy) - sqz) + sqw))
+      let x' = (((2 * q._1 * q._4) -(2 * q._2 * q._3)))
+                .atan2((-sqx + sqy) - (sqz + sqw))
+      let y' = ((2 * q._2 * q._4) - (2 * q._1 * q._3))
+                .atan2((sqx - sqy - sqz) + sqw)
+      let z' = ((2 * test) / unit').asin()
+      (x', y', z')
     end
     _force_pos_euler(v)
 //    V3fun.mul(v, Linear.rad_to_deg())
 
+  fun to_m3(q: Q4): M3 =>
+    let a1 = 1 - (2 * ((q._2 * q._2) + (q._3 * q._3)))
+    let a2 = 2 * ((q._1 * q._2) - (q._3 * q._4))
+    let a3 = 2 * ((q._1 * q._3) + (q._2 * q._4))
+    let b1 = 2 * ((q._1 * q._2) + (q._3 * q._4))
+    let b2 = 1 - (2 * ((q._1 * q._1) + (q._3 * q._3)))
+    let b3 = 2 * ((q._2 * q._3) - (q._1 * q._4))
+    let c1 = 2 * ((q._1 * q._3) - (q._2 * q._4))
+    let c2 = 2 * ((q._2 * q._3) + (q._1 * q._4))
+    let c3 = 1 - (2 * ((q._1 * q._1) + (q._2 * q._2)))
+    ((a1, a2, a3), (b1, b2, b3), (c1, c2, c3))
+
+  fun from_m3(m: M3): Q4 =>
+    let t: F32 = 1 + m._1._1 + m._2._2 + m._3._3
+    if t > 0.001 then
+      let s = 2 * t.sqrt()
+      ((m._3._2 - m._2._3) / s,
+       (m._1._3 - m._3._1) / s,
+       (m._2._1 - m._1._2) / s,
+       0.25 * s)      
+    elseif((m._1._1 > m._2._2) and (m._1._1 > m._3._3 )) then
+      let s = 2 * (1 + (m._1._1 - m._2._2 - m._3._3)).sqrt()
+      (0.25 * s,
+       (m._2._1 + m._1._2) / s,
+       (m._1._3 + m._3._1) / s,
+       (m._3._2 - m._2._3) / s)
+    elseif(m._2._2 > m._3._3) then
+      let s = 2 * (1 + (m._2._2 - m._1._1 - m._3._3)).sqrt()
+      ((m._2._1 + m._1._2) / s,
+       0.25 * s,
+       (m._3._2 + m._2._3) / s,
+       (m._1._3 - m._3._1) / s)
+    else
+      let s = 2 * (1 + (m._3._3 - m._1._1 - m._2._2)).sqrt()
+      ((m._1._3 + m._3._1) / s,
+       (m._3._2 + m._2._3) / s,
+       0.25 * s,
+       (m._2._1 - m._1._2) / s)
+    end

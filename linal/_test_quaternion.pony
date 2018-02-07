@@ -50,6 +50,7 @@ class iso _TestQuaternion is UnitTest
     test.assert_eq(q.q4_mul(q.q4_mul(qi, qj), qk),
                    v4.neg(q_one), "(i*j)*k = -1")
     
+
     var euler: V3 = (0, 0, 0)
     var ii: U32 = 0
     var qt : Q4 = Q4fun.id()
@@ -57,27 +58,25 @@ class iso _TestQuaternion is UnitTest
         let r = ii.f32() * Linear.deg_to_rad()
         euler = V3fun(r, 0, 0)
         qt = q.from_euler_v3(euler)
-        test.assert_eq(r, q.axis_x(qt), "x axis:" + ii.string())
-        test.assert_eq(r, q.axis_y(qt), "y axis:" + ii.string())
-        test.assert_eq(r, q.axis_z(qt), "z axis:" + ii.string())
         test.assert_eq(euler, q.to_euler(qt), "X :" + ii.string())
         euler = V3fun(0, r, 0)
         qt = q.from_euler_v3(euler)
-        test.assert_eq(r, q.axis_x(qt), "x axis:" + ii.string())
-        test.assert_eq(r, q.axis_y(qt), "y axis:" + ii.string())
-        test.assert_eq(r, q.axis_z(qt), "z axis:" + ii.string())
         test.assert_eq(euler, q.to_euler(qt), "Y :" + ii.string())
         euler = V3fun(0, 0, r)
         qt = q.from_euler_v3(euler)
-        test.assert_eq(r, q.axis_x(qt), "x axis:" + ii.string())
-        test.assert_eq(r, q.axis_y(qt), "y axis:" + ii.string())
-        test.assert_eq(r, q.axis_z(qt), "z axis:" + ii.string())
         test.assert_eq(euler, q.to_euler(qt), "Z :" + ii.string())
         euler = V3fun(r, r, r)
         qt = q.from_euler_v3(euler)
-        test.assert_eq(r, q.axis_x(qt), "x axis:" + ii.string())
-        test.assert_eq(r, q.axis_y(qt), "y axis:" + ii.string())
-        test.assert_eq(r, q.axis_z(qt), "z axis:" + ii.string())
         test.assert_eq(euler, q.to_euler(qt), "XYZ :" + ii.string())
+        test.assert_eq(qt, q.from_m3(q.to_m3(qt)), "M3 :" + ii.string())
         ii = ii + 15
     end
+    euler = (F32.pi()/2, F32.pi()/2, 0)
+    let q90 = q.from_euler_v3(euler)
+
+    test.assert_eq(q90, q.add(q.id(),q.add(qi, qj)), "9090 :" + ii.string())
+    test.assert_eq(q.id(), q.from_euler_ypr(0, 0, 0), "ID :" + ii.string())
+    test.assert_eq(q.id(),
+     q.from_euler_ypr(F32.pi()*2, F32.pi()*2, F32.pi()*2), "Euler 360")
+    test.assert_eq(q.id(),
+     q.unit(q.from_euler_ypr(F32.pi()*2, F32.pi()*2, F32.pi()*2)), "Euler 360")
