@@ -176,7 +176,7 @@ primitive Q4fun
   fun _force_pos_euler(v: V3): V3 => 
     (var x, var y, var z) = v
       let rad360 = F32.pi() * 2
-      let n = F32(-0.005729578)
+      let n = F32(-0.005729578) * Linear.deg_to_rad()
       let n2 = rad360 + n
       x = if (x < n) then x + rad360
       elseif (x > n2) then x - rad360
@@ -188,23 +188,6 @@ primitive Q4fun
 
       z = if (z < n) then z + rad360
       elseif (z > n2) then z - rad360
-      else z end
-      (x, y, z)
-
-  fun _force_pos_euler_deg(v: V3): V3 => 
-    (var x, var y, var z) = v
-      let n = F32(-0.005729578)
-      let n2 = 360 + n
-      x = if (x < n) then x + 360
-      elseif (x > n2) then x - 360
-      else x end
-
-      y = if (y < n) then y + 360
-      elseif (y > n2) then y - 360
-      else y end
-
-      z = if (z < n) then z + 360
-      elseif (z > n2) then z - 360
       else z end
       (x, y, z)
 

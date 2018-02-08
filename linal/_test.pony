@@ -4,20 +4,21 @@ type _Testable is (F32 | M2 | M3 | M4 | OptVector)
 
 class _TWrap is (Stringable & Equatable[_TWrap])
   var _o: _Testable = None
-
-  fun ref apply(o: _Testable): _TWrap =>
+  var _eps: F32 = F32.epsilon()
+  fun ref apply(o: _Testable, eps: F32 = F32.epsilon()): _TWrap =>
     _o = o
+    _eps = eps
     this
 
   fun eq(that: box->_TWrap): Bool =>
     match (_o, that._o)
-    | (let mine: V2, let that': V2) => V2fun.eq(mine, that')
-    | (let mine: V3, let that': V3) => V3fun.eq(mine, that')
-    | (let mine: V4, let that': V4) => V4fun.eq(mine, that')
-    | (let mine: M2, let that': M2) => M2fun.eq(mine, that')
-    | (let mine: M3, let that': M3) => M3fun.eq(mine, that')
-    | (let mine: M4, let that': M4) => M4fun.eq(mine, that')
-    | (let mine: F32, let that': F32) => mine == that'
+    | (let a: V2,  let b: V2) =>   V2fun.eq(a, b, _eps)
+    | (let a: V3,  let b: V3) =>   V3fun.eq(a, b, _eps)
+    | (let a: V4,  let b: V4) =>   V4fun.eq(a, b, _eps)
+    | (let a: M2,  let b: M2) =>   M2fun.eq(a, b, _eps)
+    | (let a: M3,  let b: M3) =>   M3fun.eq(a, b, _eps)
+    | (let a: M4,  let b: M4) =>   M4fun.eq(a, b, _eps)
+    | (let a: F32, let b: F32) => Linear.eq(a, b, _eps)
     else false
     end
 
@@ -61,9 +62,11 @@ class _TestHelperHelper
     end
 
   fun ref assert_eq(a: _Testable, b: _Testable,
-                    msg: String = "", loc: SourceLoc = __loc)
+                    msg: String = "", loc: SourceLoc = __loc,
+                    eps: F32 = F32.epsilon())
   =>
-    h.assert_eq[_TWrap](_this(a), _that(b), msg, loc)
+    _this
+    h.assert_eq[_TWrap](_this(a, eps), _that(b), msg, loc)
   
   fun ref assert_ne(a: _Testable, b: _Testable,
                     msg: String = "", loc: SourceLoc= __loc)
