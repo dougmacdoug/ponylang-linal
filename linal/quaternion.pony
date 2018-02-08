@@ -102,34 +102,29 @@ primitive Q4fun
     (x, y, z, w)
 
   fun from_euler_v3(v: V3): Q4 =>
-    from_euler_ypr(v._2, v._1, v._3)
+    from_euler(v._1, v._2, v._3)
 
-  fun from_euler_ypr(yaw: F32, pitch: F32, roll: F32): Q4 =>
+  fun from_euler(x': F32, y': F32, z': F32): Q4 =>
+    let hx: F64 = x'.f64() * 0.5
+    let hy: F64 = y'.f64() * 0.5
+    let hz: F64 = z'.f64() * 0.5
+    let cr: F64 = hx.cos()
+    let cp: F64 = hy.cos()
+    let cy: F64 = hz.cos()
 
-    let half_roll: F64 = roll.f64() * 0.5
-    let sr: F64 = half_roll.sin()
-    let cr: F64 = half_roll.cos()
-  	let half_pitch = pitch.f64() * 0.5
-    let sp: F64 = half_pitch.sin()
-    let cp: F64 = half_pitch.cos()
-  	let half_yaw = yaw.f64() * 0.5
-    let sy: F64 = half_yaw.sin()
-    let cy: F64 = half_yaw.cos()
+    let sr: F64 = hx.sin()
+    let sp: F64 = hy.sin()
+    let sy: F64 = hz.sin()
+
     let cpcy: F64 = cp * cy
     let spcy: F64 = sp * cy
     let cpsy: F64 = cp * sy
     let spsy: F64 = sp * sy
-
-    unit((((spcy * cr) + (cpsy * sr)).f32(),
-     ((cpsy * cr) - (spcy * sr)).f32(),
-     ((cpcy * sr) - (spsy * cr)).f32(),
-     ((cpcy * cr) + (spsy * sr)).f32()))
-
-
-    // Q4fun.unit((((sr * cpcy) - (cr * spsy)).f32(),
-    //             ((cr * spcy) + (sr * cpsy)).f32(),
-    //       	    ((cr * cpsy) - (sr * spcy)).f32(),
-    //       	    ((cr * cpcy) + (sr * spsy)).f32()))
+    let qx = ((cpcy * sr) - (spsy * cr)).f32()
+    let qy = ((spcy * cr) + (cpsy * sr)).f32()
+    let qz = ((cpsy * cr) - (spcy * sr)).f32()
+    let qw = ((cpcy * cr) + (spsy * sr)).f32()
+    unit((qx, qy, qz, qw))
 
 // convenience aliases
   fun add(a: Q4, b: Q4): Q4 => V4fun.add(a, b)
