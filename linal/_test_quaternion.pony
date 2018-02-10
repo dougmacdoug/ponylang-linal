@@ -93,7 +93,7 @@ class iso _TestQuaternion is UnitTest
     end
     euler = (F32.pi()/2, F32.pi()/2, 0)
     let q90 = q.from_euler_v3(euler)
-
+    test.assert_eq(q(0.5, 0, 0, 1), q.unit((0.5, 0, 0, 1)), "Unit :" + ii.string())
     test.assert_eq(q90, q.add(q.id(),q.add(qi, qj)), "9090 :" + ii.string())
     test.assert_eq(q.id(), q.from_euler(0, 0, 0), "ID :" + ii.string())
     test.assert_eq(q.id(),

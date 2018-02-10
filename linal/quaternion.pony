@@ -229,6 +229,7 @@ primitive Q4fun
 
   fun from_m3(m: M3): Q4 =>
     let t: F32 = 1 + m._1._1 + m._2._2 + m._3._3
+    let q: Q4 =
     if t > 0.001 then
       let s = 2 * t.sqrt()
       ((m._3._2 - m._2._3) / s,
@@ -254,3 +255,4 @@ primitive Q4fun
        0.25 * s,
        (m._2._1 - m._1._2) / s)
     end
+    unit(q)
