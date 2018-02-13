@@ -115,3 +115,25 @@ class iso _TestQuaternion is UnitTest
     test.assert_eq(q.id(), q.from_euler((0, 0, 0)), "id = xyz 0")
     test.assert_eq(q.neg(q.id()),
      q.unit(q.from_euler(v3.mul(v3.id(), F32.pi()*2))), "-id = xyz 360")
+
+    test.assert_eq(qx90, q.axis_angle(v3(1,0,0), r90), "x axis angle 90")
+    test.assert_eq(qy90, q.axis_angle(v3(0,1,0), r90), "y axis angle 90")
+    test.assert_eq(qz90, q.axis_angle(v3(0,0,1), r90), "z axis angle 90")
+    
+    // test.assert_eq(v3(r90, 0, 0),
+    //    q.to_euler_seq(qx90, RotXYZ), "x to_euler XYZ")
+    // test.assert_eq(v3(0, r90, 0),
+    //    q.to_euler_seq(qy90, RotXYZ), "y to_euler XYZ")
+    // test.assert_eq(v3(0, 0, r90),
+    //    q.to_euler_seq(qz90, RotXYZ), "z to_euler XYZ")
+
+    test.assert_eq(v3(r90, 0, 0),
+       q.to_euler_seq(qz90, RotZYX), "x to_euler XYZ"
+       where eps = 0.00001)
+    test.assert_eq(v3(0, r90, 0),
+       q.to_euler_seq(qy90, RotZYX), "y to_euler XYZ"
+       where eps = 0.00001)
+    test.assert_eq(v3(0, 0, r90),
+       q.to_euler_seq(qx90, RotZYX), "z to_euler XYZ"
+       where eps = 0.00001)
+

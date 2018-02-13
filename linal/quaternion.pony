@@ -223,30 +223,36 @@ primitive Q4fun
     // if normalised is one, otherwise is correction factor
     var test = (q._1 * q._2) + (q._3 * q._4)
     let v = if (test > (0.4999 * unit')) then // singularity at north pole
-      // Left hand coord
       (F32.pi() / 2, 2 * q._1.atan2(q._4), 0) 
      elseif (test < (-0.4909 * unit')) then // singularity at south pole
       (-F32.pi() / 2, -2 * q._1.atan2(q._4), 0) 
     else
-    
-      match s
-      | (RotXYZ) =>
-        _rot3axes(
-         2 * test,
-         sqw + sqx + (-sqy) + (-sqz),
-        -2 * ((q._1 * q._3) - (q._4 * q._2)),
-         2 * ((q._2 * q._3) + (q._4 * q._1)),
-         sqw + (-sqx) + (-sqy) + sqz)
 
-      | (RotZYX) =>
-        _rot3axes(
-         -2 * ((q._2 * q._3) - (q._4 * q._1)),
-          sqw + (-sqx) + (-sqy) + sqz,
-          2 * ((q._1 * q._3) + (q._4 * q._2)),
-         -2 * ((q._1 * q._2) - (q._4 * q._3)),
-         sqw + sqx + (-sqy) + (-sqz))
-      end      
-    end
+    let heading = ((2 * q._2 * q._4) - (2 * q._1 * q._3))
+              .atan2(1 - (2 * sqy) - (2 * sqz))
+    let attitude = (2*test).asin()
+    let bank = ((2 * q._1 * q._4) - (2 * q._2 * q._3))
+              .atan2(1 - (2 * sqx) - (2*sqz))
+    (attitude, heading, bank)
+  end
+    //   match s
+    //   | (RotXYZ) =>
+    //     _rot3axes(
+    //      2 * test,
+    //      sqw + sqx + (-sqy) + (-sqz),
+    //     -2 * ((q._1 * q._3) - (q._4 * q._2)),
+    //      2 * ((q._2 * q._3) + (q._4 * q._1)),
+    //      sqw + (-sqx) + (-sqy) + sqz)
+
+    //   | (RotZYX) =>
+    //     _rot3axes(
+    //      -2 * ((q._2 * q._3) - (q._4 * q._1)),
+    //       sqw + (-sqx) + (-sqy) + sqz,
+    //       2 * ((q._1 * q._3) + (q._4 * q._2)),
+    //      -2 * ((q._1 * q._2) - (q._4 * q._3)),
+    //      sqw + sqx + (-sqy) + (-sqz))
+    //   end      
+    // end
     _force_pos_euler(v)
 //    V3fun.mul(v, Linear.rad_to_deg())
 
