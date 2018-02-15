@@ -6,6 +6,14 @@ primitive RotZYX
 
 type RotationSequence is (RotXYZ | RotZYX)
 
+trait _Pole 
+  fun apply() : U32
+primitive _NorthPole is _Pole
+  fun apply() : U32 => 1
+primitive _SouthPole
+  fun apply() : U32 => -1
+type _GimbalLock is (_NorthPole | _SouthPole | None)
+
 primitive Q4fun
   fun apply(x': F32, y': F32, z': F32, w': F32): Q4 => (x', y', z', w')
   fun zero(): Q4 => (0, 0, 0, 0)
@@ -172,19 +180,49 @@ primitive Q4fun
     (let x, let y, let z, let w) = unit(q)
     V3fun.div((x, y, z), (q._4.acos()).sin())
 
+  
+  fun _gimbal(q: Q4) : _GimbalLock => 
+    let t = (q._2 * q._1) + (q._3 * q._4)
+    if  t > 0.4999 then
+       _NorthPole
+    elseif t < -0.4999 then
+      _SouthPole
+    else
+      None
+    end
+
   fun axis_x(q: Q4): F32 =>
-    let ii = (q._1 * q._2 * 2) + (q._3 * q._4)
-    let yy = ((q._1 * q._1) + (q._4 * q._4)) - (q._2 * q._2) - (q._3 * q._3)
-    ii.atan2(yy)
+    match _gimbal(q) 
+    | None =>
+      Linear.clamp((2 * ((q._4 * q._1) - (q._3 * q._2))).asin(), -1, 1)
+    | let pole : _Pole val =>
+       pole().f32() * F32.pi() * 0.5
+     else
+      0
+   end
+    //     let ii = (q._1 * q._2 * 2) + (q._3 * q._4)
+    // let yy = ((q._1 * q._1) + (q._4 * q._4)) - (q._2 * q._2) - (q._3 * q._3)
+    // ii.atan2(yy)
 
   fun axis_y(q: Q4): F32 =>
     let ii = (q._2 * q._3 * 2) + (q._1 * q._4)
     let yy = ((q._4 * q._4) - (q._1 * q._1) - (q._2 * q._2)) + (q._3 * q._3)
     ii.atan2(yy)
 
+  // fun axis_z(q: Q4): F32 =>
+  //   let ii = ((q._1 * q._3) - (q._4 * q._2)) * -2
+  //   ii.asin()
+
   fun axis_z(q: Q4): F32 =>
-    let ii = ((q._1 * q._3) - (q._4 * q._2)) * -2
-    ii.asin()
+    match _gimbal(q) 
+    | None =>
+      (2 * ((q._4 * q._3) + (q._2 * q._1)))
+        .atan2(1 - (2 * ((q._1 * q._1) + (q._3 * q._3))))
+    | let pole : _Pole val =>
+       pole().f32() * 2 * q._2.atan2(q._4)
+     else
+      0
+   end
 
   fun v3_rot(q: Q4, v: V3): V3 =>
     let t = V3fun.mul(V3fun.cross((q._1, q._2, q._3), v), 2)
@@ -212,7 +250,9 @@ primitive Q4fun
   fun _rot3axes(r11: F32, r12: F32, r21: F32, r31: F32, r32: F32): V3 =>
     (r31.atan2(r32), r21.asin(), r11.atan2(r12))
 
-  fun to_euler(q: Q4): V3 => to_euler_seq(q, RotZYX)
+  fun to_euler(q: Q4): V3 => 
+    (axis_x(q), axis_y(q), axis_z(q))
+//    to_euler_seq(q, RotZYX)
 
   fun to_euler_seq(q: Q4, s: RotationSequence): V3 =>
     let sqx = q._1 * q._1
@@ -298,6 +338,138 @@ primitive Q4fun
     end
     unit(q)
 
+  fun rot_m3(m: M3): Q4 =>
+    (let v1, let v2, let v3) = m
+    (let m00: F32, let m01: F32, let m02: F32) = v1
+    (let m10: F32, let m11: F32, let m12: F32) = v2
+    (let m20: F32, let m21: F32, let m22: F32) = v3
+
+    let t = m00 + m11 + m22
+    if t >= 0 then
+      let s = (t + 1).sqrt()
+      let s' = 0.5 / s
+      ((m21 - m12) * s',
+       (m02 - m20) * s',
+       (m10 - m01) * s',
+       0.5 * s)
+    elseif ((m00 > m11) and (m00 > m22)) then
+      let s = 1 + (m00 - m11 - m22)
+      let s' = 0.5 / s
+      (s * 0.5, (m10 + m01) * s',
+        (m02 + m20) * s', (m21 - m12) * s')
+    elseif (m11 > m22) then
+      let s = (1 + (m11 - m00 - m22)).sqrt()
+      let s' = 0.5 / s
+      ((m10 + m01) * s', s * 0.5,
+       (m21 + m12) * s', (m02 - m20) * s')
+    else
+      let s = (1 + (m22 - m00 - m11)).sqrt()
+      let s' = 0.5 / s
+      ((m02 + m20) * s', (m21 + m12) * s',
+       s * 0.5, (m10 - m01) * s')
+    end
+
+/***
+
+ public Quaternion fromRotationMatrix(let m00: F32, let m01: F32, let m02: F32,
+            let m10: F32, let m11: F32, let m12: F32,
+            let m20: F32, let m21: F32, let m22: F32) {
+        // Use the Graphics Gems code, from 
+        // ftp://ftp.cis.upenn.edu/pub/graphics/shoemake/quatut.ps.Z
+        // *NOT* the "Matrix and Quaternions FAQ", which has errors!
+
+        // the trace is the sum of the diagonal elements; see
+        // http://mathworld.wolfram.com/MatrixTrace.html
+        float t = m00 + m11 + m22;
+
+        // we protect the division by s by ensuring that s>=1
+        if (t >= 0) { // |w| >= .5
+            float s = FastMath.sqrt(t + 1); // |s|>=1 ...
+            w = 0.5f * s;
+            s = 0.5f / s;                 // so this division isn't bad
+            x = (m21 - m12) * s;
+            y = (m02 - m20) * s;
+            z = (m10 - m01) * s;
+        } else if ((m00 > m11) && (m00 > m22)) {
+            float s = FastMath.sqrt(1.0f + m00 - m11 - m22); // |s|>=1
+            x = s * 0.5f; // |x| >= .5
+            s = 0.5f / s;
+            y = (m10 + m01) * s;
+            z = (m02 + m20) * s;
+            w = (m21 - m12) * s;
+        } else if (m11 > m22) {
+            float s = FastMath.sqrt(1.0f + m11 - m00 - m22); // |s|>=1
+            y = s * 0.5f; // |y| >= .5
+            s = 0.5f / s;
+            x = (m10 + m01) * s;
+            z = (m21 + m12) * s;
+            w = (m02 - m20) * s;
+        } else {
+            float s = FastMath.sqrt(1.0f + m22 - m00 - m11); // |s|>=1
+            z = s * 0.5f; // |z| >= .5
+            s = 0.5f / s;
+            x = (m02 + m20) * s;
+            y = (m21 + m12) * s;
+            w = (m10 - m01) * s;
+        }
+
+        return this;
+    }
+
+    /**
+     * <code>toRotationMatrix</code> converts this quaternion to a rotational
+     * matrix. Note: the result is created from a normalized version of this quat.
+     * 
+     * @return the rotation matrix representation of this quaternion.
+     */
+    public Matrix3f toRotationMatrix() {
+        Matrix3f matrix = new Matrix3f();
+        return toRotationMatrix(matrix);
+    }
+
+    /**
+     * <code>toRotationMatrix</code> converts this quaternion to a rotational
+     * matrix. The result is stored in result.
+     * 
+     * @param result
+     *            The Matrix3f to store the result in.
+     * @return the rotation matrix representation of this quaternion.
+     */
+    public Matrix3f toRotationMatrix(Matrix3f result) {
+
+        float norm = norm();
+        // we explicitly test norm against one here, saving a division
+        // at the cost of a test and branch.  Is it worth it?
+        float s = (norm == 1f) ? 2f : (norm > 0f) ? 2f / norm : 0;
+
+        // compute xs/ys/zs first to save 6 multiplications, since xs/ys/zs
+        // will be used 2-4 times each.
+        float xs = x * s;
+        float ys = y * s;
+        float zs = z * s;
+        float xx = x * xs;
+        float xy = x * ys;
+        float xz = x * zs;
+        float xw = w * xs;
+        float yy = y * ys;
+        float yz = y * zs;
+        float yw = w * ys;
+        float zz = z * zs;
+        float zw = w * zs;
+
+        // using s=2/norm (instead of 1/norm) saves 9 multiplications by 2 here
+        result.m00 = 1 - (yy + zz);
+        result.m01 = (xy - zw);
+        result.m02 = (xz + yw);
+        result.m10 = (xy + zw);
+        result.m11 = 1 - (xx + zz);
+        result.m12 = (yz - xw);
+        result.m20 = (xz - yw);
+        result.m21 = (yz + xw);
+        result.m22 = 1 - (xx + yy);
+
+        return result;
+    }**/
 class Quaternion is (Stringable & Equatable[Quaternion])
   var _x: F32 = 0
   var _y: F32 = 0
