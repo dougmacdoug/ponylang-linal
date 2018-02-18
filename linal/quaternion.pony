@@ -1,19 +1,6 @@
 type Q4 is (F32, F32, F32, F32)
 type AnyQuaternion is (Quaternion | Q4)
 
-primitive RotXYZ
-primitive RotZYX
-
-type RotationSequence is (RotXYZ | RotZYX)
-
-trait _Pole 
-  fun apply() : U32
-primitive _NorthPole is _Pole
-  fun apply() : U32 => 1
-primitive _SouthPole
-  fun apply() : U32 => -1
-type _GimbalLock is (_NorthPole | _SouthPole | None)
-
 primitive Q4fun
   fun apply(x': F32, y': F32, z': F32, w': F32): Q4 => (x', y', z', w')
   fun zero(): Q4 => (0, 0, 0, 0)
@@ -46,7 +33,7 @@ primitive Q4fun
     let qy = ((spcy * cr) - (cpsy * sr)).f32()
     let qz = ((cpcy * sr) - (spsy * cr)).f32()
     let qw = ((cpcy * cr) + (spsy * sr)).f32()
-   unit((qx, qy, qz, qw))
+    unit((qx, qy, qz, qw))
 
 // convenience aliases
   fun add(a: Q4, b: Q4): Q4 => V4fun.add(a, b)
@@ -88,37 +75,18 @@ primitive Q4fun
     end
 
   fun axis_x(q: Q4): F32 =>
-    match _gimbal(q) 
-    | None =>
-      Linear.clamp((2 * ((q._4 * q._1) - (q._3 * q._2))).asin(), -1, 1)
-    | let pole : _Pole val =>
-       pole().f32() * F32.pi() * 0.5
-     else
-      0
-   end
-    //     let ii = (q._1 * q._2 * 2) + (q._3 * q._4)
-    // let yy = ((q._1 * q._1) + (q._4 * q._4)) - (q._2 * q._2) - (q._3 * q._3)
-    // ii.atan2(yy)
+    let ii = (q._1 * q._2 * 2) + (q._3 * q._4)
+    let yy = ((q._1 * q._1) + (q._4 * q._4)) - (q._2 * q._2) - (q._3 * q._3)
+    ii.atan2(yy)
 
   fun axis_y(q: Q4): F32 =>
     let ii = (q._2 * q._3 * 2) + (q._1 * q._4)
     let yy = ((q._4 * q._4) - (q._1 * q._1) - (q._2 * q._2)) + (q._3 * q._3)
     ii.atan2(yy)
 
-  // fun axis_z(q: Q4): F32 =>
-  //   let ii = ((q._1 * q._3) - (q._4 * q._2)) * -2
-  //   ii.asin()
-
   fun axis_z(q: Q4): F32 =>
-    match _gimbal(q) 
-    | None =>
-      (2 * ((q._4 * q._3) + (q._2 * q._1)))
-        .atan2(1 - (2 * ((q._1 * q._1) + (q._3 * q._3))))
-    | let pole : _Pole val =>
-       pole().f32() * 2 * q._2.atan2(q._4)
-     else
-      0
-   end
+    let ii = ((q._1 * q._3) - (q._4 * q._2)) * -2
+    ii.asin()
 
   fun v3_rot(q: Q4, v: V3): V3 =>
     let t = V3fun.mul(V3fun.cross((q._1, q._2, q._3), v), 2)
@@ -148,28 +116,27 @@ primitive Q4fun
 //    to_euler_seq(q, RotZYX)
 
   fun to_euler_seq(q: Q4, s: RotationSequence): V3 =>
+
     let sqx = q._1 * q._1
     let sqy = q._2 * q._2
     let sqz = q._3 * q._3
     let sqw = q._4 * q._4
     let unit' = sqx + sqy + sqz + sqw
     // if normalised is one, otherwise is correction factor
-    var test = (q._1 * q._2) + (q._3 * q._4)
+    var test = (q._1 * q._4) - (q._2 * q._3)
     let v = if (test > (0.4999 * unit')) then // singularity at north pole
-      (F32.pi() / 2, 2 * q._1.atan2(q._4), 0) 
+      (F32.pi() / 2, 2 * q._2.atan2(q._1), 0) 
      elseif (test < (-0.4909 * unit')) then // singularity at south pole
-      (-F32.pi() / 2, -2 * q._1.atan2(q._4), 0) 
+      (-F32.pi() / 2, -2 * q._2.atan2(q._1), 0) 
     else
-
-    let heading = ((2 * q._2 * q._4) - (2 * q._1 * q._3))
-              .atan2(1 - (2 * sqy) - (2 * sqz))
-    let attitude = (2*test).asin()
-    let bank = ((2 * q._1 * q._4) - (2 * q._2 * q._3))
-              .atan2(1 - (2 * sqx) - (2*sqz))
+      let heading = ((2 * q._2 * q._4) + (2 * q._1 * q._3))
+                .atan2(1 - (2 * (sqx + sqy)))
+      let attitude = (2*test).asin() // good
+      let bank = (2 * ((q._3 * q._4) + (q._1 * q._2)))
+                .atan2(1 - (2 * (sqz + sqx)))
     (attitude, heading, bank)
   end
   _force_pos_euler(v)
-//    V3fun.mul(v, Linear.rad_to_deg())
 
   fun to_m3(q: Q4): M3 =>
     let a1 = 1 - (2 * ((q._2 * q._2) + (q._3 * q._3)))
