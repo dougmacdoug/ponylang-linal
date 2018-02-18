@@ -25,132 +25,28 @@ primitive Q4fun
     let w = (angle_radians * 0.5).cos()
     (x, y, z, w)
 
-  // fun from_euler_v3(v: V3): Q4 =>
-  //   from_euler(v._1, v._2, v._3)
-
-  fun _rot2axes(r11: F32, r12: F32, r21: F32, r31: F32, r32: F32): V3 =>
-    (r11.atan2(r12), r21.acos(), r31.atan2(r32))
- 
-
- 
-/*
-
- 
-        case RotSeq.zyz:
-            return twoaxisrot( 2*(q._2*q._3 - q._4*q._1),
-                2*(q._1*q._3 + q._4*q._2),
-                q._4*q._4 - q._1*q._1 - q._2*q._2 + q._3*q._3,
-                2*(q._2*q._3 + q._4*q._1),
-                -2*(q._1*q._3 - q._4*q._2));
-           
- 
-        case RotSeq.zxy:
-            return threeaxisrot( -2*(q._1*q._2 - q._4*q._3),
-                q._4*q._4 - q._1*q._1 + q._2*q._2 - q._3*q._3,
-                2*(q._2*q._3 + q._4*q._1),
-                -2*(q._1*q._3 - q._4*q._2),
-                q._4*q._4 - q._1*q._1 - q._2*q._2 + q._3*q._3);
-           
- 
-        case RotSeq.zxz:
-            return twoaxisrot( 2*(q._1*q._3 + q._4*q._2),
-                -2*(q._2*q._3 - q._4*q._1),
-                q._4*q._4 - q._1*q._1 - q._2*q._2 + q._3*q._3,
-                2*(q._1*q._3 - q._4*q._2),
-                2*(q._2*q._3 + q._4*q._1));
-           
- 
-        case RotSeq.yxz:
-            return threeaxisrot( 2*(q._1*q._3 + q._4*q._2),
-                q._4*q._4 - q._1*q._1 - q._2*q._2 + q._3*q._3,
-                -2*(q._2*q._3 - q._4*q._1),
-                2*(q._1*q._2 + q._4*q._3),
-                q._4*q._4 - q._1*q._1 + q._2*q._2 - q._3*q._3);
- 
-        case RotSeq.yxy:
-            return twoaxisrot( 2*(q._1*q._2 - q._4*q._3),
-                2*(q._2*q._3 + q._4*q._1),
-                q._4*q._4 - q._1*q._1 + q._2*q._2 - q._3*q._3,
-                2*(q._1*q._2 + q._4*q._3),
-                -2*(q._2*q._3 - q._4*q._1));
-           
- 
-        case RotSeq.yzx:
-            return threeaxisrot( -2*(q._1*q._3 - q._4*q._2),
-                q._4*q._4 + q._1*q._1 - q._2*q._2 - q._3*q._3,
-                2*(q._1*q._2 + q._4*q._3),
-                -2*(q._2*q._3 - q._4*q._1),
-                q._4*q._4 - q._1*q._1 + q._2*q._2 - q._3*q._3);
-           
- 
-        case RotSeq.yzy:
-            return twoaxisrot( 2*(q._2*q._3 + q._4*q._1),
-                -2*(q._1*q._2 - q._4*q._3),
-                q._4*q._4 - q._1*q._1 + q._2*q._2 - q._3*q._3,
-                2*(q._2*q._3 - q._4*q._1),
-                2*(q._1*q._2 + q._4*q._3));
-           
- 
-        case RotSeq.xyz:
-            return threeaxisrot( -2*(q._2*q._3 - q._4*q._1),
-                q._4*q._4 - q._1*q._1 - q._2*q._2 + q._3*q._3,
-                2*(q._1*q._3 + q._4*q._2),
-                -2*(q._1*q._2 - q._4*q._3),
-                q._4*q._4 + q._1*q._1 - q._2*q._2 - q._3*q._3);
-           
- 
-        case RotSeq.xyx:
-            return twoaxisrot( 2*(q._1*q._2 + q._4*q._3),
-                -2*(q._1*q._3 - q._4*q._2),
-                q._4*q._4 + q._1*q._1 - q._2*q._2 - q._3*q._3,
-                2*(q._1*q._2 - q._4*q._3),
-                2*(q._1*q._3 + q._4*q._2));
-           
- 
-        case RotSeq.xzy:
-            return threeaxisrot( 2*(q._2*q._3 + q._4*q._1),
-                q._4*q._4 - q._1*q._1 + q._2*q._2 - q._3*q._3,
-                -2*(q._1*q._2 - q._4*q._3),
-                2*(q._1*q._3 + q._4*q._2),
-                q._4*q._4 + q._1*q._1 - q._2*q._2 - q._3*q._3);
-           
- 
-        case RotSeq.xzx:
-            return twoaxisrot( 2*(q._1*q._3 - q._4*q._2),
-                2*(q._1*q._2 + q._4*q._3),
-                q._4*q._4 + q._1*q._1 - q._2*q._2 - q._3*q._3,
-                2*(q._1*q._3 + q._4*q._2),
-                -2*(q._1*q._2 - q._4*q._3));
-           
-        default:
-            Debug.LogError("No good sequence");
-            return Vector3.zero;
- 
-        }
- 
-    }**/
-
+// ZXY ORDER same as Unity3D
   fun from_euler(v: V3): Q4 =>
-    let hx: F64 = v._1.f64() * 0.5
-    let hy: F64 = v._2.f64() * 0.5
-    let hz: F64 = v._3.f64() * 0.5
-    let cr: F64 = hx.cos()
-    let cp: F64 = hy.cos()
-    let cy: F64 = hz.cos()
+    let hy: F64 = v._1.f64() * 0.5
+    let hp: F64 = v._2.f64() * 0.5
+    let hr: F64 = v._3.f64() * 0.5
+    let cy: F64 = hy.cos() 
+    let cp: F64 = hp.cos() 
+    let cr: F64 = hr.cos()
 
-    let sr: F64 = hx.sin()
-    let sp: F64 = hy.sin()
-    let sy: F64 = hz.sin()
+    let sy: F64 = hy.sin()
+    let sp: F64 = hp.sin()
+    let sr: F64 = hr.sin()
 
     let cpcy: F64 = cp * cy
     let spcy: F64 = sp * cy
     let cpsy: F64 = cp * sy
     let spsy: F64 = sp * sy
-    let qx = ((cpcy * sr) - (spsy * cr)).f32()
-    let qy = ((spcy * cr) + (cpsy * sr)).f32()
-    let qz = ((cpsy * cr) - (spcy * sr)).f32()
+    let qx = ((cpsy * cr) + (spcy * sr)).f32()
+    let qy = ((spcy * cr) - (cpsy * sr)).f32()
+    let qz = ((cpcy * sr) - (spsy * cr)).f32()
     let qw = ((cpcy * cr) + (spsy * sr)).f32()
-    unit((qx, qy, qz, qw))
+   unit((qx, qy, qz, qw))
 
 // convenience aliases
   fun add(a: Q4, b: Q4): Q4 => V4fun.add(a, b)
@@ -247,9 +143,6 @@ primitive Q4fun
       else z end
       (x, y, z)
 
-  fun _rot3axes(r11: F32, r12: F32, r21: F32, r31: F32, r32: F32): V3 =>
-    (r31.atan2(r32), r21.asin(), r11.atan2(r12))
-
   fun to_euler(q: Q4): V3 => 
     (axis_x(q), axis_y(q), axis_z(q))
 //    to_euler_seq(q, RotZYX)
@@ -275,25 +168,7 @@ primitive Q4fun
               .atan2(1 - (2 * sqx) - (2*sqz))
     (attitude, heading, bank)
   end
-    //   match s
-    //   | (RotXYZ) =>
-    //     _rot3axes(
-    //      2 * test,
-    //      sqw + sqx + (-sqy) + (-sqz),
-    //     -2 * ((q._1 * q._3) - (q._4 * q._2)),
-    //      2 * ((q._2 * q._3) + (q._4 * q._1)),
-    //      sqw + (-sqx) + (-sqy) + sqz)
-
-    //   | (RotZYX) =>
-    //     _rot3axes(
-    //      -2 * ((q._2 * q._3) - (q._4 * q._1)),
-    //       sqw + (-sqx) + (-sqy) + sqz,
-    //       2 * ((q._1 * q._3) + (q._4 * q._2)),
-    //      -2 * ((q._1 * q._2) - (q._4 * q._3)),
-    //      sqw + sqx + (-sqy) + (-sqz))
-    //   end      
-    // end
-    _force_pos_euler(v)
+  _force_pos_euler(v)
 //    V3fun.mul(v, Linear.rad_to_deg())
 
   fun to_m3(q: Q4): M3 =>
@@ -369,107 +244,6 @@ primitive Q4fun
        s * 0.5, (m10 - m01) * s')
     end
 
-/***
-
- public Quaternion fromRotationMatrix(let m00: F32, let m01: F32, let m02: F32,
-            let m10: F32, let m11: F32, let m12: F32,
-            let m20: F32, let m21: F32, let m22: F32) {
-        // Use the Graphics Gems code, from 
-        // ftp://ftp.cis.upenn.edu/pub/graphics/shoemake/quatut.ps.Z
-        // *NOT* the "Matrix and Quaternions FAQ", which has errors!
-
-        // the trace is the sum of the diagonal elements; see
-        // http://mathworld.wolfram.com/MatrixTrace.html
-        float t = m00 + m11 + m22;
-
-        // we protect the division by s by ensuring that s>=1
-        if (t >= 0) { // |w| >= .5
-            float s = FastMath.sqrt(t + 1); // |s|>=1 ...
-            w = 0.5f * s;
-            s = 0.5f / s;                 // so this division isn't bad
-            x = (m21 - m12) * s;
-            y = (m02 - m20) * s;
-            z = (m10 - m01) * s;
-        } else if ((m00 > m11) && (m00 > m22)) {
-            float s = FastMath.sqrt(1.0f + m00 - m11 - m22); // |s|>=1
-            x = s * 0.5f; // |x| >= .5
-            s = 0.5f / s;
-            y = (m10 + m01) * s;
-            z = (m02 + m20) * s;
-            w = (m21 - m12) * s;
-        } else if (m11 > m22) {
-            float s = FastMath.sqrt(1.0f + m11 - m00 - m22); // |s|>=1
-            y = s * 0.5f; // |y| >= .5
-            s = 0.5f / s;
-            x = (m10 + m01) * s;
-            z = (m21 + m12) * s;
-            w = (m02 - m20) * s;
-        } else {
-            float s = FastMath.sqrt(1.0f + m22 - m00 - m11); // |s|>=1
-            z = s * 0.5f; // |z| >= .5
-            s = 0.5f / s;
-            x = (m02 + m20) * s;
-            y = (m21 + m12) * s;
-            w = (m10 - m01) * s;
-        }
-
-        return this;
-    }
-
-    /**
-     * <code>toRotationMatrix</code> converts this quaternion to a rotational
-     * matrix. Note: the result is created from a normalized version of this quat.
-     * 
-     * @return the rotation matrix representation of this quaternion.
-     */
-    public Matrix3f toRotationMatrix() {
-        Matrix3f matrix = new Matrix3f();
-        return toRotationMatrix(matrix);
-    }
-
-    /**
-     * <code>toRotationMatrix</code> converts this quaternion to a rotational
-     * matrix. The result is stored in result.
-     * 
-     * @param result
-     *            The Matrix3f to store the result in.
-     * @return the rotation matrix representation of this quaternion.
-     */
-    public Matrix3f toRotationMatrix(Matrix3f result) {
-
-        float norm = norm();
-        // we explicitly test norm against one here, saving a division
-        // at the cost of a test and branch.  Is it worth it?
-        float s = (norm == 1f) ? 2f : (norm > 0f) ? 2f / norm : 0;
-
-        // compute xs/ys/zs first to save 6 multiplications, since xs/ys/zs
-        // will be used 2-4 times each.
-        float xs = x * s;
-        float ys = y * s;
-        float zs = z * s;
-        float xx = x * xs;
-        float xy = x * ys;
-        float xz = x * zs;
-        float xw = w * xs;
-        float yy = y * ys;
-        float yz = y * zs;
-        float yw = w * ys;
-        float zz = z * zs;
-        float zw = w * zs;
-
-        // using s=2/norm (instead of 1/norm) saves 9 multiplications by 2 here
-        result.m00 = 1 - (yy + zz);
-        result.m01 = (xy - zw);
-        result.m02 = (xz + yw);
-        result.m10 = (xy + zw);
-        result.m11 = 1 - (xx + zz);
-        result.m12 = (yz - xw);
-        result.m20 = (xz - yw);
-        result.m21 = (yz + xw);
-        result.m22 = 1 - (xx + yy);
-
-        return result;
-    }**/
 class Quaternion is (Stringable & Equatable[Quaternion])
   var _x: F32 = 0
   var _y: F32 = 0
@@ -558,5 +332,3 @@ class Quaternion is (Stringable & Equatable[Quaternion])
     V4fun.eq(mine, that', F32.epsilon())
 
   fun ne(that: (Quaternion box | Q4)): Bool => not eq(that)
-
-

@@ -66,29 +66,15 @@ class iso _TestQuaternion is UnitTest
     test.assert_eq((0,hs,0,hs), qy90, "Euler 0,90,0")
     test.assert_eq((0,0,hs,hs), qz90, "Euler 0,0,90")
     test.assert_eq((0.5,0.5,-0.5,0.5), qxy90, "Euler 90,90,0")
-    test.assert_eq((0.5,0.5,-0.5,0.5),
-     q.q4_mul(qy90, qx90), "q4 mul 90,90,0")
+    test.assert_eq((0.5,-0.5,0.5,0.5), qxz90, "Euler 90,0,90")
+    test.assert_eq((0.5,0.5,0.5,0.5), qyz90, "Euler 0,90,90")
+    test.assert_eq((hs,0,0,hs), qxyz90, "Euler 90,90,90")
 
-    test.assert_eq((0.5,0.5,0.5,0.5), qxz90, "Euler 90,0,90")
-    test.assert_eq((0.5,0.5,0.5,0.5),
-     q.q4_mul(qz90, qx90), "q4 mul 90,0,90")
-
-    test.assert_eq((-0.5,0.5,0.5,0.5), qyz90, "Euler 0,90,90")
-
-    test.assert_eq((0,hs,0,hs), qxyz90, "Euler 90,90,90")
-    // ZYX ORDER
+    // ZXY ORDER
     test.assert_eq(qxyz90,
-        q.q4_mul(qz90, q.q4_mul(qy90, qx90)), "q4 mul 90,90,90"
-        where eps = 0.00001)
-    // XYZ ORDER
-    test.assert_eq((hs, 0, hs, 0),
-        q.q4_mul(qx90, q.q4_mul(qy90, qz90)), "q4 mul 90,90,90"
+        q.q4_mul(qy90, q.q4_mul(qx90, qz90)), "q4 mul 90,90,90"
         where eps = 0.00001)
 
-   // todo: zyx reorder on to_euler
-    test.assert_eq((r90, 0, 0),
-        q.to_euler(qz90), "to zyx 90,0,0"
-        where eps = 0.00001)
     var euler: V3 = (0, 0, 0)
     var ii: U32 = 0
     var qt : Q4 = Q4fun.id()
@@ -119,24 +105,24 @@ class iso _TestQuaternion is UnitTest
     test.assert_eq(qx90, q.axis_angle(v3(1,0,0), r90), "x axis angle 90")
     test.assert_eq(qy90, q.axis_angle(v3(0,1,0), r90), "y axis angle 90")
     test.assert_eq(qz90, q.axis_angle(v3(0,0,1), r90), "z axis angle 90")
+
+    let r45 = r90 / 2
+    var v = v3(r45, 0, 0)
+    test.assert_eq(q(0.382683,0,0,0.92388),
+                    q.from_euler(v), "x45" where eps = 0.0001)
+
+    v = v3(r45, r90, 0)
+    test.assert_eq(q(0.270598,0.653282,-0.270598,0.653282),
+                    q.from_euler(v), "x45" where eps = 0.0001)
+
+    v = v3(r45, r45, r90)
+    test.assert_eq(q(0.5,0.0,0.5,0.707107),
+                    q.from_euler(v), "x45" where eps = 0.0001)
+
+    v = v3(r90*2, r45, r45*3)
+    test.assert_eq(q(0.353553, -0.853553, -0.146447, 0.353553),
+                    q.from_euler(v), "x45" where eps = 0.0001)
+    v = v3(r90*3, r45, r45*7)
+    test.assert_eq(q(-0.707107, 0, 0, 0.707107),
+                    q.from_euler(v), "x45" where eps = 0.0001)
     
-    // test.assert_eq(v3(r90, 0, 0),
-    //    q.to_euler_seq(qx90, RotXYZ), "x to_euler XYZ")
-    // test.assert_eq(v3(0, r90, 0),
-    //    q.to_euler_seq(qy90, RotXYZ), "y to_euler XYZ")
-    // test.assert_eq(v3(0, 0, r90),
-    //    q.to_euler_seq(qz90, RotXYZ), "z to_euler XYZ")
-
-    // test.assert_eq(v3(r90, 0, 0),
-    //    q.to_euler(qx90), "x to_euler XYZ"
-    //    where eps = 0.00001)
-    // test.assert_eq(v3(0, r90, 0),
-    //    q.to_euler_seq(qy90, RotZYX), "y to_euler XYZ"
-    //    where eps = 0.00001)
-    h.log(Linear.to_string(qz90))
-    h.log(Linear.to_string(v3.mul(q.to_euler(qz90), Linear.rad_to_deg())))
-    // test.assert_eq(v3(0, 0, r90),
-    //    q.to_euler(qz90), "z to_euler XYZ"
-    //    where eps = 0.00001)
-//    h.log(Linear.to_string(qz90))
-
