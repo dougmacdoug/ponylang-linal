@@ -1,10 +1,32 @@
-# Linear Algebra library for Pony Language
+# linal - Linear Algebra library for Pony Language
 
 This library is intended for use in common 2D and 3D applications
 not as a scientific or math library. Various scientific libraries
-such as [LAPACK], [GSL] or even [NumPy] can be bound with the [Pony C ABI].
+such as [LAPACK](https://github.com/Reference-LAPACK/lapack), [GSL](https://www.gnu.org/software/gsl/) or others can be bound with the [Pony C ABI](https://tutorial.ponylang.org/c-ffi/).
 
-### pre-alpha software (0.1.0 version coming mid Feb'18)
+## Status
+
+### v0.1.0 - 2018-02-19
+
+[![CircleCI](https://circleci.com/gh/dougmacdoug/ponylang-linal.svg?style=svg)](https://circleci.com/gh/dougmacdoug/ponylang-linal)
+
+
+## Installation
+
+* Install [pony-stable](https://github.com/ponylang/pony-stable)
+* Update your `bundle.json`
+
+```json
+{ 
+  "type": "github",
+  "repo": "dougmacdoug/ponylang-linal"
+}
+```
+
+* `stable fetch` to fetch your dependencies
+* `use "linal"` to include this package
+* `stable env ponyc` to compile your application
+
 
 ### Tuple-based Linear Algebra for typical 2D, 3D operations  
   * operate on the stack
@@ -30,19 +52,14 @@ Example:
 ```
 
 
-@TODO:
-  * another sweep of m4, q4, r4
-  * unit tests q4, r4, and wrapper classes
-  * Rect does not follow wrapper pattern.. (align or write doc)
-  * follow lib pattern for pony, add to pony stable
-  * release 0.1.0
-@FUTURE
-  * create good example folder
+### @FUTURE
+
+  * create example folder
   * plan for more classes like Plane /or/ move Rect to new lib
   * consider writing longhand (dist2 = distance_squared)
   * add fast sqrt for unit vector
   * slerp nlerp
   * faster Q4
   * try to use compile time expressions once adopted by pony
-     fun inv(q: Q4) : Q4 => #( div(conj(q), dot(q,q)) )
+     `fun inv(q: Q4) : Q4 => #( div(conj(q), dot(q,q)))`
 
