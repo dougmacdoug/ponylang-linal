@@ -83,16 +83,16 @@ actor Main is TestList
   new make() => None
 
   fun tag tests(test: PonyTest) =>
-    // test(_TestVectorFun)
+    test(_TestVectorFun)
     test(_TestQuaternion)
-    // test(_TestVectorFunCross)
-    // test(_TestM2fun)
-    // test(_TestM3fun)
-    // test(_TestLinearString)
-    // test(_TestStringable)    
-    // test(_TestLinearEq)
-    // test(_TestLinearClamp)
-    // test(_TestLinearFun)
+    test(_TestVectorFunCross)
+    test(_TestM2fun)
+    test(_TestM3fun)
+    test(_TestLinearString)
+    test(_TestStringable)    
+    test(_TestLinearEq)
+    test(_TestLinearClamp)
+    test(_TestLinearFun)
 
 class iso _TestLinearString is UnitTest
   fun name():String => "Linear/String"

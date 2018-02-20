@@ -50,7 +50,6 @@ class iso _TestQuaternion is UnitTest
     test.assert_eq(q.q4_mul(qk, qk), v4.neg(q_one), "k*k = -1")
     test.assert_eq(q.q4_mul(q.q4_mul(qi, qj), qk),
                    v4.neg(q_one), "(i*j)*k = -1")
-    
 
     let hs = F32(0.5).sqrt()
     let r90 = 90 * Linear.deg_to_rad()
@@ -73,30 +72,11 @@ class iso _TestQuaternion is UnitTest
     // ZXY ORDER
     test.assert_eq(qxyz90,
         q.q4_mul(qy90, q.q4_mul(qx90, qz90)), "q4 mul 90,90,90"
-        where eps = 0.00001)
+        where eps = 0.0001)
 
     var euler: V3 = (0, 0, 0)
     var ii: U32 = 0
     var qt : Q4 = Q4fun.id()
-    while ii < 360 do
-        let r = ii.f32() * Linear.deg_to_rad()
-        euler = V3fun(r, 0, 0)
-        // qt = q.from_euler(euler)
-        // // test.assert_eq(euler, q.to_euler(qt), "X :" + ii.string())
-        // euler = V3fun(0, r, 0)
-        // qt = q.from_euler(euler)
-        // test.assert_eq(euler, q.to_euler(qt), "Y :" + ii.string()
-        //     where eps = 0.000001)
-        // euler = V3fun(0, 0, r)
-        // qt = q.from_euler(euler)
-        // // test.assert_eq(euler, q.to_euler(qt), "Z :" + ii.string())
-        euler = V3fun(r, r, r)
-        qt = q.from_euler(euler)
-        // test.assert_eq(euler, q.to_euler(qt), "XYZ :" + ii.string())
-        // test.assert_eq(qt, q.rot_m3(q.to_m3(qt)), "M3 :" + ii.string()
-        //    where eps = 0.000001)
-        ii = ii + 15
-    end
 
     test.assert_eq(q.id(), q.from_euler((0, 0, 0)), "id = xyz 0")
     test.assert_eq(q.neg(q.id()),
@@ -107,22 +87,60 @@ class iso _TestQuaternion is UnitTest
     test.assert_eq(qz90, q.axis_angle(v3(0,0,1), r90), "z axis angle 90")
 
     let r45 = r90 / 2
-    var v = v3(r45, 0, 0)
-    test.assert_eq(q(0.382683,0,0,0.92388),
-                    q.from_euler(v), "x45" where eps = 0.0001)
-
-    v = v3(r45, r90, 0)
+    // validated using alternate quaternion source for ZXY angles.
+    var v = v3(r45, r90, 0)
     test.assert_eq(q(0.270598,0.653282,-0.270598,0.653282),
-                    q.from_euler(v), "x45" where eps = 0.0001)
+                    q.from_euler(v), "verified ZXY euler 1/4" where eps = 0.0001)
 
     v = v3(r45, r45, r90)
     test.assert_eq(q(0.5,0.0,0.5,0.707107),
-                    q.from_euler(v), "x45" where eps = 0.0001)
+                    q.from_euler(v), "verified ZXY euler 2/4" where eps = 0.0001)
 
     v = v3(r90*2, r45, r45*3)
     test.assert_eq(q(0.353553, -0.853553, -0.146447, 0.353553),
-                    q.from_euler(v), "x45" where eps = 0.0001)
+                    q.from_euler(v), "verified ZXY euler 3/4" where eps = 0.0001)
     v = v3(r90*3, r45, r45*7)
     test.assert_eq(q(-0.707107, 0, 0, 0.707107),
-                    q.from_euler(v), "x45" where eps = 0.0001)
+                    q.from_euler(v), "verified ZXY euler 4/4" where eps = 0.0001)
+    let rq = q.unit((0.353553, -0.853553, -0.146447, 0.353553))
+
+    test.assert_eq(q.angle(rq) * Linear.rad_to_deg(),
+                   139,     "angles"
+         where eps = 2)
+        test.assert_eq(v3(0.4, -0.9, -0.1),
+            q.axis(rq),     "axis"
+         where eps = 0.1)
     
+    // var euler: V3 = (0, 0, 0)
+    // var ii: U32 = 0
+    // var qt : Q4 = Q4fun.id()
+    // while ii < 360 do
+    //     let r = ii.f32() * Linear.deg_to_rad()
+    //     euler = V3fun(r, 0, 0)
+    //     qt = q.from_euler(euler)
+    //     test.assert_eq(euler, q.to_euler(qt), "X :" + ii.string()
+    //         where eps = 0.01)
+    //     euler = V3fun(0, r, 0)
+    //     qt = q.from_euler(euler)
+    //     test.assert_eq(euler, q.to_euler(qt), "Y :" + ii.string()
+    //         where eps = 0.01)
+    //     euler = V3fun(0, 0, r)
+    //     qt = q.from_euler(euler)
+    //     test.assert_eq(euler, q.to_euler(qt), "Z :" + ii.string()
+    //         where eps = 0.01)
+    //     euler = V3fun(r, r, r)
+
+    //     qt = q.from_euler(euler)
+    //     let e' = q.to_euler(qt)
+    //     let m1 = q.to_m3(qt)
+    //     let mq = q.from_m3(m1)
+    //     test.assert_eq(euler, q.to_euler(qt), "Z :" + ii.string()
+    //         where eps = 0.01)
+    //     // test.assert_eq(v3.mul(euler, Linear.rad_to_deg()),
+    //     //                v3.mul(e', Linear.rad_to_deg()),
+    //     //             "XYZ :" + ii.string() where eps = 1)
+
+    //     ii = ii + 15
+    // end
+
+    // 

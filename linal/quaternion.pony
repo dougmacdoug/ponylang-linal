@@ -2,39 +2,9 @@ type Q4 is (F32, F32, F32, F32)
 type AnyQuaternion is (Quaternion | Q4)
 
 primitive Q4fun
-  fun apply(x': F32, y': F32, z': F32, w': F32): Q4 => (x', y', z', w')
+  fun apply(x: F32, y: F32, z: F32, w: F32): Q4 => (x, y, z, w)
   fun zero(): Q4 => (0, 0, 0, 0)
   fun id():   Q4 => (0, 0, 0, 1)
-
-  fun axis_angle(axis': V3, angle_radians: F32): Q4 =>
-    let sina = (angle_radians * 0.5).sin()
-    (let x, let y, let z) = V3fun.mul(V3fun.unit(axis'), sina)
-    let w = (angle_radians * 0.5).cos()
-    (x, y, z, w)
-
-// ZXY ORDER same as Unity3D
-  fun from_euler(v: V3): Q4 =>
-    let hy: F64 = v._1.f64() * 0.5
-    let hp: F64 = v._2.f64() * 0.5
-    let hr: F64 = v._3.f64() * 0.5
-    let cy: F64 = hy.cos() 
-    let cp: F64 = hp.cos() 
-    let cr: F64 = hr.cos()
-
-    let sy: F64 = hy.sin()
-    let sp: F64 = hp.sin()
-    let sr: F64 = hr.sin()
-
-    let cpcy: F64 = cp * cy
-    let spcy: F64 = sp * cy
-    let cpsy: F64 = cp * sy
-    let spsy: F64 = sp * sy
-    let qx = ((cpsy * cr) + (spcy * sr)).f32()
-    let qy = ((spcy * cr) - (cpsy * sr)).f32()
-    let qz = ((cpcy * sr) - (spsy * cr)).f32()
-    let qw = ((cpcy * cr) + (spsy * sr)).f32()
-    unit((qx, qy, qz, qw))
-
 // convenience aliases
   fun add(a: Q4, b: Q4): Q4 => V4fun.add(a, b)
   fun sub(a: Q4, b: Q4): Q4 => V4fun.sub(a, b)
@@ -44,10 +14,11 @@ primitive Q4fun
   fun eq(a: Q4, b: Q4): Bool => V4fun.eq(a, b)
 
   fun q4_mul(a: Q4, b: Q4): Q4 =>
-    	(((a._4 * b._1) + (a._1 * b._4)  + (a._2 * b._3)) - (a._3 * b._2),
-    	 ((a._4 * b._2) - (a._1 * b._3)) + (a._2 * b._4)  + (a._3 * b._1),
-    	(((a._4 * b._3) + (a._1 * b._2)) - (a._2 * b._1)) + (a._3 * b._4),
-    	  (a._4 * b._4) - (a._1 * b._1)  - (a._2 * b._2)  - (a._3 * b._3))
+    """multiply 2 quaternions. Can be used to combine rotations"""
+  	((a._4 * b._1) +  (a._1 * b._4) +  (a._2 * b._3) + -(a._3 * b._2),
+  	 (a._4 * b._2) + -(a._1 * b._3) +  (a._2 * b._4) +  (a._3 * b._1),
+  	 (a._4 * b._3) +  (a._1 * b._2) + -(a._2 * b._1) +  (a._3 * b._4),
+  	 (a._4 * b._4) + -(a._1 * b._1) + -(a._2 * b._2) + -(a._3 * b._3))
 
   fun q4_div(a: Q4, b: Q4): Q4 => q4_mul(a, inv(b))
 
@@ -56,22 +27,34 @@ primitive Q4fun
   fun len(q: Q4): F32 => dot(q, q).sqrt()
   fun unit(q: Q4): Q4 => div(q, len(q))
   fun conj(q: Q4): Q4 => (-q._1, -q._2, -q._3, q._4)
-  fun inv(q: Q4): Q4 => div(conj(q), dot(q, q))
+  fun inv(q: Q4): Q4 =>
+    let l2 = dot(q, q)
+    if l2 == 0 then zero()
+    else div(conj(q), l2)
+  end
 
-  fun angle(q: Q4): F32 => (q._4 / len(q)).acos()
-  fun axis(q: Q4): V3 =>
-    (let x, let y, let z, let w) = unit(q)
-    V3fun.div((x, y, z), (q._4.acos()).sin())
+  fun axis_angle(axis': V3, angle_radians: F32): Q4 =>
+    let half = angle_radians * 0.5
+    let hs = half.sin()
+    let w = half.cos()
+    (let x, let y, let z) = V3fun.mul(V3fun.unit(axis'), hs)
+    (x, y, z, w)
 
-  
-  fun _gimbal(q: Q4) : _GimbalLock => 
-    let t = (q._2 * q._1) + (q._3 * q._4)
-    if  t > 0.4999 then
-       _NorthPole
-    elseif t < -0.4999 then
-      _SouthPole
+  fun angle(q: Q4): F32 =>  
+    if Linear.eq(q._1, 0) and Linear.eq(q._2, 0) and Linear.eq(q._3, 0) then
+      0
     else
-      None
+      Linear.clamp(q._4, -1, 1).acos() * 2
+    end
+
+  fun axis(q: Q4): V3 =>
+    let v3 = V4fun.v3(q) // xyz
+    let l2 = V3fun.len2(v3)
+    if l2 == 0 then
+      (1, 0, 0)
+    else
+      let inv' = 1 / l2.sqrt()
+      (q._1 * inv', q._2 * inv', q._3 * inv')
     end
 
   fun axis_x(q: Q4): F32 =>
@@ -93,10 +76,59 @@ primitive Q4fun
     let p = V3fun.cross((q._1, q._2, q._3), t)
     V3fun.add(V3fun.add(V3fun.mul(t, q._4), v), p)
 
+  fun from_rot_ab(a': V3, b': V3): Q4 =>
+    """creates a quaternion for rotation from point a to point b"""
+    let a = V3fun.unit(a')
+    let b = V3fun.unit(b')
+    let d = V3fun.dot(a, b)
+    if (d > (-1 + F32.epsilon())) then
+      let c = V3fun.cross(a, b)
+      let s =  ((1 + d) * 2).sqrt()
+      let s' = 1 / s
+
+      (c._1 * s', c._2 * s', c._3 * s', 0.5 * s)
+    else
+      var axis' = V3fun.cross((1,0,0), a)
+      if Linear.eq(V3fun.len(axis'), 0) then
+        axis' = V3fun.cross((0,1,0), a)
+      end
+      axis_angle(axis', 180)
+    end
+
+// ZXY ORDER same as Unity3D
+  fun from_euler(v: V3): Q4 =>
+    let hy: F64 = v._1.f64() * 0.5 //x
+    let hp: F64 = v._2.f64() * 0.5 //y
+    let hr: F64 = v._3.f64() * 0.5 //z
+    let cy: F64 = hy.cos() 
+    let cp: F64 = hp.cos() 
+    let cr: F64 = hr.cos()
+
+    let sy: F64 = hy.sin()
+    let sp: F64 = hp.sin()
+    let sr: F64 = hr.sin()
+
+    let cpcy: F64 = cp * cy
+    let spcy: F64 = sp * cy
+    let cpsy: F64 = cp * sy
+    let spsy: F64 = sp * sy
+    let qx = ((cpsy * cr) + (spcy * sr)).f32()
+    let qy = ((spcy * cr) - (cpsy * sr)).f32()
+    let qz = ((cpcy * sr) - (spsy * cr)).f32()
+    let qw = ((cpcy * cr) + (spsy * sr)).f32()
+    unit((qx, qy, qz, qw))
+
+  fun from_axes(x: V3, y: V3, z: V3): Q4 =>
+    let m: M3 = 
+      ((x._1, y._1, z._1),
+       (x._2, y._2, z._2),
+       (x._3, y._3, z._3))
+    from_m3(m)
+
   fun _force_pos_euler(v: V3): V3 => 
     (var x, var y, var z) = v
       let rad360 = F32.pi() * 2
-      let n = F32(-0.005729578) * Linear.deg_to_rad()
+      let n: F32 = -0.005729578 * Linear.deg_to_rad()
       let n2 = rad360 + n
       x = if (x < n) then x + rad360
       elseif (x > n2) then x - rad360
@@ -111,105 +143,86 @@ primitive Q4fun
       else z end
       (x, y, z)
 
+// YXZ
   fun to_euler(q: Q4): V3 => 
-    (axis_x(q), axis_y(q), axis_z(q))
-//    to_euler_seq(q, RotZYX)
-
-  fun to_euler_seq(q: Q4, s: RotationSequence): V3 =>
-
     let sqx = q._1 * q._1
     let sqy = q._2 * q._2
     let sqz = q._3 * q._3
     let sqw = q._4 * q._4
+
     let unit' = sqx + sqy + sqz + sqw
-    // if normalised is one, otherwise is correction factor
     var test = (q._1 * q._4) - (q._2 * q._3)
-    let v = if (test > (0.4999 * unit')) then // singularity at north pole
-      (F32.pi() / 2, 2 * q._2.atan2(q._1), 0) 
-     elseif (test < (-0.4909 * unit')) then // singularity at south pole
-      (-F32.pi() / 2, -2 * q._2.atan2(q._1), 0) 
+    let v =
+    if (test > (0.4999 * unit')) then
+      (F32.pi() / 2, 2 * q._1.atan2(q._4), 0)
+      elseif (test < (-0.4909 * unit')) then
+      (-F32.pi() / 2, -2 * q._1.atan2(q._4), 0)
     else
-      let heading = ((2 * q._2 * q._4) + (2 * q._1 * q._3))
-                .atan2(1 - (2 * (sqx + sqy)))
-      let attitude = (2*test).asin() // good
-      let bank = (2 * ((q._3 * q._4) + (q._1 * q._2)))
-                .atan2(1 - (2 * (sqz + sqx)))
-    (attitude, heading, bank)
-  end
+      let a1 = 2 * ((q._1 * q._3) + (q._4 * q._2))
+      let a2 = sqw + -sqx + -sqy + sqz
+      let b = -2 * ((q._2 * q._3) - (q._4 * q._1))
+      let c1 = 2 * ((q._1 * q._2) + (q._4 * q._3))
+      let c2 = sqw + -sqx + sqy + -sqz
+      (a1.atan2(a2), b.asin(), c1.atan2(c2))
+    end
   _force_pos_euler(v)
 
   fun to_m3(q: Q4): M3 =>
-    let a1 = 1 - (2 * ((q._2 * q._2) + (q._3 * q._3)))
-    let a2 = 2 * ((q._1 * q._2) - (q._3 * q._4))
-    let a3 = 2 * ((q._1 * q._3) + (q._2 * q._4))
-    let b1 = 2 * ((q._1 * q._2) + (q._3 * q._4))
-    let b2 = 1 - (2 * ((q._1 * q._1) + (q._3 * q._3)))
-    let b3 = 2 * ((q._2 * q._3) - (q._1 * q._4))
-    let c1 = 2 * ((q._1 * q._3) - (q._2 * q._4))
-    let c2 = 2 * ((q._2 * q._3) + (q._1 * q._4))
-    let c3 = 1 - (2 * ((q._1 * q._1) + (q._2 * q._2)))
-    ((a1, a2, a3), (b1, b2, b3), (c1, c2, c3))
+    let xx = q._1 * q._1
+    let yy = q._2 * q._2
+    let zz = q._3 * q._3
+    let xy = q._1 * q._2
+    let zw = q._3 * q._4
+    let zx = q._3 * q._1
+    let yw = q._2 * q._4
+    let yz = q._2 * q._3
+    let xw = q._1 * q._4
+    ((1 - (2 * (yy + zz)), 2 * (xy + zw), 2 * (zx - yw)),
+     (2 * (xy - zw), 1 - (2 * (zz + xx)), 2 * (yz + xw)),
+     (2 * (zx + yw), 2 * (yz - xw), 1 - (2 * (yy + xx))))
 
   fun from_m3(m: M3): Q4 =>
-    let t: F32 = 1 + m._1._1 + m._2._2 + m._3._3
+    let t: F32 = m._1._1 + m._2._2 + m._3._3
     let q: Q4 =
-    if t > 0.001 then
-      let s = 2 * t.sqrt()
-      ((m._3._2 - m._2._3) / s,
-       (m._1._3 - m._3._1) / s,
-       (m._2._1 - m._1._2) / s,
-       0.25 * s)      
-    elseif((m._1._1 > m._2._2) and (m._1._1 > m._3._3 )) then
-      let s = 2 * (1 + (m._1._1 - m._2._2 - m._3._3)).sqrt()
-      (0.25 * s,
-       (m._2._1 + m._1._2) / s,
-       (m._1._3 + m._3._1) / s,
-       (m._3._2 - m._2._3) / s)
-    elseif(m._2._2 > m._3._3) then
-      let s = 2 * (1 + (m._2._2 - m._1._1 - m._3._3)).sqrt()
-      ((m._2._1 + m._1._2) / s,
-       0.25 * s,
-       (m._3._2 + m._2._3) / s,
-       (m._1._3 - m._3._1) / s)
+    if t > 0 then
+      let s = (1 + t).sqrt()
+      let s' = 0.5 / s
+
+      let x = (m._2._3 - m._3._2) * s'
+      let y = (m._3._1 - m._1._3) * s'
+      let z = (m._1._2 - m._2._1) * s'
+      let w = s * 0.5      
+      (x, y, z, w)
+    elseif (m._1._1 >= m._2._2) and (m._1._1 >= m._3._3) then
+      let s = ((1 + m._1._1) - m._2._2 - m._3._3).sqrt()
+      let s' = 0.5 / s
+
+      let x = 0.5 * s
+      let y = (m._1._2 + m._2._1) * s'
+      let z = (m._1._3 + m._3._1) * s'
+      let w = (m._2._3 - m._3._2) * s'
+      (x, y, z, w)
+    elseif m._2._2 > m._3._3 then
+      let s = ((1 + m._2._2) - m._1._1 - m._3._3).sqrt()
+      let s' = 0.5 / s
+
+      let x = (m._2._1 + m._1._2) * s'
+      let y = 0.5 * s
+      let z = (m._3._2 + m._2._3) * s'
+      let w = (m._3._1 - m._1._3) * s'
+      (x, y, z, w)
     else
-      let s = 2 * (1 + (m._3._3 - m._1._1 - m._2._2)).sqrt()
-      ((m._1._3 + m._3._1) / s,
-       (m._3._2 + m._2._3) / s,
-       0.25 * s,
-       (m._2._1 - m._1._2) / s)
+      let s = ((1 + m._3._3) - m._1._1 - m._2._2).sqrt()
+      let s' = 0.5 / s
+
+      let x = (m._3._1 + m._1._3) * s'
+      let y = (m._3._2 + m._2._3) * s'
+      let z = 0.5 * s
+      let w = (m._1._2 - m._2._1) * s'
+      (x, y, z, w)
     end
     unit(q)
 
-  fun rot_m3(m: M3): Q4 =>
-    (let v1, let v2, let v3) = m
-    (let m00: F32, let m01: F32, let m02: F32) = v1
-    (let m10: F32, let m11: F32, let m12: F32) = v2
-    (let m20: F32, let m21: F32, let m22: F32) = v3
-
-    let t = m00 + m11 + m22
-    if t >= 0 then
-      let s = (t + 1).sqrt()
-      let s' = 0.5 / s
-      ((m21 - m12) * s',
-       (m02 - m20) * s',
-       (m10 - m01) * s',
-       0.5 * s)
-    elseif ((m00 > m11) and (m00 > m22)) then
-      let s = 1 + (m00 - m11 - m22)
-      let s' = 0.5 / s
-      (s * 0.5, (m10 + m01) * s',
-        (m02 + m20) * s', (m21 - m12) * s')
-    elseif (m11 > m22) then
-      let s = (1 + (m11 - m00 - m22)).sqrt()
-      let s' = 0.5 / s
-      ((m10 + m01) * s', s * 0.5,
-       (m21 + m12) * s', (m02 - m20) * s')
-    else
-      let s = (1 + (m22 - m00 - m11)).sqrt()
-      let s' = 0.5 / s
-      ((m02 + m20) * s', (m21 + m12) * s',
-       s * 0.5, (m10 - m01) * s')
-    end
 
 class Quaternion is (Stringable & Equatable[Quaternion])
   var _x: F32 = 0
