@@ -6,7 +6,7 @@ such as [LAPACK](https://github.com/Reference-LAPACK/lapack), [GSL](https://www.
 
 ## Status
 
-### v0.1.0 - 2018-02-19
+* v0.1.0  - 2018-02-19
 
 [![CircleCI](https://circleci.com/gh/dougmacdoug/ponylang-linal.svg?style=svg)](https://circleci.com/gh/dougmacdoug/ponylang-linal)
 
@@ -31,6 +31,7 @@ such as [LAPACK](https://github.com/Reference-LAPACK/lapack), [GSL](https://www.
 ### Tuple-based Linear Algebra for typical 2D, 3D operations  
   * operate on the stack
   * 100% immutable
+  * side-effect free functions
   * float32 internals (F32)
   * 🐎 pure pony
 
@@ -54,7 +55,9 @@ Example:
 
 ### @FUTURE
 
-  * create example folder
+  * examples
+  * more complete README
+  * `make docs`
   * plan for more classes like Plane /or/ move Rect to new lib
   * consider writing longhand (dist2 = distance_squared)
   * add fast sqrt for unit vector

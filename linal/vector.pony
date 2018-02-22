@@ -102,6 +102,8 @@ primitive V2fun is VectorFun[V2]
   fun id(): V2 => (1, 1)
   fun from_array(a: Array[F32] box, offset: USize=0): V2 ? =>
     (a(0 + offset)?, a(1 + offset)?)
+  fun x(v: V2): F32 => v._1
+  fun y(v: V2): F32 => v._2
   fun add(a: V2, b: V2): V2 => (a._1 + b._1, a._2 + b._2)
   fun sub(a: V2, b: V2): V2 => (a._1 - b._1, a._2 - b._2)
   fun neg(v: V2): V2 => (-v._1 , -v._2)
@@ -157,6 +159,9 @@ primitive V3fun is VectorFun[V3 val]
   fun id(): V3 => (1, 1, 1)
   fun from_array(a: Array[F32] box, offset: USize=0): V3 ? =>
     (a(0 + offset)?, a(1 + offset)?, a(2 + offset)?)
+  fun x(v: V3): F32 => v._1
+  fun y(v: V3): F32 => v._2
+  fun z(v: V3): F32 => v._3
   fun add(a: V3, b: V3): V3 => (a._1 + b._1, a._2 + b._2, a._3 + b._3)
   fun sub(a: V3, b: V3): V3 => (a._1 - b._1, a._2 - b._2, a._3 - b._3)
   fun neg(v: V3): V3 => (-v._1 , -v._2, -v._3)
@@ -218,6 +223,10 @@ primitive V4fun is VectorFun[V4 val]
   fun id(): V4 => (1, 1, 1, 1)
   fun from_array(a: Array[F32] box, offset: USize=0): V4 ? =>
     (a(0 + offset)?, a(1 + offset)?, a(2 + offset)?, a(3 + offset)?)
+  fun x(v: V4): F32 => v._1
+  fun y(v: V4): F32 => v._2
+  fun z(v: V4): F32 => v._3
+  fun w(v: V4): F32 => v._4
   fun add(a: V4, b: V4): V4 =>
     (a._1 + b._1, a._2 + b._2, a._3 + b._3, a._4 + b._4)
   fun sub(a: V4, b: V4): V4 =>
