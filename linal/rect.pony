@@ -85,11 +85,13 @@ primitive R4fun
   fun grow_centered(r: R4, dx: F32, dy: F32): R4 =>
     resize_centered(r, r._2 + dx, r._3 + dy)
 
-  fun contains(r: R4, pt: V2): Bool =>
+  fun contains(r: R4, pt': (V2 | V3)): Bool => 
+    let pt: V2 = match pt'
+    | let v2: V2 => v2
+    | let v3: V3 => V3fun.v2(v3)
+    end
     (r._1._1 <= pt._1) and ((r._1._1 + r._2) >= pt._1) and
     (r._1._2 <= pt._2) and ((r._1._2 + r._3) >= pt._2)
-
-  fun contains(r: R4, pt: V3): Bool => contains(r, V3fun.v2(pt))
 
   fun overlaps(r: R4, other: R4): Bool =>
     (x_max(other) > x_min(r)) and
