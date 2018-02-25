@@ -211,9 +211,7 @@ class Rect is (Stringable & Equatable[Rect])
   fun height(): F32 => R4fun.height(r4())
   fun size(): (F32, F32) => R4fun.size(r4())
   fun center(): V2 => R4fun.center(r4())
-
-  fun contains(pt: V2): Bool => R4fun.contains(r4(), pt)
-  fun contains(pt: V3): Bool => R4fun.contains(r4(), pt)
+  fun contains(pt: (V2 | V3)): Bool => R4fun.contains(r4(), pt)
 
   fun overlaps(that: box->AnyRect): Bool =>
     let mine = r4()

@@ -235,7 +235,9 @@ class Quaternion is (Stringable & Equatable[Quaternion])
   new zero() =>
     """create zero Quaternion"""
     apply((0, 0, 0, 0))
- 
+
+  new from_euler(v: V3) => apply(Q4fun.from_euler(v))
+  new from_axis_angle(v: V3, a: F32) => apply(Q4fun.axis_angle(v, a))
   fun ref apply(q: (Q4 | Quaternion box) = Q4fun.zero()): Quaternion =>
     (_x, _y, _z, _w) = match q
     | let q': Q4 => q'
