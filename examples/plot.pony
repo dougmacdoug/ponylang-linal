@@ -1,4 +1,18 @@
 use "../linal"
+use "term"
+class  KeyboardHandler is ANSINotify
+ let _m: Main tag 
+   new iso create(m : Main tag) => _m = m
+
+   fun ref apply(term: ANSITerm ref, input: U8 val) =>
+     if input == 113 then // q key
+       _m.quit()
+       term.dispose()
+     end
+   // fun ref left(ctrl: Bool, alt: Bool, shift: Bool)  => _game.move(LEFT)
+   // fun ref down(ctrl: Bool, alt: Bool, shift: Bool)  => _game.move(DOWN)
+   // fun ref up(ctrl: Bool, alt: Bool, shift: Bool)    => _game.move(UP)
+   // fun ref right(ctrl: Bool, alt: Bool, shift: Bool) => _game.move(RIGHT)
 
 actor Main
   let _env: Env
@@ -14,6 +28,18 @@ actor Main
     let p3 = v3(1.99, -1.17, 0.75)
     _print(p3)
     _print(v3(0,0,0))
+    let input : Stdin tag = env.input
+    let term = ANSITerm(KeyboardHandler(this), _env.input)
+    let notify : StdinNotify iso = object iso
+        fun ref apply(data: Array[U8] iso) => term(consume data)
+        fun ref dispose() => env.input.dispose()
+    end
+    env.input(consume notify)
+
+  be quit()=>
+    _env.out.print("Exiting.. some terminals may require <ctrl-c>")
+    _env.exitcode(0)
+    _env.input.dispose()
 
   fun _print(p': (V2 | V3))=>
     match p'
