@@ -76,6 +76,11 @@ primitive Q4fun
     let p = V3fun.cross((q._1, q._2, q._3), t)
     V3fun.add(V3fun.add(V3fun.mul(t, q._4), v), p)
 
+  fun rotate_point(q: Q4, v: V3): V3 =>
+    let v4 = V3fun.v4(v)
+    let v4' = q4_mul(q4_mul(q, v4), conj(q))
+    V4fun.v3(v4')
+
   fun from_rot_ab(a': V3, b': V3): Q4 =>
     """creates a quaternion for rotation from point a to point b"""
     let a = V3fun.unit(a')

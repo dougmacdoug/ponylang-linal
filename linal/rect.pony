@@ -129,7 +129,8 @@ primitive R4fun
     end
 
   fun rectify(r: R4): R4 =>
-    ((var x', var y'), var w', var h') = r
+    (let pt, var w', var h') = r
+    (var x', var y') = pt
     if w' < 0 then
       w' = -w'
       x' = x' - w'

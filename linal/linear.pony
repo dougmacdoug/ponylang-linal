@@ -63,7 +63,7 @@ primitive Linear
 
   fun approx_eq(a: F32, b: F32): Bool  =>
     """approximate equality"""
-    (b - a).abs() < (1e-6 * a.abs().max(b.abs())).max(F32.epsilon() * 8.0)
+    (b - a).abs() < (tolerance() * a.abs().max(b.abs())).max(F32.epsilon() * 8.0)
 
   fun toggle(t: F32, len: F32): F32 =>
     """returns t as a modded range from 0 to len"""
@@ -73,3 +73,7 @@ primitive Linear
     """ping pong t as a modded range from 0 to len back to 0"""
     let t' = toggle(t, len * 2)
     len - (t' - len).abs()
+
+  fun tolerance(): F32 => 1.0e-6
+
+  // fun near_zero(a: F32)=> a.abs() < tolerance()
