@@ -11,7 +11,8 @@ type OptVector is (FixVector | None)
 """ tuple based Vector or None alias"""
 
 // @Hack VectorX is Vector[VX, VXfun] but compiler requires both in the alias
-type AnyVector2 is (Vector2 | Vector[V2, V2fun] | V2)
+type Vector2X is (Vector2 | Vector[V2, V2fun])
+type AnyVector2 is (Vector2X | V2)
 """instance|tuple vector 2 alias - see Vector and VectorFun"""
 type AnyVector3 is (Vector3 | Vector[V3, V3fun] | V3)
 """instance|tuple vector 3 alias - see Vector and VectorFun"""
@@ -277,7 +278,7 @@ primitive V4fun is VectorFun[V4 val]
       error
     end
 
-trait Vector[V: Any #read, Vfun: VectorFun[V] val] is
+trait Vector[V: Any #share, Vfun: VectorFun[V] val] is
  (Stringable & Equatable[Vector[V, Vfun]])
 """
 trait for class wrappers for tuple types
@@ -398,22 +399,14 @@ trait for class wrappers for tuple types
   fun ref update(value: (box->Vector[V, Vfun] | V)) =>
     """set this vector value to instance|tuple"""
 
-  fun eq(that: (Vector[V, Vfun] box | V)): Bool  =>
+  fun eq(that: (Vector[V, Vfun] box | V)): Bool =>
     """test equality with this vector and another instance|tuple"""
     let mine: V = as_tuple()
-    match that
-    | let v: Vector[V, Vfun] box => Vfun.eq(mine, v.as_tuple(), F32.epsilon())
-    | let v: V =>
-      Vfun.eq(mine, v, F32.epsilon())
-    end
+    Vfun.eq(mine, _tuplize(that), F32.epsilon())
 
   fun ne(that: (Vector[V, Vfun] box | V)): Bool => not eq(that)
 
-  fun _tuplize(that: (Vector[V, Vfun] box | V)): V =>
-    match that
-    | let v: V => v
-    | let v: Vector[V, Vfun] box => v.as_tuple()
-    end
+  fun _tuplize(that: (Vector[V, Vfun] box | V)): V
 
 
 class Vector2 is Vector[V2, V2fun]
@@ -452,6 +445,11 @@ class Vector2 is Vector[V2, V2fun]
 
   fun box string(): String iso^ => Linear.to_string(as_tuple())
 
+  fun _tuplize(that: box->AnyVector2): V2 =>
+    match that
+    | let v: V2 => v
+    | let v: Vector[V2, V2fun] box => v.as_tuple()
+    end
 
 class Vector3 is Vector[V3, V3fun]
   """class wrapper for V3 - see Vector for details"""
@@ -490,6 +488,12 @@ class Vector3 is Vector[V3, V3fun]
 
   fun box string(): String iso^ => Linear.to_string(as_tuple())
 
+  fun _tuplize(that: box->AnyVector3): V3 =>
+    match that
+    | let v: V3 => v
+    | let v: Vector[V3, V3fun] box => v.as_tuple()
+    end
+
 class Vector4 is Vector[V4, V4fun]
   """class wrapper for V4 - see Vector for details"""
   var _x: F32
@@ -524,3 +528,9 @@ class Vector4 is Vector[V4, V4fun]
     end
 
   fun string(): String iso^ => Linear.to_string(as_tuple())
+
+  fun _tuplize(that: box->AnyVector4): V4 =>
+    match that
+    | let v: V4 => v
+    | let v: Vector[V4, V4fun] box => v.as_tuple()
+    end
