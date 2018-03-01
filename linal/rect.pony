@@ -1,6 +1,6 @@
 type R4 is (V2, F32, F32)
 """
-R4 (Rectangle) is Position, Width, Height
+R4 is a tuple based Rectangle (Position, Width, Height)
 
 Position is always bottom left, also called origin
 
@@ -107,9 +107,10 @@ primitive R4fun
       (Linear.unlerp(r._1._1, x_max(r), pt._1),
        Linear.unlerp(r._1._2, y_max(r), pt._2))
 
-  fun eq(lhs: R4, rhs: R4): Bool =>
-    (lhs._1._1 == rhs._1._1) and (lhs._1._2 == rhs._1._2) and
-     (lhs._2 == rhs._2) and (lhs._3 == rhs._3)
+  fun eq(lhs: R4, rhs: R4, eps: F32 = F32.epsilon()): Bool =>
+    V2fun.eq(lhs._1, rhs._1, eps) and
+      Linear.eq(lhs._2, rhs._2, eps) and
+      Linear.eq(lhs._3, rhs._3, eps)
 
   fun to_string(r: R4) : String iso^ =>
     """string format a rectangle"""

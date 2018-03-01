@@ -1,9 +1,65 @@
-primitive Linear
-  """
-  linear functions and helpers for linal types
-  """
+type LinalType is (V2 | V3 | V4 | M2 | M3 | M4 |
+                      Q4 | R4 | R2 | P4 | F32)
 
-  fun to_string(o: (Q4 | M2 | M3 | M4 | OptVector| F32)): String iso^ =>
+primitive Linear
+"""linear functions and helpers for linal types"""
+  fun vector2(): V2fun => V2fun
+  fun vector3(): V3fun => V3fun
+  fun vector4(): V4fun => V4fun
+  fun matrix2(): M2fun => M2fun
+  fun matrix3(): M3fun => M3fun
+  fun matrix4(): M4fun => M4fun
+  fun quaternion(): Q4fun => Q4fun
+  fun rectangle(): R4fun => R4fun
+  fun ray(): R2fun => R2fun
+  fun plane(): P4fun => P4fun
+
+  fun is_scalar(o: LinalType): Bool =>
+    match o
+    | let f: F32 => true
+    else false end
+  fun is_vector2(o: LinalType): Bool =>
+    match o
+    | let v: V2 => true
+    else false end
+  fun is_vector3(o: LinalType): Bool =>
+    match o
+    | let v: V3 => true
+    else false end
+  fun is_vector4(o: LinalType): Bool =>
+    match o
+    | let v: V4 => true
+    else false end
+  fun is_matrix2(o: LinalType): Bool =>
+    match o
+    | let m: M2 => true
+    else false end
+  fun is_matrix3(o: LinalType): Bool =>
+    match o
+    | let m: M3 => true
+    else false end
+  fun is_matrix4(o: LinalType): Bool =>
+    match o
+    | let m: M4 => true
+    else false end
+  fun is_quaternion(o: LinalType): Bool =>
+    match o
+    | let q: Q4 => true
+    else false end
+  fun is_rectangle(o: LinalType): Bool =>
+    match o
+    | let r: R4 => true
+    else false end
+  fun is_ray(o: LinalType): Bool =>
+    match o
+    | let r: R2 => true
+    else false end
+  fun is_plane(o: LinalType): Bool =>
+    match o
+    | let p: P4 => true
+    else false end
+
+  fun to_string(o: (LinalType|None)): String iso^ =>
     """convert linal tuple based objects to string"""
     match o
     | let v: V2 => V2fun.to_string(v)
@@ -13,8 +69,11 @@ primitive Linear
     | let m: M2 => M2fun.to_string(m)
     | let m: M3 => M3fun.to_string(m)
     | let m: M4 => M4fun.to_string(m)
+    | let r: R4 => R4fun.to_string(r)
+    | let r: R2 => R2fun.to_string(r)
+    | let p: P4 => P4fun.to_string(p)
     | let f: F32 => f.string()
-    else None.string()
+    | None =>  None.string()
     end
 
   fun eq(a: F32, b: F32, eps: F32 = F32.epsilon()): Bool =>
@@ -76,4 +135,5 @@ primitive Linear
 
   fun tolerance(): F32 => 1.0e-6
 
-  // fun near_zero(a: F32)=> a.abs() < tolerance()
+  fun near_zero(a: F32): Bool => a.abs() < tolerance()
+  fun near_eq(a: F32, b: F32): Bool => near_zero(a - b)

@@ -20,5 +20,13 @@
   let c = V2fun(3,3) // apply sugar => V2
   let d = V2fun.add(a, b) // a + b
   let f = V2fun.mul(V2fun.unit(d), 5) // scale to 5 units
+
+## Types
+
+### Vectors
+
+  * V2 - x, y pair
+ * V2fun - functions for V2
+
 ```
 """

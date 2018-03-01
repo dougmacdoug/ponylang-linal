@@ -1,6 +1,6 @@
 use "ponytest"
 
-type _Testable is (F32 | M2 | M3 | M4 | OptVector)
+type _Testable is (LinalType | None)
 
 class _TWrap is (Stringable & Equatable[_TWrap])
   var _o: _Testable = None
@@ -18,7 +18,11 @@ class _TWrap is (Stringable & Equatable[_TWrap])
     | (let a: M2,  let b: M2) =>   M2fun.eq(a, b, _eps)
     | (let a: M3,  let b: M3) =>   M3fun.eq(a, b, _eps)
     | (let a: M4,  let b: M4) =>   M4fun.eq(a, b, _eps)
+    | (let a: R4,  let b: R4) =>   R4fun.eq(a, b, _eps)
+    | (let a: R2,  let b: R2) =>   R2fun.eq(a, b, _eps)
+    | (let a: P4,  let b: P4) =>   P4fun.eq(a, b, _eps)
     | (let a: F32, let b: F32) => Linear.eq(a, b, _eps)
+    | (None, None) => true
     else false
     end
 
@@ -93,6 +97,7 @@ actor Main is TestList
     test(_TestLinearEq)
     test(_TestLinearClamp)
     test(_TestLinearFun)
+    test(_TestIntersect)
 
 class iso _TestLinearString is UnitTest
   fun name():String => "Linear/String"

@@ -1,12 +1,6 @@
 type P4 is (V3, F32)
 """P4 is a tuple based plane represented as (Normal, Distance)"""
 
-primitive Intersects
-  fun ray_point(ray: R3, pt: V3) : Bool =>
-    false
-  fun plane_plane(a: P4, b: P4): R3 ? =>
-    error
-
 primitive P4fun
   fun apply(norm: V3, d: F32): P4 => (norm, d)
   fun normal(p: P4): V3 => p._1
@@ -90,9 +84,8 @@ primitive P4fun
     let rz = (n._1 * (xz - wy)) + (n._2 * (yz + wx)) + (n._3 * (1 - xx - yy))
     ((rx, ry, rz),  p._2)
 
-  fun eq(a: P4, b: P4): Bool =>
-    V3fun.eq(a._1, b._1) and Linear.eq(a._2, b._2)
-
+  fun eq(a: P4, b: P4, eps: F32 = F32.epsilon()): Bool =>
+    V3fun.eq(a._1, b._1, eps) and Linear.eq(a._2, b._2, eps)
 
   fun to_string(p: P4): String iso^ =>
     recover
