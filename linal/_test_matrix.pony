@@ -13,10 +13,10 @@ class iso _TestM2fun is UnitTest
     let a1 = try m2.from_array(arr)? else m2.zero() end
     let a2 = try m2.from_array(arr, 2)? else m2.zero() end
 
-    let rx = m2.rowx(m2.id())
-    let cx = m2.colx(m2.id())
-    let ry = m2.rowy(m2.id())
-    let cy = m2.coly(m2.id())
+    let rx = m2.row_x(m2.id())
+    let cx = m2.col_x(m2.id())
+    let ry = m2.row_y(m2.id())
+    let cy = m2.col_y(m2.id())
     test.assert_eq(rx, cx, "Row X == Col X")
     test.assert_eq(ry, cy, "Row Y == Col Y")
     test.assert_ne(rx, ry, "Row X =/= Row Y")
@@ -58,10 +58,10 @@ class iso _TestM3fun is UnitTest
     let a1 = try m3.from_array(arr)? else m3.zero() end
     let a2 = try m3.from_array(arr, 2)? else m3.zero() end
 
-    let rx = m3.rowx(m3.id())
-    let cx = m3.colx(m3.id())
-    let ry = m3.rowy(m3.id())
-    let cy = m3.coly(m3.id())
+    let rx = m3.row_x(m3.id())
+    let cx = m3.col_x(m3.id())
+    let ry = m3.row_y(m3.id())
+    let cy = m3.col_y(m3.id())
     test.assert_eq(rx, cx, "Row X == Col X")
     test.assert_eq(ry, cy, "Row Y == Col Y")
     test.assert_ne(rx, ry, "Row X =/= Row Y")
@@ -127,10 +127,10 @@ class iso _TestM3fun is UnitTest
       let all1: Matrix4 box = Matrix4(M4fun(V4fun.id(), V4fun.id(),
         V4fun.id(), V4fun.id()))
 
-      let x = M4fun.rowx(M4fun.id())
-      let y = M4fun.rowy(M4fun.id())
-      let z = M4fun.rowz(M4fun.id())
-      let w = M4fun.roww(M4fun.id())
+      let x = M4fun.row_x(M4fun.id())
+      let y = M4fun.row_y(M4fun.id())
+      let z = M4fun.row_z(M4fun.id())
+      let w = M4fun.row_w(M4fun.id())
       let v4one = V4fun.add(V4fun.add(V4fun.add(x, y), z), w)
 
       let ma = Matrix4            // zero

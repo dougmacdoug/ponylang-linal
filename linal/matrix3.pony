@@ -13,22 +13,22 @@ primitive M3fun
   fun id(): M3 =>
     """identity matrix 3x3"""
     ((1, 0, 0), (0, 1, 0), (0, 0, 1))
-  fun rowx(m: M3): V3 =>
+  fun row_x(m: M3): V3 =>
     """x or 1st row"""
     m._1
-  fun rowy(m: M3): V3 =>
+  fun row_y(m: M3): V3 =>
     """y or 2nd row"""
     m._2
-  fun rowz(m: M3): V3 =>
+  fun row_z(m: M3): V3 =>
     """z or 3rd row"""
     m._3
-  fun colx(m: M3): V3 =>
+  fun col_x(m: M3): V3 =>
     """x or 1st column"""
     (m._1._1, m._2._1, m._3._1)
-  fun coly(m: M3): V3 =>
+  fun col_y(m: M3): V3 =>
     """y or 2nd column"""
     (m._1._2, m._2._2, m._3._2)
-  fun colz(m: M3): V3 =>
+  fun col_z(m: M3): V3 =>
     """z or 3rd column"""
     (m._1._3, m._2._3, m._3._3)
 
@@ -118,10 +118,10 @@ primitive M3fun
      (m._1._1 * m._2._3 * m._3._2) -
      (m._1._2 * m._2._1 * m._3._3))
 
-  fun inv(m: M3): M3 ? =>
+  fun inv(m: M3): (M3 | None) =>
     """inverse"""
     let d =  det(m)
-    if d == 0 then error end
+    if d == 0 then None end
     ((((m._2._2 * m._3._3) - (m._2._3 * m._3._2)) / d,
       ((m._3._2 * m._1._3) - (m._3._3 * m._1._2)) / d,
       ((m._1._2 * m._2._3) - (m._1._3 * m._2._2)) / d),
@@ -132,10 +132,10 @@ primitive M3fun
       ((m._3._1 * m._1._2) - (m._3._2 * m._1._1)) / d,
       ((m._1._1 * m._2._2) - (m._1._2 * m._2._1)) / d))
 
-  fun solve(m: M3, v: V3): V3 ? =>
+  fun solve(m: M3, v: V3): (V3 | None) =>
     """solve"""
     let d  = det(m)
-    if Linear.eq(d, 0) then error end
+    if Linear.eq(d, 0) then None end
     let dx = det(((v._1, m._1._2, m._1._3),
                   (v._2, m._2._2, m._2._3),
                   (v._3, m._3._2, m._3._3)))
@@ -227,20 +227,20 @@ class Matrix3 is (Stringable & Equatable[Matrix3])
   fun mul(s: F32): M3 => M3fun.mul(m3(), s)
   fun div(s: F32): M3 => M3fun.div(m3(), s)
   fun neg(): M3 => M3fun.neg(m3())
-  fun rowx(): V3 => M3fun.rowx(m3())
-  fun rowy(): V3 => M3fun.rowy(m3())
-  fun rowz(): V3 => M3fun.rowz(m3())
-  fun colx(): V3 => M3fun.colx(m3())
-  fun coly(): V3 => M3fun.coly(m3())
-  fun colz(): V3 => M3fun.colz(m3())
+  fun row_x(): V3 => M3fun.row_x(m3())
+  fun row_y(): V3 => M3fun.row_y(m3())
+  fun row_z(): V3 => M3fun.row_z(m3())
+  fun col_x(): V3 => M3fun.col_x(m3())
+  fun col_y(): V3 => M3fun.col_y(m3())
+  fun col_z(): V3 => M3fun.col_z(m3())
 
   fun trans(): M3 => M3fun.trans(m3())
   fun v3_mul(v: V3): V3 => M3fun.v3_mul(m3(), v)
   fun m3_mul(that: M3): M3 => M3fun.m3_mul(m3(), that)
   fun trace(): F32 => M3fun.trace(m3())
   fun det(): F32 => M3fun.det(m3())
-  fun inv(): M3 ? => M3fun.inv(m3())?
-  fun solve(v: V3): V3 ? => M3fun.solve(m3(), v)?
+  fun inv(): (M3 | None) => M3fun.inv(m3())
+  fun solve(v: V3): (V3 | None) => M3fun.solve(m3(), v)
 
   fun get(index: (USize | (USize, USize))): F32 ? =>
     """get cell value. flat array index or (row, col)"""

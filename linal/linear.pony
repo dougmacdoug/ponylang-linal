@@ -137,3 +137,31 @@ primitive Linear
 
   fun near_zero(a: F32): Bool => a.abs() < tolerance()
   fun near_eq(a: F32, b: F32): Bool => near_zero(a - b)
+
+  fun to_v2(any_v: box->AnyVector): V2 =>
+    match any_v
+    | let v: V2 => v
+    | let v: Vector[V2, V2fun] box => v.as_tuple()
+    | let v: V3 => V3fun.v2(v)
+    | let v: Vector[V3, V3fun] box => V3fun.v2(v.as_tuple())
+    | let v: V4 => V4fun.v2(v)
+    | let v: Vector[V4, V4fun] box => V4fun.v2(v.as_tuple())
+    end
+  fun to_v3(any_v: box->AnyVector): V3 =>
+    match any_v
+    | let v: V2 => V2fun.v3(v)
+    | let v: Vector[V2, V2fun] box => V2fun.v3(v.as_tuple())
+    | let v: V3 => v
+    | let v: Vector[V3, V3fun] box => v.as_tuple()
+    | let v: V4 => V4fun.v3(v)
+    | let v: Vector[V4, V4fun] box => V4fun.v3(v.as_tuple())
+    end
+  fun to_v4(any_v: box->AnyVector): V4 =>
+    match any_v
+    | let v: V2 => V2fun.v4(v)
+    | let v: Vector[V2, V2fun] box => V2fun.v4(v.as_tuple())
+    | let v: V3 => V3fun.v4(v)
+    | let v: Vector[V3, V3fun] box => V3fun.v4(v.as_tuple())
+    | let v: V4 => v
+    | let v: Vector[V4, V4fun] box => v.as_tuple()
+    end

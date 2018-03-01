@@ -2,10 +2,28 @@
 primitive Intersect
   """provides hit test methods for linal types"""
 
-  fun ray_point(ray: R2, pt: V3) : Bool =>
-    false
+  fun ray_point(ray: R2, pt: V3) : (V3 | None) =>
+    let m = V3fun.sub(ray._1, pt)
+    let b = V3fun.dot(m, ray._2)
+    let c = V3fun.dot(m, m) - Linear.tolerance()
+    let d = (b * b) - c
+    if ((c > 0) and (b > 0)) or (d < 0) then 
+      None
+    else pt end
+
   fun plane_plane(a: P4, b: P4): (R2 | None) =>
-    None
+    (let a_norm, let a_dist) = a
+    (let b_norm, let b_dist) = b
+    let dir = V3fun.cross(a_norm, b_norm)
+    let d =  V3fun.dot(dir, dir)
+    if Linear.near_zero(d) then return None end
+    
+    let a_x = V3fun.mul(a_norm, b_dist)
+    let b_x = V3fun.mul(b_norm, a_dist)
+    let tmp = V3fun.sub(b_x, a_x)
+    let pt: V3 = V3fun.cross(tmp, dir)
+
+    R2fun(pt, V3fun.unit(dir))
   
   fun v2_rect(v2: V2, r: R4): (V2 | None) =>
     """if intersects return point translated from origin"""
@@ -40,24 +58,26 @@ primitive Intersect
     R4fun(min_x, min_y, max_x - min_x, max_y - min_y)
 
   fun ray_ray(a: R2, b: R2): (V3 | None) =>
-    let axb = V3fun.cross(a._2, b._2)
+    (let a_pt, let a_dir) = a
+    (let b_pt, let b_dir) = b
+    let axb = V3fun.cross(a_dir, b_dir)
     var d = V3fun.len(axb)
-    if Linear.approx_eq(d, 0) and
-      Linear.approx_eq(a._1._1, b._1._1) and
-      Linear.approx_eq(a._1._2, b._1._2) and
-      Linear.approx_eq(a._1._3, b._1._3) then
+    if Linear.near_zero(d) and
+      Linear.near_eq(a_pt._1, b_pt._1) and
+      Linear.near_eq(a_pt._2, b_pt._2) and
+      Linear.near_eq(a_pt._3, b_pt._3) then
       return V3fun.zero()
     end
     d = d * d
-    let ma: M3 = (V3fun.sub(b._1, a._1), b._2, axb)
+    let ma: M3 = (V3fun.sub(b_pt, a_pt), b_dir, axb)
     let ds = M3fun.det(ma)
-    let mb: M3 = (ma._1, a._2, ma._3)
+    let mb: M3 = (ma._1, a_dir, ma._3)
     let dt = M3fun.det(mb)
     let s = ds / d
     let t = dt / d
 
-    let p1 = V3fun.add(a._1, V3fun.mul(a._2, s))
-    let p2 = V3fun.add(b._1, V3fun.mul(b._2, t))
+    let p1 = V3fun.add(a_pt, V3fun.mul(a_dir, s))
+    let p2 = V3fun.add(b_pt, V3fun.mul(b_dir, t))
     if V3fun.eq(p1, p2, Linear.tolerance()) then
       p1
     else

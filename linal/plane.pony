@@ -21,8 +21,8 @@ primitive P4fun
     (norm, dist)
 
   fun unit(p: P4): P4 =>
-    let len' = V3fun.len(p._1)
-    (V3fun.div(p._1, len'), p._2 / len')
+    let len = V3fun.len(p._1)
+    (V3fun.div(p._1, len), p._2 / len)
 
   fun reflect_m4(p: P4): M4 =>
     (let x, let y, let z) = p._1
@@ -52,9 +52,7 @@ primitive P4fun
 
   fun reflect_m3(p: P4): M3 =>
     let m = reflect_m4(p)
-    ((m._1._1, m._1._2, m._1._3),
-     (m._2._1, m._2._2, m._2._3),
-     (m._3._1, m._3._2, m._3._3))
+    (V4fun.v3(m._1), V4fun.v3(m._2),V4fun.v3(m._3))
 
   fun dot(p: P4, v: V4): F32 =>
     V3fun.dot(p._1, V4fun.v3(v)) + (p._2 * v._4)

@@ -6,18 +6,16 @@ type V4 is (F32, F32, F32, F32)
 """ tuple based Vector 4 alias - see VectorFun for functions"""
 type FixVector  is (V2 | V3 | V4)
 """ tuple based Vector alias - see VectorFun for functions"""
-// @TODO: consider removing.. not particularly useful
-type OptVector is (FixVector | None)
-""" tuple based Vector or None alias"""
 
 // @Hack VectorX is Vector[VX, VXfun] but compiler requires both in the alias
-type Vector2X is (Vector2 | Vector[V2, V2fun])
-type AnyVector2 is (Vector2X | V2)
+type AnyVector2 is (Vector2 | Vector[V2, V2fun] | V2)
 """instance|tuple vector 2 alias - see Vector and VectorFun"""
 type AnyVector3 is (Vector3 | Vector[V3, V3fun] | V3)
 """instance|tuple vector 3 alias - see Vector and VectorFun"""
 type AnyVector4 is (Vector4 | Vector[V4, V4fun] | V4)
 """instance|tuple vector 4 alias - see Vector and VectorFun"""
+type AnyVector is (AnyVector2 | AnyVector3 | AnyVector4)
+"""instance|tuple vector 2,3,4 alias - see Vector and VectorFun"""
 
 trait VectorFun[V]
 """Trait defining tuple based vector functions"""

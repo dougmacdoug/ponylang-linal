@@ -12,28 +12,28 @@ primitive M4fun
   fun id(): M4 =>
     """identity matrix 4x4"""
     ((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1))
-  fun rowx(m: M4): V4 =>
+  fun row_x(m: M4): V4 =>
     """x or 1st row"""
     m._1
-  fun rowy(m: M4): V4 =>
+  fun row_y(m: M4): V4 =>
     """y or 2nd row"""
     m._2
-  fun rowz(m: M4): V4 =>
+  fun row_z(m: M4): V4 =>
     """z or 3rd row"""
     m._3
-  fun roww(m: M4): V4 =>
+  fun row_w(m: M4): V4 =>
     """w or 4th row"""
     m._4
-  fun colx(m: M4): V4 =>
+  fun col_x(m: M4): V4 =>
     """x or 1st column"""
     (m._1._1, m._2._1, m._3._1, m._4._1)
-  fun coly(m: M4): V4 =>
+  fun col_y(m: M4): V4 =>
     """y or 2nd column"""
     (m._1._2, m._2._2, m._3._2, m._4._2)
-  fun colz(m: M4): V4 =>
+  fun col_z(m: M4): V4 =>
     """z or 3rd column"""
     (m._1._3, m._2._3, m._3._3, m._4._3)
-  fun colw(m: M4): V4 =>
+  fun col_w(m: M4): V4 =>
     """w or 3rd column"""
     (m._1._4, m._2._4, m._3._4, m._4._4)
   fun from_array(a: Array[F32] box, offset: USize=0): M4 ? =>
@@ -206,12 +206,12 @@ primitive M4fun
     (n1 * n12) + (-n2 * n11) + (n3 * n10) +
     (n4 * n9)  + (-n5 * n8)  + (n6 * n7)
 
-  fun inv(m: M4): M4 ? =>
+  fun inv(m: M4): (M4 | None) =>
     """inverse"""
     // inline det reduces operations
     let n = _det1(m)
     let d = _det2(n)
-    if Linear.eq(d, 0) then error end
+    if Linear.eq(d, 0) then None end
     let d' = 1 / d
 
     ((let n1, let n2, let n3, let n4),
@@ -238,7 +238,7 @@ primitive M4fun
     ((b11, b12, b13, b14), (b21, b22, b23, b24),
      (b31, b32, b33, b34), (b41, b42, b43, b44))
 
-  fun solve(m: M4, v: V4): V4 ? =>
+  fun solve(m: M4, v: V4): (V4 | None) =>
     """solve"""
     // inline det reduces operations
     let n = _det1(m)
@@ -391,22 +391,22 @@ class Matrix4 is (Stringable & Equatable[Matrix4])
   fun mul(s: F32): M4 => M4fun.mul(m4(), s)
   fun div(s: F32): M4 => M4fun.div(m4(), s)
   fun neg(): M4 => M4fun.neg(m4())
-  fun rowx(): V4 => M4fun.rowx(m4())
-  fun rowy(): V4 => M4fun.rowy(m4())
-  fun rowz(): V4 => M4fun.rowz(m4())
-  fun roww(): V4 => M4fun.roww(m4())
-  fun colx(): V4 => M4fun.colx(m4())
-  fun coly(): V4 => M4fun.coly(m4())
-  fun colz(): V4 => M4fun.colz(m4())
-  fun colw(): V4 => M4fun.colw(m4())
+  fun row_x(): V4 => M4fun.row_x(m4())
+  fun row_y(): V4 => M4fun.row_y(m4())
+  fun row_z(): V4 => M4fun.row_z(m4())
+  fun row_w(): V4 => M4fun.row_w(m4())
+  fun col_x(): V4 => M4fun.col_x(m4())
+  fun col_y(): V4 => M4fun.col_y(m4())
+  fun col_z(): V4 => M4fun.col_z(m4())
+  fun col_w(): V4 => M4fun.col_w(m4())
 
   fun trans(): M4 => M4fun.trans(m4())
   fun v4_mul(v: V4): V4 => M4fun.v4_mul(m4(), v)
   fun m4_mul(that: M4): M4 => M4fun.m4_mul(m4(), that)
   fun trace(): F32 => M4fun.trace(m4())
   fun det(): F32 => M4fun.det(m4())
-  fun inv(): M4 ? => M4fun.inv(m4())?
-  fun solve(v: V4): V4 ? => M4fun.solve(m4(), v)?
+  fun inv(): (M4 | None) => M4fun.inv(m4())
+  fun solve(v: V4): (V4 | None) => M4fun.solve(m4(), v)
 
   fun get(index: (USize | (USize, USize))): F32 ? =>
     """get cell value. flat array index or (row, col)"""

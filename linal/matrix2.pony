@@ -14,16 +14,16 @@ primitive M2fun
   fun id(): M2 =>
   """identity matrix 2x2"""
     ((1, 0), (0, 1))
-  fun rowx(m: M2): V2 =>
+  fun row_x(m: M2): V2 =>
   """x or 1st row"""
     m._1
-  fun rowy(m: M2): V2 =>
+  fun row_y(m: M2): V2 =>
     """y or 2nd row"""
     m._2
-  fun colx(m: M2): V2 =>
+  fun col_x(m: M2): V2 =>
     """x or 1st column"""
     (m._1._1, m._2._1)
-  fun coly(m: M2): V2 =>
+  fun col_y(m: M2): V2 =>
     """y or 2nd column"""
     (m._1._2, m._2._2)
 
@@ -150,10 +150,10 @@ class Matrix2 is (Stringable & Equatable[Matrix2])
   fun mul(s: F32): M2 => M2fun.mul(m2(), s)
   fun div(s: F32): M2 => M2fun.div(m2(), s)
   fun neg(): M2 => M2fun.neg(m2())
-  fun rowx(): V2 => M2fun.rowx(m2())
-  fun rowy(): V2 => M2fun.rowy(m2())
-  fun colx(): V2 => M2fun.colx(m2())
-  fun coly(): V2 => M2fun.coly(m2())
+  fun row_x(): V2 => M2fun.row_x(m2())
+  fun row_y(): V2 => M2fun.row_y(m2())
+  fun col_x(): V2 => M2fun.col_x(m2())
+  fun col_y(): V2 => M2fun.col_y(m2())
 
   fun trans(): M2 => M2fun.trans(m2())
   fun v2_mul(v: V2): V2 => M2fun.v2_mul(m2(), v)
