@@ -183,7 +183,7 @@ primitive M4fun
     """determinant"""
     let n = _det1(m)
     _det2(n)
-   
+
   fun _det1(m: M4): (V4, V4, V4) =>
     let n1  = (m._1._1 * m._2._2) - (m._1._2 * m._2._1)
     let n2  = (m._1._1 * m._2._3) - (m._1._3 * m._2._1)
@@ -357,10 +357,10 @@ class Matrix4 is (Stringable & Equatable[Matrix4])
   var _m42 : F32 = 0
   var _m43 : F32 = 0
   var _m44 : F32 = 0
-  
+
   new create() =>
     """zeroed 4x4 matrix"""
-  
+
   new id() => apply(M4fun.id())
 
   new rot(q: Q4)=>apply(M4fun.rot(q))

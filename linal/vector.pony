@@ -409,17 +409,15 @@ trait for class wrappers for tuple types
 
 class Vector2 is Vector[V2, V2fun]
   """class wrapper for V2 - see Vector for details"""
-  var _x: F32
-  var _y: F32
+  var _x: F32 = 0
+  var _y: F32 = 0
 
-  new create(v': box->AnyVector2) =>
-    (_x, _y) = match v'
-    | let v: Vector[V2, V2fun] box => v.as_tuple()
-    | let v: V2 => (v._1, v._2)
-    end
+  new create() =>
+  """create empty Vector2""""
 
   new zero() => (_x, _y) = (0, 0)
   new id() => (_x, _y) = (1, 1)
+  new xy(x': F32, y': F32) => (_x, _y) = (x', y')
   fun x(): F32 => _x
   fun y(): F32 => _y
   fun z(): F32 ? => error
@@ -435,11 +433,14 @@ class Vector2 is Vector[V2, V2fun]
     """V2->F32 cross product of this and that"""
     V2fun.cross((_x, _y), _tuplize(that))
 
-  fun ref update(value: box->AnyVector2)  =>
+  fun ref apply(value: box->AnyVector2): Vector2  =>
     (_x, _y) = match value
     | let v: Vector[V2, V2fun] box => v.as_tuple()
     | let v: V2 => v
     end
+    this
+
+  fun ref update(value: box->AnyVector2) => apply(value)
 
   fun box string(): String iso^ => Linear.to_string(as_tuple())
 
@@ -451,17 +452,16 @@ class Vector2 is Vector[V2, V2fun]
 
 class Vector3 is Vector[V3, V3fun]
   """class wrapper for V3 - see Vector for details"""
-  var _x: F32
-  var _y: F32
-  var _z: F32
+  var _x: F32 = 0
+  var _y: F32 = 0
+  var _z: F32 = 0
 
-  new create(v': box->AnyVector3) =>
-    (_x, _y, _z) = match v'
-    | let v: Vector[V3, V3fun] box => v.as_tuple()
-    | let v: V3 => v
-    end
+  new create() =>
+  """create empty Vector3""""
+
   new zero() => (_x, _y, _z) = (0, 0, 0)
   new id() => (_x, _y, _z) = (1, 1, 1)
+  new xyz(x': F32, y': F32, z': F32) => (_x, _y, _z) = (x', y', z')
   fun x(): F32 => _x
   fun y(): F32 => _y
   fun z(): F32 => _z
@@ -477,12 +477,15 @@ class Vector3 is Vector[V3, V3fun]
     """cross product of this and that"""
     V3fun.cross((_x, _y, _z), _tuplize(that))
 
-  fun ref update(value: box->AnyVector3)  =>
+  fun ref apply(value: box->AnyVector3): Vector3 =>
     (_x, _y, _z) =
     match value
     | let v: Vector[V3, V3fun] box => v.as_tuple()
     | let v: V3 => v
     end
+    this
+
+  fun ref update(value: box->AnyVector3) => apply(value)
 
   fun box string(): String iso^ => Linear.to_string(as_tuple())
 
@@ -494,19 +497,16 @@ class Vector3 is Vector[V3, V3fun]
 
 class Vector4 is Vector[V4, V4fun]
   """class wrapper for V4 - see Vector for details"""
-  var _x: F32
-  var _y: F32
-  var _z: F32
-  var _w: F32
-
-  new create(v': box->AnyVector4) =>
-    (_x, _y, _z, _w) =
-    match v'
-    | let v: Vector[V4, V4fun] box => v.as_tuple()
-    | let v: V4 => v
-    end
+  var _x: F32 = 0
+  var _y: F32 = 0
+  var _z: F32 = 0
+  var _w: F32 = 0
+  new create() =>
+  """create empty Vector4""""
   new zero() => (_x, _y, _z, _w) = (0, 0, 0, 0)
   new id() => (_x, _y, _z, _w) = (1, 1, 1, 1)
+  new xyzw(x': F32, y': F32, z': F32, w': F32) =>
+    (_x, _y, _z, _w) = (x', y', z', w')
   fun x(): F32 => _x
   fun y(): F32 => _y
   fun z(): F32 => _z
@@ -518,12 +518,15 @@ class Vector4 is Vector[V4, V4fun]
   fun v3(): V3 => (_x, _y, _z)
   fun v4(): V4 => (_x, _y, _z, _w)
 
-  fun ref update(value: box->AnyVector4)  =>
+  fun ref apply(value: box->AnyVector4): Vector4 =>
     (_x, _y, _z, _w) =
     match value
     | let v: Vector[V4, V4fun] box => v.as_tuple()
     | let v: V4 => v
     end
+    this
+
+  fun ref update(value: box->AnyVector4)  => apply(value)
 
   fun string(): String iso^ => Linear.to_string(as_tuple())
 

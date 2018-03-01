@@ -28,8 +28,8 @@ primitive R2fun
      V3fun.eq(a._1, b._1, eps)  and V3fun.eq(a._2, b._2, eps)
 
 class Ray is (Stringable & Equatable[Ray])
-  let _pos: Vector3 ref = Vector3.zero()
-  embed _dir: Vector3 = Vector3((1, 0, 0))
+  embed _pos: Vector3 = Vector3
+  embed _dir: Vector3 = Vector3.xyz(1, 0, 0)
 
   fun ref apply(r: box->AnyRay): Ray =>
     (let pos, let dir) =
@@ -43,7 +43,7 @@ class Ray is (Stringable & Equatable[Ray])
   fun ref move_to(pt: box->AnyVector3): Ray =>
     _pos() = Linear.to_v3(pt)
     this
-  
+
   fun ref aim_at(pt: box->AnyVector3): Ray =>
     let to = Linear.to_v3(pt)
     let rnew = R2fun.cast(_pos.v3(), to)
@@ -61,7 +61,7 @@ class Ray is (Stringable & Equatable[Ray])
 
   fun position(): Vector3 box => _pos
   fun direction(): Vector3 box => _dir
-  
+
   fun box eq(that: box->AnyRay): Bool =>
     let mine = r2()
     let that' =

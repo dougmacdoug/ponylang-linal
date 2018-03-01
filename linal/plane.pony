@@ -1,6 +1,8 @@
 type P4 is (V3, F32)
 """P4 is a tuple based plane represented as (Normal, Distance)"""
 
+type AnyPlane is (Plane | P4)
+
 primitive P4fun
   fun apply(norm: V3, d: F32): P4 => (norm, d)
   fun normal(p: P4): V3 => p._1
@@ -63,7 +65,7 @@ primitive P4fun
   fun dot_normal(p: P4, v: V3): F32 =>
     V3fun.dot(p._1, v)
 
-  fun transform(p: P4, q: Q4): P4 =>  
+  fun transform(p: P4, q: Q4): P4 =>
     let v =  V3fun.mul(V4fun.v3(q), 2)
 
     let wx = q._4 * v._1
@@ -95,3 +97,46 @@ primitive P4fun
       s.push(']')
       s.>recalc()
     end
+
+class Plane is (Stringable & Equatable[Plane])
+  embed _norm: Vector3 = Vector3.xyz(0, 1, 0)
+  var _d: F32 = 0
+
+  fun ref apply(p: box->AnyPlane): Plane =>
+    (let norm, let d) =
+    match p
+    | let p' : P4 => p'
+    | let p' : Plane box => p'.p4()
+    end
+    _norm() = V3fun.unit(norm)
+    _d = d
+    this
+
+  fun ref update(p: box->AnyPlane) =>
+    apply(p)
+
+  fun p4(): P4 => (_norm.v3(), _d)
+  fun as_tuple(): P4 => p4()
+
+  fun normal(): Vector3 box => _norm
+  fun distance(): F32 => _d
+
+  fun reflect_m4(): M4 => P4fun.reflect_m4(p4())
+  fun reflect_m3(): M3 => P4fun.reflect_m3(p4())
+  fun dot(v: V4): F32 =>  P4fun.dot(p4(), v)
+  fun dot_coordinate(v: V3): F32 => P4fun.dot_coordinate(p4(), v)
+  fun dot_normal(v: V3): F32 => P4fun.dot_normal(p4(), v)
+  fun transform(q: Q4): P4 => P4fun.transform(p4(), q)
+
+  fun box eq(that: box->AnyPlane): Bool =>
+    let mine = p4()
+    let that' =
+    match that
+    | let p' : Plane box => p'.p4()
+    | let p' : P4 => p'
+    end
+    P4fun.eq(mine, that')
+
+  fun box ne(that: box->AnyPlane): Bool => not eq(that)
+
+  fun string(): String iso^ => P4fun.to_string(p4())

@@ -34,7 +34,7 @@ such as [LAPACK](https://github.com/Reference-LAPACK/lapack), [GSL](https://www.
   * side-effect free functions
   * float32 internals (F32)
   * 🐎 pure pony
-
+  * efficient wrapper classes available for convenience
 
 Each TYPE consists of a type alias and a primitive behaving similar to a "class"
  - A type alias to a tuple (similar to class state data)
@@ -45,11 +45,24 @@ Each TYPE consists of a type alias and a primitive behaving similar to a "class"
 Example:
 
 ```
-  let a = (F32(1),F32(1)) // simple tuple compatible with V2
-  let b : V2 = (3,3) // declared type alias forces 3's to F32
-  let c = V2fun(3,3) // apply sugar => V2
-  let d = V2fun.add(a, b) // a + b
-  let f = V2fun.mul(V2fun.unit(d), 5) // scale to 5 units
+  let a = (F32(1), F32(1)) // simple tuple compatible with V2
+  let b : V2 = (3, 3)      // declared type alias forces 3's to F32
+  let c = V2fun(3, 3)      // apply sugar => V2
+  let d = V2fun.add(a, b)  // a + b
+  let f = V2fun.mul(V2fun.unit(d), 5) // normalize and scale to 5 units
+
+  let v2 = Linear.vector2()   // readable function alias
+  let p1 = v2(1, 2)           // alias + apply sugar
+  let p2 = v2.add(p1, (1, 1)) // p2 = p1 + (1, 1)
+
+  let vec = Vector2 // wrapper class
+  vec() = vec + p1  // vec = vec + p1 via add sugar, update sugar
+  vec() = vec * 5   // vec = vec * 5 via mul sugar, update sugar
+  vec(p2)           // vec = p2 via apply sugar
+
+  // wrapper classes accept other wrapper instances or tuples
+  let other1 = Vector2(vec)
+  let other2 = Vector2(p1)
 ```
 
 

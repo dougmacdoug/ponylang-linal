@@ -10,8 +10,8 @@ the rectangle is "rectified" having its point of origin
 shifted down and left to accomadate the size
 
 ```
-((0, 0), -2, -3) -> ((-2, -3), 2, 3) [rectified] 
-((-1, 2), 3, -1) -> ((-1, 1), 3, 1) [rectified] 
+((0, 0), -2, -3) -> ((-2, -3), 2, 3) [rectified]
+((-1, 2), 3, -1) -> ((-1, 1), 3, 1) [rectified]
 ```
 """
 type AnyRect is (Rect | R4)
@@ -25,11 +25,11 @@ primitive R4fun
   fun zero(): R4 =>
     """create zero R4"""
     ((0, 0), 0, 0)
-    
+
   fun unit(): R4 =>
     """create unit R4"""
     ((0, 0), 1, 1)
-    
+
   fun sized(w': F32, h': F32): R4 =>
     """create R4 starting at zero with rectified size *(w', h')*"""
     rectify(((0, 0), w', h'))
@@ -85,7 +85,7 @@ primitive R4fun
   fun grow_centered(r: R4, dx: F32, dy: F32): R4 =>
     resize_centered(r, r._2 + dx, r._3 + dy)
 
-  fun contains(r: R4, pt': (V2 | V3)): Bool => 
+  fun contains(r: R4, pt': (V2 | V3)): Bool =>
     let pt: V2 = match pt'
     | let v2: V2 => v2
     | let v3: V3 => V3fun.v2(v3)
@@ -175,7 +175,7 @@ class Rect is (Stringable & Equatable[Rect])
 
   fun r4(): R4 => ((_x, _y), _w, _h)
   fun origin(): V2 => (_x, _y)
-   // @todo: check out .> operator.. return this
+
   fun ref move(pt: V2) =>
     """move to point"""
     apply(R4fun.move(r4(), pt))
