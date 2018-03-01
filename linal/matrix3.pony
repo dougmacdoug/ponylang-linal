@@ -121,7 +121,7 @@ primitive M3fun
   fun inv(m: M3): (M3 | None) =>
     """inverse"""
     let d =  det(m)
-    if d == 0 then None end
+    if Linear.eq(d, 0) then return None end
     ((((m._2._2 * m._3._3) - (m._2._3 * m._3._2)) / d,
       ((m._3._2 * m._1._3) - (m._3._3 * m._1._2)) / d,
       ((m._1._2 * m._2._3) - (m._1._3 * m._2._2)) / d),

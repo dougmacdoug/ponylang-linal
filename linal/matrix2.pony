@@ -82,16 +82,16 @@ primitive M2fun
   fun det(m: M2): F32 =>
     """determinant"""
     (m._1._1 * m._2._2) - (m._1._2 * m._2._1)
-  fun inv(m: M2): M2 ? =>
+  fun inv(m: M2): (M2 | None) =>
     """inverse"""
     let d = det(m)
-    if d == 0 then error end
+    if Linear.eq(d, 0) then return None end
     let m2 = ((m._2._2, -m._1._2), (-m._2._1, m._1._1))
     mul(m2, 1/d)
-  fun solve(m: M2, v: V2): V2 ? =>
+  fun solve(m: M2, v: V2): (V2 | None) =>
     """solve [2x2][2]"""
     let d = -det(m)
-    if d == 0 then error end
+    if d == 0 then return None end
     ((((m._1._2 * v._2) - (m._2._2 * v._1)) / d),
      (((m._2._1 * v._1) - (m._1._1 * v._2)) / d))
 
@@ -160,8 +160,8 @@ class Matrix2 is (Stringable & Equatable[Matrix2])
   fun m2_mul(that: M2): M2 => M2fun.m2_mul(m2(), that)
   fun trace(): F32 => M2fun.trace(m2())
   fun det(): F32 => M2fun.det(m2())
-  fun inv(): M2 ? => M2fun.inv(m2())?
-  fun solve(v: V2): V2 ? => M2fun.solve(m2(), v)?
+  fun inv(): (M2 | None)  => M2fun.inv(m2())
+  fun solve(v: V2): (V2 | None) => M2fun.solve(m2(), v)
 
   fun get(index: (USize | (USize, USize))): F32 ? =>
     """get cell value. flat array index or (row, col)"""

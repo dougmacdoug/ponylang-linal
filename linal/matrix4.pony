@@ -211,7 +211,7 @@ primitive M4fun
     // inline det reduces operations
     let n = _det1(m)
     let d = _det2(n)
-    if Linear.eq(d, 0) then None end
+    if Linear.eq(d, 0) then return None end
     let d' = 1 / d
 
     ((let n1, let n2, let n3, let n4),
@@ -243,7 +243,7 @@ primitive M4fun
     // inline det reduces operations
     let n = _det1(m)
     let d = _det2(n)
-    if Linear.eq(d, 0) then error end
+    if Linear.eq(d, 0) then return None end
     let d' = 1 / d
 
     ((let n1, let n2, let n3, let n4),

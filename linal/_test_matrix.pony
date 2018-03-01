@@ -11,7 +11,7 @@ class iso _TestM2fun is UnitTest
     let one = m2(v2.id(), v2.id())
     let two = m2.add(one, one)
     let a1 = try m2.from_array(arr)? else m2.zero() end
-    let a2 = try m2.from_array(arr, 2)? else m2.zero() end
+    let a2 = try m2.from_array(arr, 2)? else m2.zero() end 
 
     let rx = m2.row_x(m2.id())
     let cx = m2.col_x(m2.id())
@@ -40,7 +40,7 @@ class iso _TestM2fun is UnitTest
     test.assert_eq((8,18), m2.v2_mul(a1, (2,3)), "m2 * v2")
     test.assert_eq(((13,16),(29,36)), m2.m2_mul(a1, a2), "m2 * m2")
     test.assert_eq(5, m2.trace(a1), "trace")
-    let solve_answer = try m2.solve(((2,3), (10,16)), (1,2))? else zero end
+    let solve_answer = m2.solve(((2,3), (10,16)), (1,2))
     test.assert_eq((5, -3), solve_answer, "Ax=b")
     test.assert_eq(-13, m2.det(((5, -1),(2, -3))), "determinant")
     test.assert_eq(-2, m2.det(a1), "determinant a1")
@@ -84,22 +84,14 @@ class iso _TestM3fun is UnitTest
 
     let m3_sample = m3((1, 2, 3), (0, 1, 4), (5, 6, 0))
     let m3_sample_inv = m3((-24, 18, 5), (20, -15, -4), (-5, 4, 1))
-    let inv32 = try m3.inv(m3_sample)? else m3.zero() end
+    let inv32 = m3.inv(m3_sample)
     test.assert_eq(1, m3.det(m3_sample), "det 1")
 
-    test.assert_eq(m3_sample_inv,
-      try m3.inv(m3_sample)? else m3.zero() end, "inverse det=1")
+    test.assert_eq(m3_sample_inv, m3.inv(m3_sample), "inverse det=1")
 
-    test.assert_eq(m3.id(),
-      try m3.inv(m3.id())? else m3.zero() end, "inverse id = id")
+    test.assert_eq(m3.id(), m3.inv(m3.id()), "inverse id = id")
 
-    h.log("try invalid inverse " + m3.to_string(a1))
-    try
-      m3.inv(a1)?
-      h.fail("invalid inverse did not error")
-    else
-      h.log("passed invalid inverse check")
-    end
+    test.assert_eq(None, m3.inv(a1), "invalid inverse")
 
     test.assert_eq(m3.id(), m3.trans(m3.id()), "translate id = id")
     test.assert_eq(
@@ -118,7 +110,7 @@ class iso _TestM3fun is UnitTest
 
     let solve_m3 = m3((1, 2, 2), (3, -2, 1), (2, 1, -1))
     let solve_v3 = v3(5, -6, -1)
-    let solve_answer = try m3.solve(solve_m3, solve_v3)? else zero end
+    let solve_answer = m3.solve(solve_m3, solve_v3)
     test.assert_eq(v3(-1, 2, 1), solve_answer, "solve [m3][v3] equation")
 
     fun _testMatrix(h: TestHelper) =>
