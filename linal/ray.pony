@@ -41,11 +41,11 @@ class Ray is (Stringable & Equatable[Ray])
     _dir() = V3fun.unit(dir)
     this
   fun ref move_to(pt: box->AnyVector3): Ray =>
-    _pos() = Linear.to_v3(pt)
+    _pos() = _MakeV3(pt)
     this
 
   fun ref aim_at(pt: box->AnyVector3): Ray =>
-    let to = Linear.to_v3(pt)
+    let to = _MakeV3(pt)
     let rnew = R2fun.cast(_pos.v3(), to)
     _dir() = R2fun.direction(rnew)
     this

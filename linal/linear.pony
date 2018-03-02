@@ -1,8 +1,11 @@
 type LinalType is (V2 | V3 | V4 | M2 | M3 | M4 |
                       Q4 | R4 | R2 | P4 | F32)
+"""All tuple types defined in linal"""
 
 primitive Linear
-"""linear functions and helpers for linal types"""
+"""
+linear functions and helpers for linal types
+"""
   fun vector2(): V2fun => V2fun
   fun vector3(): V3fun => V3fun
   fun vector4(): V4fun => V4fun
@@ -59,7 +62,7 @@ primitive Linear
     | let p: P4 => true
     else false end
 
-  fun to_string(o: (LinalType|None)): String iso^ =>
+  fun to_string(o: (LinalType | None)): String iso^ =>
     """convert linal tuple based objects to string"""
     match o
     | let v: V2 => V2fun.to_string(v)
@@ -79,24 +82,30 @@ primitive Linear
   fun eq(a: F32, b: F32, eps: F32 = F32.epsilon()): Bool =>
     """floating point equality with epsilon"""
     (a - b).abs() < eps
+
+  fun lerp_unclamped(a: F32, b: F32, t: F32): F32 =>
+    """floating point lerp t% unclamped from a to b"""
+    ((1 - t) * a) + (b * t)
+
   fun lerp(a: F32, b: F32, t: F32): F32 =>
-    """floating point lerp t% (0-1) from a to b"""
+    """floating point lerp t% clamped(0-1) from a to b"""
     let t' = clamp01(t)
-    (a*(1-t')) + (b*t')
+    (a * (1 - t')) + (b * t')
+
   fun unlerp(a: F32, b: F32, t: F32): F32 =>
     """floating point unlerp t% (0-1) from b to a"""
     let t' = clamp01(t)
-    (t'-a)/(b-a)
+    (t' - a) / (b - a)
   fun smooth_step(a: F32, b: F32, t: F32): F32 =>
     """floating point smooth step t% (0-1) from a to b"""
     let t' = clamp01(t)
-    let x = (t' - a)/(b - a)
-    x*x*(3.0 - (2.0*x))
+    let x = (t' - a) / (b - a)
+    x * x * (3 - (2 * x))
   fun smoother_step(a: F32, b: F32, t: F32): F32 =>
     """floating point smoother step t% (0-1) from a to b"""
     let t' = clamp01(t)
-    let x = (t' - a)/(b - a)
-    x*x*x*((x*((6.0*x) - 15.0)) + 10.0)
+    let x = (t' - a) / (b - a)
+    x * x * x * ((x * ((6 * x) - 15)) + 10)
 
   fun clamp01(t: F32): F32 =>
     """clamps t to normalized 0<=t<=1"""
@@ -121,8 +130,9 @@ primitive Linear
     end
 
   fun approx_eq(a: F32, b: F32): Bool  =>
-    """approximate equality"""
-    (b - a).abs() < (tolerance() * a.abs().max(b.abs())).max(F32.epsilon() * 8.0)
+    """approximate equality (better than near_zero for larger numbers)"""
+    (b - a).abs() < (tolerance() * a.abs().max(b.abs()))
+                    .max(F32.epsilon() * 8)
 
   fun toggle(t: F32, len: F32): F32 =>
     """returns t as a modded range from 0 to len"""
@@ -133,35 +143,16 @@ primitive Linear
     let t' = toggle(t, len * 2)
     len - (t' - len).abs()
 
-  fun tolerance(): F32 => 1.0e-6
+  fun tolerance(): F32 =>
+    """1.0e-6"""
+    1.0e-6
 
-  fun near_zero(a: F32): Bool => a.abs() < tolerance()
-  fun near_eq(a: F32, b: F32): Bool => near_zero(a - b)
+  fun near_zero(a: F32): Bool =>
+    """test if a == 0 within tolerance"""
+    a.abs() < tolerance()
 
-  fun to_v2(any_v: box->AnyVector): V2 =>
-    match any_v
-    | let v: V2 => v
-    | let v: Vector[V2, V2fun] box => v.as_tuple()
-    | let v: V3 => V3fun.v2(v)
-    | let v: Vector[V3, V3fun] box => V3fun.v2(v.as_tuple())
-    | let v: V4 => V4fun.v2(v)
-    | let v: Vector[V4, V4fun] box => V4fun.v2(v.as_tuple())
-    end
-  fun to_v3(any_v: box->AnyVector): V3 =>
-    match any_v
-    | let v: V2 => V2fun.v3(v)
-    | let v: Vector[V2, V2fun] box => V2fun.v3(v.as_tuple())
-    | let v: V3 => v
-    | let v: Vector[V3, V3fun] box => v.as_tuple()
-    | let v: V4 => V4fun.v3(v)
-    | let v: Vector[V4, V4fun] box => V4fun.v3(v.as_tuple())
-    end
-  fun to_v4(any_v: box->AnyVector): V4 =>
-    match any_v
-    | let v: V2 => V2fun.v4(v)
-    | let v: Vector[V2, V2fun] box => V2fun.v4(v.as_tuple())
-    | let v: V3 => V3fun.v4(v)
-    | let v: Vector[V3, V3fun] box => V3fun.v4(v.as_tuple())
-    | let v: V4 => v
-    | let v: Vector[V4, V4fun] box => v.as_tuple()
-    end
+  fun near_eq(a: F32, b: F32): Bool =>
+    """test if a == b within tolerance"""
+    near_zero(a - b)
+
+ 

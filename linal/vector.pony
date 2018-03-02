@@ -87,15 +87,15 @@ Trait defining tuple based vector functions
       let n = size()
       var s = String(160)
       s.push('(')
-      s.append((try get(v, USize(0))?.string() else zero' end))
+      s.append((try get(v, 0)?.string() else zero' end))
       s.push(',')
-      s.append((try get(v, USize(1))?.string() else zero' end))
+      s.append((try get(v, 1)?.string() else zero' end))
       if n > 2 then
         s.push(',')
-        s.append((try get(v, USize(2))?.string() else zero' end))
+        s.append((try get(v, 2)?.string() else zero' end))
         if n > 3 then
           s.push(',')
-          s.append((try get(v, USize(3))?.string() else zero' end))
+          s.append((try get(v, 3)?.string() else zero' end))
         end
       end
       s.push(')')
@@ -205,7 +205,7 @@ primitive V3fun is VectorFun[V3 val]
   fun roll_right(v: V3): V3 => (v._3, v._1, v._2)
   fun roll_left(v: V3): V3 => (v._2, v._3, v._1)
   fun size(): USize => 3
-  fun get(v: V3, i: Int): F32 ? =>
+  fun get(v: V3, i: USize): F32 ? =>
     match i.u32()
     | 0 => v._1
     | 1 => v._2
@@ -274,8 +274,8 @@ primitive V4fun is VectorFun[V4 val]
       error
     end
 
-  fun set(v: V4, i: Int, value: F32): V4 ? =>
-    match i.u32()
+  fun set(v: V4, i: USize, value: F32): V4 ? =>
+    match i
     | 0 => (value, v._2, v._3, v._4)
     | 1 => (v._1, value, v._3, v._4)
     | 2 => (v._1, v._2, value, v._4)
@@ -542,6 +542,40 @@ class Vector4 is Vector[V4, V4fun]
 
   fun _tuplize(that: box->AnyVector4): V4 =>
     match that
+    | let v: V4 => v
+    | let v: Vector[V4, V4fun] box => v.as_tuple()
+    end
+
+primitive _MakeV2
+  fun apply(any_v: box->AnyVector): V2 =>
+  match any_v
+  | let v: V2 => v
+  | let v: Vector[V2, V2fun] box => v.as_tuple()
+  | let v: V3 => V3fun.v2(v)
+  | let v: Vector[V3, V3fun] box => V3fun.v2(v.as_tuple())
+  | let v: V4 => V4fun.v2(v)
+  | let v: Vector[V4, V4fun] box => V4fun.v2(v.as_tuple())
+  end
+
+// @todo: figure out a way around this or just make it public
+primitive _MakeV3
+  fun apply(any_v: box->AnyVector): V3 =>
+    match any_v
+    | let v: V2 => V2fun.v3(v)
+    | let v: Vector[V2, V2fun] box => V2fun.v3(v.as_tuple())
+    | let v: V3 => v
+    | let v: Vector[V3, V3fun] box => v.as_tuple()
+    | let v: V4 => V4fun.v3(v)
+    | let v: Vector[V4, V4fun] box => V4fun.v3(v.as_tuple())
+    end
+
+primitive _MakeV4
+  fun apply(any_v: box->AnyVector): V4 =>
+    match any_v
+    | let v: V2 => V2fun.v4(v)
+    | let v: Vector[V2, V2fun] box => V2fun.v4(v.as_tuple())
+    | let v: V3 => V3fun.v4(v)
+    | let v: Vector[V3, V3fun] box => V3fun.v4(v.as_tuple())
     | let v: V4 => v
     | let v: Vector[V4, V4fun] box => v.as_tuple()
     end

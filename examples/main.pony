@@ -1,3 +1,11 @@
+"""
+these examples are not particularly good
+ at showing how to use the library
+
+ @TODO make simpler examples to show typical linal usage
+ rather than attempting to print 3d graphs in console ascii
+"""
+
 use "../linal"
 
 actor Main

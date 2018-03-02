@@ -4,6 +4,7 @@ type P4 is (V3, F32)
 type AnyPlane is (Plane | P4)
 
 primitive P4fun
+"""plane operations for P4"""
   fun apply(norm: V3, d: F32): P4 => (norm, d)
   fun normal(p: P4): V3 => p._1
   fun distance(p: P4): F32 => p._2
