@@ -78,11 +78,11 @@ fun _testVectorFun[V: Any val](v: VectorFun[V val] val, test: _TestHelperHelper)
   out = try v.get(a, v.size() - 1)? else -1 end
   test.assert_eq(0, out, "Shift Left")
   a = v.roll_right(a)
-  out = try v.get(a, U32(0))? else -1 end
+  out = try v.get(a, 0)? else -1 end
   test.assert_eq(0, out, "Roll Right")
   
   a = v.shift_right(one)
-  out = try v.get(a, U32(0))? else -1 end
+  out = try v.get(a, 0)? else -1 end
   test.assert_eq(0, out, "Shift Right")
   a = v.roll_left(a)
   out = try v.get(a, v.size() - 1)? else -1 end

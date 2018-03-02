@@ -120,7 +120,7 @@ class Plane is (Stringable & Equatable[Plane])
 
   fun normal(): Vector3 box => _norm
   fun distance(): F32 => _d
-
+  fun unit(): P4 => P4fun.unit(p4())
   fun reflect_m4(): M4 => P4fun.reflect_m4(p4())
   fun reflect_m3(): M3 => P4fun.reflect_m3(p4())
   fun dot(v: V4): F32 =>  P4fun.dot(p4(), v)

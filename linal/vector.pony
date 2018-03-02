@@ -1,5 +1,5 @@
 type V2 is (F32, F32)
-""" tuple based Vector 2 alias - see VectorFun for functions"""
+""" tuple based Vector 2 alias - see [VectorFun](../linal--VectorFun) for functions"""
 type V3 is (F32, F32, F32)
 """ tuple based Vector 3 alias - see VectorFun for functions"""
 type V4 is (F32, F32, F32, F32)
@@ -18,7 +18,12 @@ type AnyVector is (AnyVector2 | AnyVector3 | AnyVector4)
 """instance|tuple vector 2,3,4 alias - see Vector and VectorFun"""
 
 trait VectorFun[V]
-"""Trait defining tuple based vector functions"""
+"""
+Trait defining tuple based vector functions
+
+ * implementations [V2fun](../linal--V2fun) [V3fun](../linal--V3fun) [V4fun](../linal--V4fun)
+ * V one of [V2](../linal--V2) [V3](../linal--V3) [V4](../linal--V4)
+ """
   new val create()
   """expects primitive implimentation with val constructor"""
   fun zero(): V
@@ -63,14 +68,17 @@ trait VectorFun[V]
     """return a vector 3 from v - fill with zeroes if necessary"""
   fun v4(v: V): V4
     """return a vector 4 from v - fill with zeroes if necessary"""
-
+  fun x(v: V): F32 => 0
+  fun y(v: V): F32 => 0
+  fun z(v: V): F32 => 0
+  fun w(v: V): F32 => 0
   fun shift_right(v: V): V
   fun shift_left(v: V): V
   fun roll_right(v: V): V
   fun roll_left(v: V): V
   fun size(): USize
-  fun get(v: val->V, i: Int): F32 ?
-  fun set(v: val->V, i: Int, value: F32): V ?
+  fun get(v: val->V, i: USize): F32 ?
+  fun set(v: val->V, i: USize, value: F32): V ?
 
   fun box to_string(v: val->V): String iso^ =>
     """string format a vector"""
@@ -79,15 +87,15 @@ trait VectorFun[V]
       let n = size()
       var s = String(160)
       s.push('(')
-      s.append((try get(v, U32(0))?.string() else zero' end))
+      s.append((try get(v, USize(0))?.string() else zero' end))
       s.push(',')
-      s.append((try get(v, U32(1))?.string() else zero' end))
+      s.append((try get(v, USize(1))?.string() else zero' end))
       if n > 2 then
         s.push(',')
-        s.append((try get(v, U32(2))?.string() else zero' end))
+        s.append((try get(v, USize(2))?.string() else zero' end))
         if n > 3 then
           s.push(',')
-          s.append((try get(v, U32(3))?.string() else zero' end))
+          s.append((try get(v, USize(3))?.string() else zero' end))
         end
       end
       s.push(')')
@@ -135,16 +143,16 @@ primitive V2fun is VectorFun[V2]
   fun roll_right(v: V2): V2 => (v._2, v._1)
   fun roll_left(v: V2): V2 => (v._2, v._1)
   fun size(): USize => 2
-  fun get(v: V2, i: Int): F32 ? =>
-    match i.u32()
+  fun get(v: V2, i: USize): F32 ? =>
+    match i
     | 0 => v._1
     | 1 => v._2
     else
       error
     end
 
-  fun set(v: V2, i: Int, value: F32): V2 ? =>
-    match i.u32()
+  fun set(v: V2, i: USize, value: F32): V2 ? =>
+    match i
     | 0 => (value, v._2)
     | 1 => (v._1, value)
     else
@@ -206,8 +214,8 @@ primitive V3fun is VectorFun[V3 val]
       error
     end
 
-  fun set(v: V3, i: Int, value: F32): V3 ? =>
-    match i.u32()
+  fun set(v: V3, i: USize, value: F32): V3 ? =>
+    match i
     | 0 => (value, v._2, v._3)
     | 1 => (v._1, value, v._3)
     | 2 => (v._1, v._2, value)
@@ -256,8 +264,8 @@ primitive V4fun is VectorFun[V4 val]
   fun roll_right(v: V4): V4 => (v._4, v._1, v._2, v._3)
   fun roll_left(v: V4): V4 => (v._2, v._3, v._4, v._1)
   fun size(): USize => 4
-  fun get(v: V4, i: Int): F32 ? =>
-    match i.u32()
+  fun get(v: V4, i: USize): F32 ? =>
+    match i
     | 0 => v._1
     | 1 => v._2
     | 2 => v._3
@@ -308,20 +316,25 @@ trait for class wrappers for tuple types
 """
   new zero()
   new id()
-  fun v2(): V2
+  fun v2(): V2 => 
     """return V2 tuple"""
+    Vfun.v2(as_tuple())
   fun v3(): V3
     """return V3 tuple - fill with zeroes if necessary"""
   fun v4(): V4
     """return V4 tuple - fill with zeroes if necessary"""
-  fun x() : F32 ?
-    """return x coord"""
-  fun y(): F32 ?
-    """return y coord"""
-  fun z(): F32 ?
-    """return z coord if available"""
-  fun w(): F32 ?
-    """return w coord if available"""
+  fun x() : F32 =>
+    """return x coord or zero"""
+    Vfun.x(as_tuple())
+  fun y(): F32 =>
+    """return y coord or zero"""
+    Vfun.y(as_tuple())
+  fun z(): F32 =>
+    """return z coord or zero"""
+    Vfun.z(as_tuple())
+  fun w(): F32 =>
+    """return w coord or zero"""
+    Vfun.w(as_tuple())
 
   fun as_tuple(): V
     """return this vector as a tuple"""
@@ -420,8 +433,6 @@ class Vector2 is Vector[V2, V2fun]
   new xy(x': F32, y': F32) => (_x, _y) = (x', y')
   fun x(): F32 => _x
   fun y(): F32 => _y
-  fun z(): F32 ? => error
-  fun w(): F32 ? => error
   fun as_array(): Array[F32] val => [_x; _y]
   fun as_tuple(): V2 => (_x, _y)
 
@@ -465,7 +476,6 @@ class Vector3 is Vector[V3, V3fun]
   fun x(): F32 => _x
   fun y(): F32 => _y
   fun z(): F32 => _z
-  fun w(): F32 ? => error
   fun as_array(): Array[F32] val => [_x; _y; _z]
   fun as_tuple(): V3 => (_x, _y, _z)
 
