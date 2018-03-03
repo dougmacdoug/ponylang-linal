@@ -13,7 +13,7 @@ primitive R2fun
   fun position(r3: R2): V3 => r3._1
   fun direction(r3: R2): V3 => r3._2
 
-   fun to_string(r: R2): String iso^ =>
+  fun to_string(r: R2): String iso^ =>
     recover
       let s = String(60)
       s.append("Ray[P:")
@@ -24,8 +24,12 @@ primitive R2fun
       s.>recalc()
     end
 
-   fun eq(a: R2, b: R2, eps: F32 = F32.epsilon()): Bool =>
-     V3fun.eq(a._1, b._1, eps)  and V3fun.eq(a._2, b._2, eps)
+  fun get_point_at(r: R2, distance: F32): V3 =>
+    """returns a point on ray at distance from position"""
+    V3fun.add(r._1, V3fun.mul(r._2, distance))
+
+  fun eq(a: R2, b: R2, eps: F32 = F32.epsilon()): Bool =>
+    V3fun.eq(a._1, b._1, eps)  and V3fun.eq(a._2, b._2, eps)
 
 class Ray is (Stringable & Equatable[Ray])
   embed _pos: Vector3 = Vector3

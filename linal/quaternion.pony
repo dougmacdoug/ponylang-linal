@@ -230,6 +230,7 @@ primitive Q4fun
 
 
 class Quaternion is (Stringable & Equatable[Quaternion])
+"""wrapper class for Q4"""
   var _x: F32 = 0
   var _y: F32 = 0
   var _z: F32 = 0

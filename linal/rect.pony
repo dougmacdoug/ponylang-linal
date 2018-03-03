@@ -71,21 +71,26 @@ primitive R4fun
    ((r._1._1 + dx, r._1._2 + dy), r._2, r._3)
 
   fun resize(r: R4, w': F32, h': F32): R4 =>
+    """resize rect to new width and height (rectified)"""
     rectify((r._1, w', h'))
 
   fun resize_centered(r: R4, w': F32, h': F32): R4 =>
+    """resize rect to new width and height maintaining current center"""
     let pos_w = w'.abs()
     let pos_h = h'.abs()
     let c = V2fun.sub(center(r), (pos_w / 2, pos_h / 2))
     (c, pos_w, pos_h)
 
   fun grow(r: R4, dx: F32, dy: F32): R4 =>
+    """grow rect by delta x, y"""
     resize(r, r._2 + dx, r._3 + dy)
 
   fun grow_centered(r: R4, dx: F32, dy: F32): R4 =>
+    """grow rect by delta x, y maintaining current center"""
     resize_centered(r, r._2 + dx, r._3 + dy)
 
   fun contains(r: R4, pt': (V2 | V3)): Bool =>
+    """test if rect contains point"""
     let pt: V2 = match pt'
     | let v2: V2 => v2
     | let v3: V3 => V3fun.v2(v3)
@@ -94,20 +99,24 @@ primitive R4fun
     (r._1._2 <= pt._2) and ((r._1._2 + r._3) >= pt._2)
 
   fun overlaps(r: R4, other: R4): Bool =>
+    """test if 2 rects overlap"""
     (x_max(other) > x_min(r)) and
     (x_min(other) < x_max(r)) and
     (y_max(other) > y_min(r)) and
     (y_min(other) < y_max(r))
 
   fun normalized_to_point(r: R4, norm: V2): V2 =>
+    """convert normalized point to rect point x_min=0, x_max=1"""
     (Linear.lerp(r._1._1, x_max(r), norm._1),
      Linear.lerp(r._1._2, y_max(r), norm._2))
 
   fun point_to_normalized(r: R4, pt: V2): V2 =>
+    """normalize point to rect coords x_min=0, x_max=1"""
       (Linear.unlerp(r._1._1, x_max(r), pt._1),
        Linear.unlerp(r._1._2, y_max(r), pt._2))
 
   fun eq(lhs: R4, rhs: R4, eps: F32 = F32.epsilon()): Bool =>
+    """test if rects equal within epsilon"""
     V2fun.eq(lhs._1, rhs._1, eps) and
       Linear.eq(lhs._2, rhs._2, eps) and
       Linear.eq(lhs._3, rhs._3, eps)
@@ -130,6 +139,7 @@ primitive R4fun
     end
 
   fun rectify(r: R4): R4 =>
+    """forces width and height to positive by moving origin down and left"""
     (let pt, var w', var h') = r
     (var x', var y') = pt
     if w' < 0 then
