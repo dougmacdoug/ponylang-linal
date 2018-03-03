@@ -6,13 +6,19 @@ type AnyPlane is (Plane | P4)
 primitive P4fun
 """plane operations for P4"""
   fun apply(norm: V3, d: F32): P4 => (norm, d)
-  fun normal(p: P4): V3 => p._1
-  fun distance(p: P4): F32 => p._2
+  fun normal(p: P4): V3 =>
+    """normal for the plane"""
+    p._1
+  fun distance(p: P4): F32 =>
+    """distance of the plane"""
+    p._2
 
   fun at_point(norm: V3, pt: V3): P4 =>
+    """create plane with normal `norm` at point `pt`"""
     (norm, -V3fun.dot(norm, pt))
 
   fun from_triangle(p1: V3, p2: V3, p3: V3): P4 =>
+    """create plane from triangle"""
     (let ax, let ay, let az) = V3fun.sub(p2, p1)
     (let bx, let by, let bz) = V3fun.sub(p3, p1)
 
@@ -24,10 +30,12 @@ primitive P4fun
     (norm, dist)
 
   fun unit(p: P4): P4 =>
+    """normalize a plane"""
     let len = V3fun.len(p._1)
     (V3fun.div(p._1, len), p._2 / len)
 
   fun reflect_m4(p: P4): M4 =>
+    """create reflection matrix4 for plane"""
     (let x, let y, let z) = p._1
     (let x2, let y2, let z2) = V3fun.mul(p._1, -2)
 
@@ -54,19 +62,24 @@ primitive P4fun
      (m41, m42, m43, m44))
 
   fun reflect_m3(p: P4): M3 =>
+    """create reflection matrix3 for plane"""
     let m = reflect_m4(p)
     (V4fun.v3(m._1), V4fun.v3(m._2),V4fun.v3(m._3))
 
   fun dot(p: P4, v: V4): F32 =>
+    """plane dot product"""
     V3fun.dot(p._1, V4fun.v3(v)) + (p._2 * v._4)
 
   fun dot_coordinate(p: P4, v: V3): F32 =>
+    """plane dot coordinate"""
     V3fun.dot(p._1, v) + p._2
 
   fun dot_normal(p: P4, v: V3): F32 =>
+    """plane dot normal"""
     V3fun.dot(p._1, v)
 
   fun transform(p: P4, q: Q4): P4 =>
+    """transform a plane by rotation"""
     let v =  V3fun.mul(V4fun.v3(q), 2)
 
     let wx = q._4 * v._1
@@ -100,6 +113,7 @@ primitive P4fun
     end
 
 class Plane is (Stringable & Equatable[Plane])
+  """wrapper class for plane"""
   embed _norm: Vector3 = Vector3.xyz(0, 1, 0)
   var _d: F32 = 0
 

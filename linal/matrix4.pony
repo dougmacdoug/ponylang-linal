@@ -91,39 +91,39 @@ primitive M4fun
      (a._1._3, a._2._3, a._3._3, a._4._3),
      (a._1._4, a._2._4, a._3._4, a._4._4))
 
-  fun v3_trans(v : V3): M4 =>
+  fun trans_v3(v : V3): M4 =>
     """translate vector 3"""
     ((1, 0, 0, v._1),
     (0, 1, 0, v._2),
     (0, 0, 1, v._3),
     (0, 0, 0, 1))
 
-  fun v3_scale(v: V3): M4 =>
+  fun scale_v3(v: V3): M4 =>
     """scale v3"""
     ((v._1,     0,   0, 0),
      (   0,  v._2,   0, 0),
      (   0,     0, v._3, 0),
      (   0,     0,   0, 1))
 
-  fun v3_mul(a: M4, v: V3): V3 =>
-    """multiply matrix * vector"""
+  fun mul_v3(a: M4, v: V3): V3 =>
+    """multiply matrix4 * vector3"""
     ((a._1._1 * v._1) + (a._1._2 * v._2) + (a._1._3 * v._3),
      (a._2._1 * v._1) + (a._2._2 * v._2) + (a._2._3 * v._3),
      (a._3._1 * v._1) + (a._3._2 * v._2) + (a._3._3 * v._3))
 
-  fun v3_mul_point_3x4(a: M4, v: V3): V3 =>
+  fun mul_v3_point_3x4(a: M4, v: V3): V3 =>
     """multiply point matrix * vector"""
     ((a._1._1 * v._1) + (a._1._2 * v._2) + (a._1._3 * v._3) + a._1._4,
      (a._2._1 * v._1) + (a._2._2 * v._2) + (a._2._3 * v._3) + a._2._4,
      (a._3._1 * v._1) + (a._3._2 * v._2) + (a._3._3 * v._3) + a._3._4)
 
-  fun v3_mul_point(a: M4, v: V3): V3 =>
+  fun mul_v3_point(a: M4, v: V3): V3 =>
     """multiply point matrix * vector"""
-    let v3 = v3_mul_point_3x4(a, v)
+    let v3 = mul_v3_point_3x4(a, v)
     let n  = (a._4._1 * v._1) + (a._4._2 * v._2) + (a._4._3 * v._3) + a._4._4
     V3fun.div(v3, n)
 
-  fun v4_mul(a: M4, v: V4): V4 =>
+  fun mul_v4(a: M4, v: V4): V4 =>
     """multiply matrix * vector"""
     ((a._1._1 * v._1) + (a._1._2 * v._2) +
      (a._1._3 * v._3) + (a._1._4 * v._4),
@@ -137,7 +137,7 @@ primitive M4fun
      (a._4._1 * v._1) + (a._4._2 * v._2) +
      (a._4._3 * v._3) + (a._4._4 * v._4))
 
-  fun m4_mul(a: M4, b: M4): M4 =>
+  fun mul_m4(a: M4, b: M4): M4 =>
     """multiply matrix * matrix"""
     (((a._1._1 * b._1._1) + (a._1._2 * b._2._1) +
       (a._1._3 * b._3._1) + (a._1._4 * b._4._1),
@@ -341,22 +341,11 @@ primitive M4fun
 type AnyMatrix4 is (Matrix4 | M4)
 
 class Matrix4 is (Stringable & Equatable[Matrix4])
-  var _m11 : F32 = 0
-  var _m12 : F32 = 0
-  var _m13 : F32 = 0
-  var _m14 : F32 = 0
-  var _m21 : F32 = 0
-  var _m22 : F32 = 0
-  var _m23 : F32 = 0
-  var _m24 : F32 = 0
-  var _m31 : F32 = 0
-  var _m32 : F32 = 0
-  var _m33 : F32 = 0
-  var _m34 : F32 = 0
-  var _m41 : F32 = 0
-  var _m42 : F32 = 0
-  var _m43 : F32 = 0
-  var _m44 : F32 = 0
+  """wrapper class"""
+  embed _x : Vector4 = Vector4.zero()
+  embed _y : Vector4 = Vector4.zero()
+  embed _z : Vector4 = Vector4.zero()
+  embed _w : Vector4 = Vector4.zero()
 
   new create() =>
     """zeroed 4x4 matrix"""
@@ -365,20 +354,29 @@ class Matrix4 is (Stringable & Equatable[Matrix4])
 
   new rot(q: Q4)=>apply(M4fun.rot(q))
 
+  new trans_v3(v : V3) =>
+    """translate vector 3"""
+    apply(M4fun.trans_v3(v))
+
+  new scale_v3(v: V3) =>
+    """scale v3"""
+    apply(M4fun.scale_v3(v))
+
   fun ref apply(m': box->AnyMatrix4): Matrix4 =>
-    ((_m11, _m12, _m13, _m14),
-     (_m21, _m22, _m23, _m24),
-     (_m31, _m32, _m33, _m34),
-     (_m41, _m42, _m43, _m44)) = _tuplize(m')
+    (let x', let y', let z', let w') = _tuplize(m')
+    _x(x')
+    _y(y')
+    _z(z')
+    _w(w')
     this
 
   fun ref update(value: box->AnyMatrix4) => apply(value)
 
   fun m4(): M4 =>
-    ((_m11, _m12, _m13, _m14),
-     (_m21, _m22, _m23, _m24),
-     (_m31, _m32, _m33, _m34),
-     (_m41, _m42, _m43, _m44))
+    """as tuple"""
+    (_x.v4(), _y.v4(), _z.v4(), _w.v4())
+
+  fun as_tuple(): M4 => m4()
 
   fun _tuplize(that: box->AnyMatrix4): M4 =>
     match that
@@ -401,8 +399,9 @@ class Matrix4 is (Stringable & Equatable[Matrix4])
   fun col_w(): V4 => M4fun.col_w(m4())
 
   fun trans(): M4 => M4fun.trans(m4())
-  fun v4_mul(v: V4): V4 => M4fun.v4_mul(m4(), v)
-  fun m4_mul(that: M4): M4 => M4fun.m4_mul(m4(), that)
+  fun mul_v4(v: V4): V4 => M4fun.mul_v4(m4(), v)
+  fun mul_m4(that: box->AnyMatrix4): M4 => 
+    M4fun.mul_m4(m4(), _tuplize(that))
   fun trace(): F32 => M4fun.trace(m4())
   fun det(): F32 => M4fun.det(m4())
   fun inv(): (M4 | None) => M4fun.inv(m4())
@@ -411,22 +410,10 @@ class Matrix4 is (Stringable & Equatable[Matrix4])
   fun get(index: (USize | (USize, USize))): F32 ? =>
     """get cell value. flat array index or (row, col)"""
     match _Mindex(index, 4)
-    | (1, 1) => _m11
-    | (1, 2) => _m12
-    | (1, 3) => _m13
-    | (1, 4) => _m14
-    | (2, 1) => _m21
-    | (2, 2) => _m22
-    | (2, 3) => _m23
-    | (2, 4) => _m24
-    | (3, 1) => _m31
-    | (3, 2) => _m32
-    | (3, 3) => _m33
-    | (3, 4) => _m34
-    | (4, 1) => _m41
-    | (4, 2) => _m42
-    | (4, 3) => _m43
-    | (4, 4) => _m44
+    | (1, let col: USize) => _x.get(col)?
+    | (2, let col: USize) => _y.get(col)?
+    | (3, let col: USize) => _z.get(col)?
+    | (4, let col: USize) => _w.get(col)?
     else
       error
     end
@@ -435,22 +422,10 @@ class Matrix4 is (Stringable & Equatable[Matrix4])
     """set cell value return old value. index flat 0-15 or (row, col)"""
     let old = get(index)?
     match _Mindex(index, 4)
-    | (1, 1) => _m11 = value
-    | (1, 2) => _m12 = value
-    | (1, 3) => _m13 = value
-    | (1, 4) => _m14 = value
-    | (2, 1) => _m21 = value
-    | (2, 2) => _m22 = value
-    | (2, 3) => _m23 = value
-    | (2, 4) => _m24 = value
-    | (3, 1) => _m31 = value
-    | (3, 2) => _m32 = value
-    | (3, 3) => _m33 = value
-    | (3, 4) => _m34 = value
-    | (4, 1) => _m41 = value
-    | (4, 2) => _m42 = value
-    | (4, 3) => _m43 = value
-    | (4, 4) => _m44 = value
+    | (1, let col: USize) => _x.set(col, value)?
+    | (2, let col: USize) => _y.set(col, value)?
+    | (3, let col: USize) => _z.set(col, value)?
+    | (4, let col: USize) => _w.set(col, value)?
     else
       error
     end
@@ -468,3 +443,4 @@ primitive _Mindex
     | let i: USize => ((i / n)  + 1, (i % n) + 1)
     | (let r: USize, let c: USize) => (r + 1, c  + 1)
     end
+

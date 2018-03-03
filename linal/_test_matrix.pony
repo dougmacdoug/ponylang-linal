@@ -37,8 +37,8 @@ class iso _TestM2fun is UnitTest
     test.assert_eq(((-1,0),(0,-1)), m2.neg(m2.id()), "negate")
     test.assert_eq(m2.id(), m2.trans(m2.id()), "translate id = id")
     test.assert_eq(((1,3),(2,4)), m2.trans(a1), "translate id = id")
-    test.assert_eq((8,18), m2.v2_mul(a1, (2,3)), "m2 * v2")
-    test.assert_eq(((13,16),(29,36)), m2.m2_mul(a1, a2), "m2 * m2")
+    test.assert_eq((8,18), m2.mul_v2(a1, (2,3)), "m2 * v2")
+    test.assert_eq(((13,16),(29,36)), m2.mul_m2(a1, a2), "m2 * m2")
     test.assert_eq(5, m2.trace(a1), "trace")
     let solve_answer = m2.solve(((2,3), (10,16)), (1,2))
     test.assert_eq((5, -3), solve_answer, "Ax=b")
@@ -102,16 +102,17 @@ class iso _TestM3fun is UnitTest
     let m3xv3_sample_v3 = v3(3, -1, 2)
 
     test.assert_eq((13, 5, -6),
-       m3.v3_mul(m3xv3_sample, m3xv3_sample_v3), "m3 * v3")
+       m3.mul_v3(m3xv3_sample, m3xv3_sample_v3), "m3 * v3")
 
     test.assert_eq(
       ((42, 48, 54), (96, 111, 126), (150, 174, 198)),
-      m3.m3_mul(a1, a2), "m3 * m3")
+      m3.mul_m3(a1, a2), "m3 * m3")
 
     let solve_m3 = m3((1, 2, 2), (3, -2, 1), (2, 1, -1))
     let solve_v3 = v3(5, -6, -1)
     let solve_answer = m3.solve(solve_m3, solve_v3)
     test.assert_eq(v3(-1, 2, 1), solve_answer, "solve [m3][v3] equation")
+    _testMatrix(h)
 
     fun _testMatrix(h: TestHelper) =>
       let identity: Matrix4 box = Matrix4.id()

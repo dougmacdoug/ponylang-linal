@@ -6,58 +6,88 @@ primitive Linear
 """
 linear functions and helpers for linal types
 """
-  fun vector2(): V2fun => V2fun
-  fun vector3(): V3fun => V3fun
-  fun vector4(): V4fun => V4fun
-  fun matrix2(): M2fun => M2fun
-  fun matrix3(): M3fun => M3fun
-  fun matrix4(): M4fun => M4fun
-  fun quaternion(): Q4fun => Q4fun
-  fun rectangle(): R4fun => R4fun
-  fun ray(): R2fun => R2fun
-  fun plane(): P4fun => P4fun
-
+  fun vector2(): V2fun =>
+    """readable alias"""
+    V2fun
+  fun vector3(): V3fun =>
+    """readable alias"""
+    V3fun
+  fun vector4(): V4fun =>
+    """readable alias"""
+    V4fun
+  fun matrix2(): M2fun =>
+    """readable alias"""
+    M2fun
+  fun matrix3(): M3fun =>
+    """readable alias"""
+    M3fun
+  fun matrix4(): M4fun =>
+    """readable alias"""
+    M4fun
+  fun quaternion(): Q4fun =>
+    """readable alias"""
+    Q4fun
+  fun rectangle(): R4fun =>
+    """readable alias"""
+    R4fun
+  fun ray(): R2fun =>
+    """readable alias"""
+    R2fun
+  fun plane(): P4fun =>
+    """readable alias"""
+    P4fun
   fun is_scalar(o: LinalType): Bool =>
+    """linal type test"""
     match o
     | let f: F32 => true
     else false end
   fun is_vector2(o: LinalType): Bool =>
+    """linal type test"""
     match o
     | let v: V2 => true
     else false end
   fun is_vector3(o: LinalType): Bool =>
+    """linal type test"""
     match o
     | let v: V3 => true
     else false end
   fun is_vector4(o: LinalType): Bool =>
+    """linal type test"""
     match o
     | let v: V4 => true
     else false end
   fun is_matrix2(o: LinalType): Bool =>
+    """linal type test"""
     match o
     | let m: M2 => true
     else false end
   fun is_matrix3(o: LinalType): Bool =>
+    """linal type test"""
     match o
     | let m: M3 => true
     else false end
   fun is_matrix4(o: LinalType): Bool =>
+    """linal type test"""
     match o
     | let m: M4 => true
     else false end
   fun is_quaternion(o: LinalType): Bool =>
+    """linal type test"""
     match o
     | let q: Q4 => true
     else false end
   fun is_rectangle(o: LinalType): Bool =>
+    """linal type test"""
     match o
     | let r: R4 => true
     else false end
   fun is_ray(o: LinalType): Bool =>
+    """linal type test"""
     match o
     | let r: R2 => true
     else false end
   fun is_plane(o: LinalType): Bool =>
+    """linal type test"""
     match o
     | let p: P4 => true
     else false end
@@ -117,8 +147,12 @@ linear functions and helpers for linal types
     elseif \unlikely\ t > max' then max'
     else \likely\ t end
 
-  fun deg_to_rad(): F32 => 0.0174532924
-  fun rad_to_deg(): F32 => 57.29578
+  fun deg_to_rad(): F32 =>
+    """degrees to radians"""
+    0.0174532925
+  fun rad_to_deg(): F32 =>
+    """radians to degrees"""
+    57.29578
 
   fun gamma(value: F32, abs_max: F32, gamma': F32): F32 =>
     """floating point gamma function"""

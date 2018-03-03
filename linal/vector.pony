@@ -461,6 +461,23 @@ class Vector2 is Vector[V2, V2fun]
     | let v: Vector[V2, V2fun] box => v.as_tuple()
     end
 
+  fun get(i: USize): F32 ? =>
+    match i
+    | 0 => _x
+    | 1 => _y
+    else
+      error
+    end
+
+  fun ref set(i: USize, value: F32): Vector2 ? =>
+    match i
+    | 0 => _x = value
+    | 1 => _y = value
+    else
+      error
+    end
+    this
+
 class Vector3 is Vector[V3, V3fun]
   """class wrapper for V3 - see Vector for details"""
   var _x: F32 = 0
@@ -504,6 +521,24 @@ class Vector3 is Vector[V3, V3fun]
     | let v: V3 => v
     | let v: Vector[V3, V3fun] box => v.as_tuple()
     end
+  fun get(i: USize): F32 ? =>
+    match i
+    | 0 => _x
+    | 1 => _y
+    | 2 => _z
+    else
+      error
+    end
+
+  fun ref set(i: USize, value: F32): Vector3 ? =>
+    match i
+    | 0 => _x = value
+    | 1 => _y = value
+    | 2 => _z = value
+    else
+      error
+    end
+    this
 
 class Vector4 is Vector[V4, V4fun]
   """class wrapper for V4 - see Vector for details"""
@@ -545,6 +580,27 @@ class Vector4 is Vector[V4, V4fun]
     | let v: V4 => v
     | let v: Vector[V4, V4fun] box => v.as_tuple()
     end
+
+  fun get(i: USize): F32 ? =>
+    match i
+    | 0 => _x
+    | 1 => _y
+    | 2 => _z
+    | 3 => _w
+    else
+      error
+    end
+
+  fun ref set(i: USize, value: F32): Vector4 ? =>
+    match i
+    | 0 => _x = value
+    | 1 => _y = value
+    | 2 => _z = value
+    | 3 => _w = value
+    else
+      error
+    end
+    this
 
 primitive _MakeV2
   fun apply(any_v: box->AnyVector): V2 =>

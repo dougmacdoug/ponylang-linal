@@ -38,17 +38,17 @@ primitive M3fun
      V3fun.from_array(a, 3 + offset)?,
      V3fun.from_array(a, 6 + offset)?)
 
-  fun rotx(angle: F32): M3 =>
+  fun rot_x(angle: F32): M3 =>
     """rotatation matrix around x axis"""
     let c : F32 = angle.cos()
     let s : F32 = angle.sin()
     ((1, 0, 0), (0, c, -s), (0, s, c))
-  fun roty(angle: F32): M3 =>
+  fun rot_y(angle: F32): M3 =>
     """rotatation matrix around y axis"""
     let c : F32 = angle.cos()
     let s : F32 = angle.sin()
     ((c, 0, s), (0, 1, 0), (-s, 0, c))
-  fun rotz(angle: F32): M3 =>
+  fun rot_z(angle: F32): M3 =>
     """rotatation matrix around z axis"""
     let c : F32 = angle.cos()
     let s : F32 = angle.sin()
@@ -88,13 +88,13 @@ primitive M3fun
      (a._1._2, a._2._2, a._3._2),
      (a._1._3, a._2._3, a._3._3))
 
-  fun v3_mul(a: M3, v: V3): V3 =>
+  fun mul_v3(a: M3, v: V3): V3 =>
     """matrix * vector multiplication"""
     ((a._1._1 * v._1) + (a._1._2 * v._2) + (a._1._3 * v._3),
      (a._2._1 * v._1) + (a._2._2 * v._2) + (a._2._3 * v._3),
      (a._3._1 * v._1) + (a._3._2 * v._2) + (a._3._3 * v._3))
 
-  fun m3_mul(a: M3, b: M3): M3 =>
+  fun mul_m3(a: M3, b: M3): M3 =>
     (((a._1._1 * b._1._1) + (a._1._2 * b._2._1) + (a._1._3 * b._3._1),
       (a._1._1 * b._1._2) + (a._1._2 * b._2._2) + (a._1._3 * b._3._2),
       (a._1._1 * b._1._3) + (a._1._2 * b._2._3) + (a._1._3 * b._3._3)),
@@ -176,44 +176,41 @@ primitive M3fun
 type AnyMatrix3 is (Matrix3 | M3)
 
 class Matrix3 is (Stringable & Equatable[Matrix3])
-  var _m11 : F32 = 0
-  var _m12 : F32 = 0
-  var _m13 : F32 = 0
-  var _m21 : F32 = 0
-  var _m22 : F32 = 0
-  var _m23 : F32 = 0
-  var _m31 : F32 = 0
-  var _m32 : F32 = 0
-  var _m33 : F32 = 0
+  """wrapper class for M3"""
+  embed _x: Vector3 = Vector3.zero()
+  embed _y: Vector3 = Vector3.zero()
+  embed _z: Vector3 = Vector3.zero()
 
   new create() =>
     """zeroed 3x3 matrix"""
   new id() => apply(M3fun.id())
 
-  new rotx(angle: F32) =>
+  new rot_x(angle: F32) =>
     """rotation matrix from angle"""
-    apply(M3fun.rotx(angle))
+    apply(M3fun.rot_x(angle))
   
-  new roty(angle: F32) =>
+  new rot_y(angle: F32) =>
     """rotation matrix from angle"""
-    apply(M3fun.roty(angle))
+    apply(M3fun.rot_y(angle))
   
-  new rotz(angle: F32) =>
+  new rot_z(angle: F32) =>
     """rotation matrix from angle"""
-    apply(M3fun.rotz(angle))
+    apply(M3fun.rot_z(angle))
 
   fun ref apply(m': box->AnyMatrix3): Matrix3 =>
-    ((_m11, _m12, _m13),
-     (_m21, _m22, _m23),
-     (_m31, _m32, _m33)) = _tuplize(m')
+    (let x', let y', let z') = _tuplize(m')
+    _x(x')
+    _y(y')
+    _z(z')
     this
 
   fun ref update(value: box->AnyMatrix3) => apply(value)
 
   fun m3(): M3 =>
-    ((_m11, _m12, _m13),
-     (_m21, _m22, _m23),
-     (_m31, _m32, _m33))
+    """as tuple"""
+    (_x.v3(), _y.v3(), _z.v3())
+
+  fun as_tuple(): M3 => m3()
 
   fun _tuplize(that: box->AnyMatrix3): M3 =>
     match that
@@ -235,8 +232,9 @@ class Matrix3 is (Stringable & Equatable[Matrix3])
   fun col_z(): V3 => M3fun.col_z(m3())
 
   fun trans(): M3 => M3fun.trans(m3())
-  fun v3_mul(v: V3): V3 => M3fun.v3_mul(m3(), v)
-  fun m3_mul(that: M3): M3 => M3fun.m3_mul(m3(), that)
+  fun mul_v3(v: V3): V3 => M3fun.mul_v3(m3(), v)
+  fun mul_m3(that: box->AnyMatrix3): M3 => 
+    M3fun.mul_m3(m3(), _tuplize(that))
   fun trace(): F32 => M3fun.trace(m3())
   fun det(): F32 => M3fun.det(m3())
   fun inv(): (M3 | None) => M3fun.inv(m3())
@@ -245,15 +243,9 @@ class Matrix3 is (Stringable & Equatable[Matrix3])
   fun get(index: (USize | (USize, USize))): F32 ? =>
     """get cell value. flat array index or (row, col)"""
     match _Mindex(index, 3)
-    | (1, 1) => _m11
-    | (1, 2) => _m12
-    | (1, 3) => _m13
-    | (2, 1) => _m21
-    | (2, 2) => _m22
-    | (2, 3) => _m23
-    | (3, 1) => _m31
-    | (3, 2) => _m32
-    | (3, 3) => _m33
+    | (1, let col: USize) => _x.get(col)?
+    | (2, let col: USize) => _y.get(col)?
+    | (3, let col: USize) => _z.get(col)?
    else
       error
     end
@@ -262,15 +254,9 @@ class Matrix3 is (Stringable & Equatable[Matrix3])
     """set cell value return old value. index flat 0-15 or (row, col)"""
     let old = get(index)?
     match _Mindex(index, 3)
-    | (1, 1) => _m11 = value
-    | (1, 2) => _m12 = value
-    | (1, 3) => _m13 = value
-    | (2, 1) => _m21 = value
-    | (2, 2) => _m22 = value
-    | (2, 3) => _m23 = value
-    | (3, 1) => _m31 = value
-    | (3, 2) => _m32 = value
-    | (3, 3) => _m33 = value
+    | (1, let col: USize) => _x.set(col, value)?
+    | (2, let col: USize) => _y.set(col, value)?
+    | (3, let col: USize) => _z.set(col, value)?
     else
       error
     end

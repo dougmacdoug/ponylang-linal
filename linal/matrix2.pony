@@ -65,11 +65,11 @@ primitive M2fun
     """translate"""
     ((a._1._1, a._2._1), (a._1._2, a._2._2))
 
-  fun v2_mul(a: M2, v: V2): V2 =>
+  fun mul_v2(a: M2, v: V2): V2 =>
     """matrix * vector multiplication"""
     ( (a._1._1*v._1) + (a._1._2* v._2), (a._2._1*v._1) + (a._2._2*v._2))
 
-  fun m2_mul(a: M2, b: M2): M2 =>
+  fun mul_m2(a: M2, b: M2): M2 =>
     """matrix * matrix multiplication"""
     (((a._1._1 * b._1._1) + (a._1._2 * b._2._1),
       (a._1._1 * b._1._2) + (a._1._2 * b._2._2)),
@@ -77,7 +77,7 @@ primitive M2fun
       (a._2._1 * b._1._2) + (a._2._2 * b._2._2)))
 
   fun trace(m: M2): F32 =>
-    """trace / sum id"""
+    """trace (sum id)"""
     m._1._1 + m._2._2
   fun det(m: M2): F32 =>
     """determinant"""
@@ -115,11 +115,10 @@ primitive M2fun
     end
 
 class Matrix2 is (Stringable & Equatable[Matrix2])
-  var _m11 : F32 = 0
-  var _m12 : F32 = 0
-  var _m21 : F32 = 0
-  var _m22 : F32 = 0
-  
+  """wrapper class for M2"""
+  embed _x : Vector2 = Vector2.zero()
+  embed _y : Vector2 = Vector2.zero()
+
   new create() =>
     """zeroed 2x2 matrix"""
   new id() => apply(M2fun.id())
@@ -129,15 +128,20 @@ class Matrix2 is (Stringable & Equatable[Matrix2])
     apply(M2fun.rot(angle))
 
   fun ref apply(m': box->AnyMatrix2): Matrix2 =>
-    ((_m11, _m12),
-     (_m21, _m22)) = _tuplize(m')
+    (let x', let y') = _tuplize(m')
+    _x(x')
+    _y(y')
     this
 
-  fun ref update(value: box->AnyMatrix2) => apply(value)
+  fun ref update(value: box->AnyMatrix2) =>
+    """update sugar"""
+    apply(value)
 
   fun m2(): M2 =>
-    ((_m11, _m12),
-     (_m21, _m22))
+    """as tuple"""
+    (_x.v2(), _y.v2())
+
+  fun as_tuple(): M2 => m2()
 
   fun _tuplize(that: box->AnyMatrix2): M2 =>
     match that
@@ -156,32 +160,36 @@ class Matrix2 is (Stringable & Equatable[Matrix2])
   fun col_y(): V2 => M2fun.col_y(m2())
 
   fun trans(): M2 => M2fun.trans(m2())
-  fun v2_mul(v: V2): V2 => M2fun.v2_mul(m2(), v)
-  fun m2_mul(that: M2): M2 => M2fun.m2_mul(m2(), that)
+  fun mul_v2(v: V2): V2 => M2fun.mul_v2(m2(), v)
+  fun mul_m2(that: M2): M2 => M2fun.mul_m2(m2(), that)
   fun trace(): F32 => M2fun.trace(m2())
   fun det(): F32 => M2fun.det(m2())
   fun inv(): (M2 | None)  => M2fun.inv(m2())
   fun solve(v: V2): (V2 | None) => M2fun.solve(m2(), v)
 
   fun get(index: (USize | (USize, USize))): F32 ? =>
-    """get cell value. flat array index or (row, col)"""
+  """
+  get cell value
+
+  accepts flat array index or (row, col)
+  """
     match _Mindex(index, 2)
-    | (1, 1) => _m11
-    | (1, 2) => _m12
-    | (2, 1) => _m21
-    | (2, 2) => _m22
+    | (1, let col: USize) => _x.get(col)?
+    | (2, let col: USize) => _y.get(col)?
     else
       error
     end
 
   fun ref set(index: (USize | (USize, USize)), value: F32): F32 ? =>
-    """set cell value return old value. flat array index or (row, col)"""
+  """
+  set cell value. returns old value
+
+  accepts flat array index or (row, col)
+  """
     let old = get(index)?
     match _Mindex(index, 2)
-    | (1, 1) => _m11 = value
-    | (1, 2) => _m12 = value
-    | (2, 1) => _m21 = value
-    | (2, 2) => _m22 = value
+    | (1, let col: USize) => _x.set(col, value)?
+    | (2, let col: USize) => _y.set(col, value)?
     else
       error
     end

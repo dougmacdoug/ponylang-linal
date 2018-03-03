@@ -3,6 +3,7 @@ type R2 is (V3, V3)
 type AnyRay is (Ray | R2)
 
 primitive R2fun
+  """functions for ray (R2)"""
   fun zero(): R2 => (V3fun.zero(), V3fun(1, 0, 0))
   fun apply(p: V3, d: V3): R2 => (p, V3fun.unit(d))
 
