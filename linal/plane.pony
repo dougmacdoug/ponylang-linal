@@ -78,6 +78,12 @@ primitive P4fun
     """plane dot normal"""
     V3fun.dot(p._1, v)
 
+  fun distance_to_point(p: P4, v: V3): F32 =>
+    dot_coordinate(p, v)
+
+  fun in_front(p: P4, v: V3): Bool =>
+    dot_coordinate(p, v) > 0
+
   fun transform(p: P4, q: Q4): P4 =>
     """transform a plane by rotation"""
     let v =  V3fun.mul(V4fun.v3(q), 2)

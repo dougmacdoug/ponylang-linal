@@ -13,14 +13,14 @@ primitive Q4fun
   fun neg(q: Q4): Q4 => V4fun.neg(q)
   fun eq(a: Q4, b: Q4): Bool => V4fun.eq(a, b)
 
-  fun q4_mul(a: Q4, b: Q4): Q4 =>
+  fun mul_q4(a: Q4, b: Q4): Q4 =>
     """multiply 2 quaternions. Can be used to combine rotations"""
   	((a._4 * b._1) +  (a._1 * b._4) +  (a._2 * b._3) + -(a._3 * b._2),
   	 (a._4 * b._2) + -(a._1 * b._3) +  (a._2 * b._4) +  (a._3 * b._1),
   	 (a._4 * b._3) +  (a._1 * b._2) + -(a._2 * b._1) +  (a._3 * b._4),
   	 (a._4 * b._4) + -(a._1 * b._1) + -(a._2 * b._2) + -(a._3 * b._3))
 
-  fun q4_div(a: Q4, b: Q4): Q4 => q4_mul(a, inv(b))
+  fun div_q4(a: Q4, b: Q4): Q4 => mul_q4(a, inv(b))
 
   fun dot(a: Q4, b: Q4): F32 => V4fun.dot(a, b)
   fun len2(q: Q4): F32 => dot(q, q)
@@ -78,7 +78,7 @@ primitive Q4fun
 
   fun rotate_point(q: Q4, v: V3): V3 =>
     let v4 = V3fun.v4(v)
-    let v4' = q4_mul(q4_mul(q, v4), conj(q))
+    let v4' = mul_q4(mul_q4(q, v4), conj(q))
     V4fun.v3(v4')
 
   fun from_rot_ab(a': V3, b': V3): Q4 =>
@@ -289,10 +289,10 @@ class Quaternion is (Stringable & Equatable[Quaternion])
   fun div(s: F32): Q4 => V4fun.div(q4(), s)
   fun neg(): Q4 => V4fun.neg(q4())
   
-  fun q4_mul(that: box->AnyQuaternion): Q4 =>
-    Q4fun.q4_mul(q4(), _tuplize(that))
-  fun q4_div(that: box->AnyQuaternion): Q4 =>
-    Q4fun.q4_mul(q4(), _tuplize(that))
+  fun mul_q4(that: box->AnyQuaternion): Q4 =>
+    Q4fun.mul_q4(q4(), _tuplize(that))
+  fun div_q4(that: box->AnyQuaternion): Q4 =>
+    Q4fun.mul_q4(q4(), _tuplize(that))
   fun dot(that: box->AnyQuaternion): F32 =>
     Q4fun.dot(q4(), _tuplize(that))
   fun len2(): F32 => Q4fun.len2(q4())

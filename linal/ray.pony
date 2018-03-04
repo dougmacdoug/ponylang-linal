@@ -61,6 +61,9 @@ class Ray is (Stringable & Equatable[Ray])
   fun r2(): R2 => (_pos.v3(), _dir.v3())
   fun as_tuple(): R2 => r2()
 
+  fun get_point_at(distance: F32): V3 =>
+    R2fun.get_point_at(r2(), distance)
+
   fun intersects_point(pt: V3): (V3 | None) =>
     Intersect.ray_point(r2(), pt)
 

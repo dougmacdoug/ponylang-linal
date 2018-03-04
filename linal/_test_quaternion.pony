@@ -21,7 +21,7 @@ class iso _TestQuaternion is UnitTest
 
     a = q(2, 3, 4, 1)
     b = q(3, 4, 5, 2)
-    test.assert_eq(q(6, 12, 12, -36), q.q4_mul(a, b), "q4 * q4")
+    test.assert_eq(q(6, 12, 12, -36), q.mul_q4(a, b), "q4 * q4")
 
     test.assert_eq(q(5, 7, 9, 3), q.add(a, b), "q4 + q4")
     test.assert_eq(q(-1, -1, -1, -1), q.sub(a, b), "q4 + q4")
@@ -39,16 +39,16 @@ class iso _TestQuaternion is UnitTest
     test.assert_eq(1,  q.len(qk), "QK Length")
     test.assert_eq(1,  q.len(q_one), "Q_ONE Length")
 
-    test.assert_eq(qk, q.q4_mul(qi, qj), "k = i*j")
-    test.assert_eq(q.q4_mul(qi, qi), v4.neg(q_one), "i*i = -1")
-    test.assert_eq(q.q4_mul(qi, qk), v4.neg(qj), "i*k = j")
-    test.assert_eq(q.q4_mul(qj, qi), v4.neg(qk), "j*i = k")
-    test.assert_eq(q.q4_mul(qj, qj), v4.neg(q_one), "j*j = -1")
-    test.assert_eq(q.q4_mul(qj, qk), qi, "j*k = i")
-    test.assert_eq(q.q4_mul(qk, qi), qj, "k*i = j")
-    test.assert_eq(q.q4_mul(qk, qj), v4.neg(qi), "k*j = -1")
-    test.assert_eq(q.q4_mul(qk, qk), v4.neg(q_one), "k*k = -1")
-    test.assert_eq(q.q4_mul(q.q4_mul(qi, qj), qk),
+    test.assert_eq(qk, q.mul_q4(qi, qj), "k = i*j")
+    test.assert_eq(q.mul_q4(qi, qi), v4.neg(q_one), "i*i = -1")
+    test.assert_eq(q.mul_q4(qi, qk), v4.neg(qj), "i*k = j")
+    test.assert_eq(q.mul_q4(qj, qi), v4.neg(qk), "j*i = k")
+    test.assert_eq(q.mul_q4(qj, qj), v4.neg(q_one), "j*j = -1")
+    test.assert_eq(q.mul_q4(qj, qk), qi, "j*k = i")
+    test.assert_eq(q.mul_q4(qk, qi), qj, "k*i = j")
+    test.assert_eq(q.mul_q4(qk, qj), v4.neg(qi), "k*j = -1")
+    test.assert_eq(q.mul_q4(qk, qk), v4.neg(q_one), "k*k = -1")
+    test.assert_eq(q.mul_q4(q.mul_q4(qi, qj), qk),
                    v4.neg(q_one), "(i*j)*k = -1")
 
     let hs = F32(0.5).sqrt()
@@ -71,7 +71,7 @@ class iso _TestQuaternion is UnitTest
 
     // ZXY ORDER
     test.assert_eq(qxyz90,
-        q.q4_mul(qy90, q.q4_mul(qx90, qz90)), "q4 mul 90,90,90"
+        q.mul_q4(qy90, q.mul_q4(qx90, qz90)), "q4 mul 90,90,90"
         where eps = 0.0001)
 
     var euler: V3 = (0, 0, 0)

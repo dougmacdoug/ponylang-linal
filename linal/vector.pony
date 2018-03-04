@@ -188,6 +188,19 @@ primitive V3fun is VectorFun[V3 val]
      (a._3 * b._1) - (a._1 * b._3),
      (a._1 * b._2) - (a._2 * b._1))
 
+  fun project(v: V3, norm: V3): V3 =>
+    """projects vector onto normal"""
+    let n2 = dot(norm, norm)
+    if n2 < F32.epsilon() then
+      zero()
+    else
+      V3fun.mul(v, dot(v, norm) / n2)
+    end
+
+  fun reflect(v: V3, norm: V3): V3 =>
+    """reflect vector off normal plane"""
+    add(mul(norm, dot(norm, v) * -2), v)
+
   fun eq(a: V3, b: V3, eps: F32 = F32.epsilon()): Bool =>
     Linear.eq(a._1, b._1, eps) and
     Linear.eq(a._2, b._2, eps) and
@@ -316,7 +329,7 @@ trait for class wrappers for tuple types
 """
   new zero()
   new id()
-  fun v2(): V2 => 
+  fun v2(): V2 =>
     """return V2 tuple"""
     Vfun.v2(as_tuple())
   fun v3(): V3
@@ -502,7 +515,15 @@ class Vector3 is Vector[V3, V3fun]
 
   fun cross(that: box->AnyVector3): V3 =>
     """cross product of this and that"""
-    V3fun.cross((_x, _y, _z), _tuplize(that))
+    V3fun.cross(v3(), _tuplize(that))
+
+  fun project(norm: box->AnyVector3): V3 =>
+    """project vector onto normal"""
+    V3fun.project(v3(), _tuplize(norm))
+
+  fun reflect(norm: box->AnyVector3): V3 =>
+    """project vector onto normal"""
+    V3fun.reflect(v3(), _tuplize(norm))
 
   fun ref apply(value: box->AnyVector3): Vector3 =>
     (_x, _y, _z) =
