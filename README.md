@@ -11,9 +11,10 @@
 
 ## Status
 
-* v0.1.0  - 2018-02-19
-
 [![CircleCI](https://circleci.com/gh/dougmacdoug/ponylang-linal.svg?style=svg)](https://circleci.com/gh/dougmacdoug/ponylang-linal)
+
+* v0.2.0  - 2018-03-03
+* v0.1.0  - 2018-02-19
 
 ### Applicability
 
