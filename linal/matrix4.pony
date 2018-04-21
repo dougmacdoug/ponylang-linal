@@ -338,6 +338,12 @@ primitive M4fun
       s.>recalc()
     end
 
+  fun tuplize(m': box->AnyMatrix4): M4 =>
+    match m'
+    | let m: M4 => m
+    | let m: Matrix4 box => m.m4()
+    end
+
 type AnyMatrix4 is (Matrix4 | M4)
 
 class Matrix4 is (Stringable & Equatable[Matrix4])
@@ -363,7 +369,7 @@ class Matrix4 is (Stringable & Equatable[Matrix4])
     apply(M4fun.scale_v3(v))
 
   fun ref apply(m': box->AnyMatrix4): Matrix4 =>
-    (let x', let y', let z', let w') = _tuplize(m')
+    (let x', let y', let z', let w') = M4fun.tuplize(m')
     _x(x')
     _y(y')
     _z(z')
@@ -378,14 +384,8 @@ class Matrix4 is (Stringable & Equatable[Matrix4])
 
   fun as_tuple(): M4 => m4()
 
-  fun _tuplize(that: box->AnyMatrix4): M4 =>
-    match that
-    | let m: M4 => m
-    | let m: Matrix4 box => m.m4()
-    end
-
-  fun add(that: box->AnyMatrix4): M4 => M4fun.add(m4(), _tuplize(that))
-  fun sub(that: box->AnyMatrix4): M4 => M4fun.sub(m4(), _tuplize(that))
+  fun add(that: box->AnyMatrix4): M4 => M4fun.add(m4(), M4fun.tuplize(that))
+  fun sub(that: box->AnyMatrix4): M4 => M4fun.sub(m4(), M4fun.tuplize(that))
   fun mul(s: F32): M4 => M4fun.mul(m4(), s)
   fun div(s: F32): M4 => M4fun.div(m4(), s)
   fun neg(): M4 => M4fun.neg(m4())
@@ -401,7 +401,7 @@ class Matrix4 is (Stringable & Equatable[Matrix4])
   fun trans(): M4 => M4fun.trans(m4())
   fun mul_v4(v: V4): V4 => M4fun.mul_v4(m4(), v)
   fun mul_m4(that: box->AnyMatrix4): M4 => 
-    M4fun.mul_m4(m4(), _tuplize(that))
+    M4fun.mul_m4(m4(), M4fun.tuplize(that))
   fun trace(): F32 => M4fun.trace(m4())
   fun det(): F32 => M4fun.det(m4())
   fun inv(): (M4 | None) => M4fun.inv(m4())
@@ -433,7 +433,8 @@ class Matrix4 is (Stringable & Equatable[Matrix4])
 
   fun string(): String iso^ => M4fun.to_string(m4())
 
-  fun box eq(that: box->AnyMatrix4): Bool => M4fun.eq(m4(), _tuplize(that))
+  fun box eq(that: box->AnyMatrix4): Bool =>
+    M4fun.eq(m4(), M4fun.tuplize(that))
   fun box ne(that: box->AnyMatrix4): Bool => not(eq(that))
 
 primitive _Mindex
