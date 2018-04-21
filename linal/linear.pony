@@ -143,9 +143,9 @@ linear functions and helpers for linal types
 
   fun clamp(t: F32, min': F32, max': F32): F32 =>
     """clamps t to min<=t<=max"""
-    if \likely\ (t >= min') and (t <= max') then t
-    elseif t > max' then max'
-    else min' end
+    if \unlikely\ t < min' then min'
+    elseif \unlikely\ t > max' then max'
+    else t end
 
   fun deg_to_rad(): F32 =>
     """degrees to radians"""
