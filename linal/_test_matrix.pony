@@ -112,7 +112,12 @@ class iso _TestM3fun is UnitTest
     let solve_v3 = v3(5, -6, -1)
     let solve_answer = m3.solve(solve_m3, solve_v3)
     test.assert_eq(v3(-1, 2, 1), solve_answer, "solve [m3][v3] equation")
+
+class iso _TestM4fun is UnitTest
+  fun name():String => "MatrixFun/M4"
+  fun apply(h: TestHelper) =>
     _testMatrix(h)
+    _testM4Mul(h)
 
     fun _testMatrix(h: TestHelper) =>
       let identity: Matrix4 box = Matrix4.id()
@@ -139,5 +144,18 @@ class iso _TestM3fun is UnitTest
 
       mc() = M4fun(v4one, v4one, v4one, v4one)
       h.assert_eq[Matrix4 box](all1, mc)
+    
+    fun _testM4Mul(h: TestHelper) =>
+      let lhs : M4 = ((2, 3, 5, 7), (11, 13, 17, 19),
+                      (23, 29, 31, 37), (41, 43, 47, 53))
+      let rhs : M4 = ((59, 61, 67, 71), (73, 79, 83, 89),
+                      (97, 101, 103, 107), (109, 113, 127, 131))
+      let expected : M4 = (
+                           (1585, 1655, 1787, 1861),
+                           (5318, 5562, 5980, 6246),
+                           (10514,11006,11840,12378),
+                           (15894,16634,17888,18710)
+                           )
+      let result: M4 = M4fun.mul_m4(lhs, rhs)
 
-
+      h.assert_eq[Matrix4 box](Matrix4(expected), Matrix4(result))

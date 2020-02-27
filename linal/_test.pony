@@ -92,6 +92,7 @@ actor Main is TestList
     test(_TestVectorFunCross)
     test(_TestM2fun)
     test(_TestM3fun)
+    test(_TestM4fun)
     test(_TestLinearString)
     test(_TestStringable)    
     test(_TestLinearEq)
