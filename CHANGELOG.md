@@ -1,6 +1,10 @@
 Change Log
 ==========
 
+### [0.2.1] - 2020-02-27
+ * fixed error in M4fun.mul_m4 
+   - added unit test for mul_m4
+
 ### [0.2.0] - 2018-03-03
  * fixed failing Vector trait on ponyc-latest
  * added P4, P4fun, Plane 

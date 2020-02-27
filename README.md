@@ -13,6 +13,7 @@
 
 [![CircleCI](https://circleci.com/gh/dougmacdoug/ponylang-linal.svg?style=svg)](https://circleci.com/gh/dougmacdoug/ponylang-linal)
 
+* v0.2.1  - 2020-02-28
 * v0.2.0  - 2018-03-03
 * v0.1.0  - 2018-02-19
 
