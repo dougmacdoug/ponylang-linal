@@ -1,4 +1,4 @@
-use "ponytest"
+use "pony_test"
 class iso _TestIntersect is UnitTest
   fun name():String => "Intersect"
 

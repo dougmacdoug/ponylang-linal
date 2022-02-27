@@ -1,4 +1,4 @@
-use "ponytest"
+use "pony_test"
 
 class iso _TestQuaternion is UnitTest
   fun name(): String => "Quaternion/Q4fun"

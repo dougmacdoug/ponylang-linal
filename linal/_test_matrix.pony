@@ -1,4 +1,4 @@
-use "ponytest"
+use "pony_test"
 
 class iso _TestM2fun is UnitTest
   fun name():String => "MatrixFun/M2"
