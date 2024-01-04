@@ -13,6 +13,7 @@
 
 [![CircleCI](https://circleci.com/gh/dougmacdoug/ponylang-linal.svg?style=svg)](https://circleci.com/gh/dougmacdoug/ponylang-linal)
 
+* 0.2.2  - 2024-01-04
 * v0.2.1  - 2020-02-28
 * v0.2.0  - 2018-03-03
 * v0.1.0  - 2018-02-19
@@ -25,19 +26,11 @@ such as [LAPACK](https://github.com/Reference-LAPACK/lapack), [GSL](https://www.
 
 ## Installation
 
-* Install [pony-stable](https://github.com/ponylang/pony-stable)
-* Update your `bundle.json`
-
-```json
-{ 
-  "type": "github",
-  "repo": "dougmacdoug/ponylang-linal"
-}
-```
-
-* `stable fetch` to fetch your dependencies
+* Install [corral](https://github.com/ponylang/corral)
+* `corral add github.com/dougmacdoug/linal.git --version 0.2.2`
+* `corral fetch` to fetch your dependencies
 * `use "linal"` to include this package
-* `stable env ponyc` to compile your application
+* `corral run -- ponyc` to compile your application
 
 ### Type System
 
@@ -94,7 +87,7 @@ Each TYPE consists of a type alias, a primitive, and a wrapper class
 | `M3` | `M3fun` | `Matrix3`    | `(x: V3, y: V3, z: V3)`                 |
 | `M4` | `M4fun` | `Matrix4`    | `(x: V4, y: V4, z: V4, w: V4)`          |
 |      |         |              |                                         |
-| `Q4` | `Q4fun` | `Quaternion` | `(x: V4, y: V4, z: V4, w: V4)`          |
+| `Q4` | `Q4fun` | `Quaternion` | `(x: F32, y: F32, z: F32, w: F32)`      |
 |      |         |              |                                         |
 | `R4` | `R4fun` | `Rect`       | `(origin: V2, width: F32, height: F32)` |
 | `R2` | `R2fun` | `Ray`        | `(position: V3, direction: V3)`         |
