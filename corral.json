@@ -1,0 +1,12 @@
+{
+  "packages": ["linal"],
+  "deps": [],
+  "info": {
+    "description": "Linear Algebra library for Pony Language",
+    "homepage": "https://github.com/dougmacdoug/ponylang-linal",
+    "license": "MIT",
+    "documentation_url": "",
+    "version": "0.2.2",
+    "name": "linal"
+  }
+}
